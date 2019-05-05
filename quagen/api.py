@@ -35,10 +35,10 @@ def game_view(game_id):
 
     return jsonify(game=game)
 
-@bp.route('/game/<game_id>/move/<int:board_spot>', methods = ['GET', 'POST'])
-def game_move(game_id, board_spot):
+@bp.route('/game/<game_id>/move/<int:spot>', methods = ['GET', 'POST'])
+def game_move(game_id, spot):
     game = model.get_game(game_id)
 
-    model.add_move(game_id, session['player_id'], game['turn_number'] + 1, board_spot)
-    return 'Move made!' + str(board_spot)
+    model.add_move(game_id, session['player_id'], game['turn_number'] + 1, spot)
+    return 'Move made!' + str(spot)
 

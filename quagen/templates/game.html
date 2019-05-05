@@ -9,9 +9,9 @@
     <body>
         Hello everybody
 
-        <div>
+        <div id="board" data-game="{{ game.game_id }}" data-turn="{{ game.turn_number }}">
         {% for i in range(game['spaces']) %}
-            <button data-spot="{{ i }}" class="button" type="button"></button>
+            <button id="spot{{ i }}" data-spot="{{ i }}" class="button" type="button"></button>
             {% if 0 == ((i + 1) % game['dimension_x']) %}
                 <br />
             {% endif %}

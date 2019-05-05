@@ -3,3 +3,6 @@
 .button  {
     padding: 8px 8px;
 }
+
+.blue {background-color: #008CBA;} /* Blue */
+.red {background-color: #f44336;} /* Red */ 

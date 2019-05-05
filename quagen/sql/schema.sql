@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS game (
 CREATE TABLE IF NOT EXISTS game_player (
     game_id             TEXT        NOT NULL,
     player_id           TEXT        NOT NULL,
-
+    player_color        INTEGER     NOT NULL,
     PRIMARY KEY(game_id, player_id)
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS game_move (
     game_id             TEXT        NOT NULL,
     player_id           TEXT        NOT NULL,
     turn_number         INTEGER     NOT NULL,
-    board_spot          INTEGER     NOT NULL,
+    spot                INTEGER     NOT NULL,
     time_created        INTEGER     DEFAULT 0 NOT NULL,
 
     PRIMARY KEY(game_id, player_id, turn_number)
