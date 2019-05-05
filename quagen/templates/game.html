@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Let's play a game</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}">
+
+    </head>
+
+    <body>
+        Hello everybody
+
+        <div>
+        {% for i in range(game['spaces']) %}
+            <button data-spot="{{ i }}" class="button" type="button"></button>
+            {% if 0 == ((i + 1) % game['dimension_x']) %}
+                <br />
+            {% endif %}
+        {% endfor %}
+        </div>
+
+        <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+
+    </body>
+
+</html>

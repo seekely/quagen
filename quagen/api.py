@@ -1,18 +1,44 @@
-from flask import Blueprint
-
 import uuid
+
+from flask import Blueprint
+from flask import jsonify
+from flask import session
 
 from quagen import model
 
+
 bp = Blueprint('api', __name__)
 
-@bp.route('/game')
-def get_game():
-    return 'Hello game!'
-
-
-@bp.route('/game/new')
-def new_game():
-    game_id = str(uuid.uuid4())
+@bp.route('/game/new', methods = ['GET'])
+def game_new():
+    game_id = uuid.uuid4().hex
     yes = model.create_game(game_id)
-    return 'Yes ' + yes
+    return 'Yes ' + game_id
+
+@bp.route('/game/<string:game_id>', methods = ['GET'])
+def game_view(game_id):
+
+    print('SESSION' + str(session))
+
+    game = model.get_game(game_id)
+    if 'player_id' not in session.keys():
+        session['player_id'] = uuid.uuid4().hex
+    
+    if 'game_ids' not in session.keys():
+        session['game_ids'] = []
+
+    if game_id not in session['game_ids']:
+        model.add_player(game_id, session['player_id'])
+        game_ids = session['game_ids'].copy()
+        game_ids.append(game_id)
+        session['game_ids'] = game_ids
+
+    return jsonify(game=game)
+
+@bp.route('/game/<game_id>/move/<int:board_spot>', methods = ['GET', 'POST'])
+def game_move(game_id, board_spot):
+    game = model.get_game(game_id)
+
+    model.add_move(game_id, session['player_id'], game['turn_number'] + 1, board_spot)
+    return 'Move made!' + str(board_spot)
+
