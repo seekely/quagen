@@ -1,10 +1,30 @@
 
+function updateBoard(board) {
+  console.log('BOARD STATE ' + board);
+
+  for (var i = 0; i < board.length; i += 2) {
+    const spotId = i / 2;
+    const spot = document.getElementById('spot' + spotId);
+    const level = parseInt(board.charAt(i + 1));
+    if ('1' == board.charAt(i)) {
+      spot.classList.add('blue');
+      spot.style.opacity = level * .25;
+    } else if ('2' == board.charAt(i)) {
+      spot.classList.add('red');
+      spot.style.opacity = level * .25;
+    }
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
 
   const game = document.getElementById('board');
   const gameId = game.getAttribute('data-game');
+  const board = game.getAttribute('data-board');
   const buttons = document.getElementsByClassName('button');
+
+  updateBoard(board);
 
   for (let button of buttons) {
 
@@ -43,21 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
             const game = xhr.response['game'];
-            console.log('BOARD STATE ' + game['board']);
-
-            for (var i = 0; i < game['board'].length; i += 2) {
-              const spotId = i / 2;
-              const spot = document.getElementById('spot' + spotId);
-              const level = parseInt(game['board'].charAt(i + 1));
-              if ('1' == game['board'].charAt(i)) {
-                spot.classList.add('blue');
-                spot.style.opacity = level * .25;
-              } else if ('2' == game['board'].charAt(i)) {
-                spot.classList.add('red');
-                spot.style.opacity = level * .25;
-              }
-            }
-
+            updateBoard(game['board']);
           } else {
             console.error(xhr.statusText);
           }

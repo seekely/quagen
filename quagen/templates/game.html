@@ -9,7 +9,7 @@
     <body>
         Hello everybody
 
-        <div id="board" data-game="{{ game.game_id }}" data-turn="{{ game.turn_number }}">
+        <div id="board" data-game="{{ game.game_id }}" data-turn="{{ game.turn_number }}" data-board="{{ game.board }}">
         {% for i in range(game['spaces']) %}
             <button id="spot{{ i }}" data-spot="{{ i }}" class="button" type="button"></button>
             {% if 0 == ((i + 1) % game['dimension_x']) %}

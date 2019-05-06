@@ -55,8 +55,8 @@ def add_move(game_id, player_id, turn_number, spot):
             spot_y = int(spot / 20)
             
             updates = [(-1, -1, 1), (0, -1, 2), (1, -1, 1),
-                       (-1, 0, 2, (0, 0, 4), (1, 0, 2),
-                        -1, 1, 1), (0, 1, 2), (1, 1, 1)]
+                       (-1, 0, 2) , (0, 0, 4) , (1, 0, 2),
+                       (-1, 1, 1) , (0, 1, 2) , (1, 1, 1)]
 
             for update in updates:
                 update_x = spot_x + update[0]
