@@ -68,20 +68,53 @@ def add_move(game_id, player_id, turn_number, spot):
                 board[spot * 2] = str(9)
                 board[(spot * 2) + 1] = str(9)
             else:
-                updates = [(-1, -1, 1), (0, -1, 2), (1, -1, 1),
-                           (-1, 0, 2) , (0, 0, 4) , (1, 0, 2),
-                           (-1, 1, 1) , (0, 1, 2) , (1, 1, 1)]
+                board[spot * 2] = str(move['player_color'])
+                board[(spot * 2) + 1] = str(4)
 
-                for update in updates:
-                    update_x = spot_x + update[0]
-                    update_y = spot_y + update[1]
-                    update_spot = ((update_y * 20) + update_x) * 2
-                    if update_x >= 0 and update_x < 20 and \
-                       update_y >= 0 and update_y < 20:
-                        if 4 == update[2] or int(board[update_spot + 1]) == 0:
-                            board[update_spot] = str(move['player_color'])
-                            board[update_spot + 1] = str(update[2])
+        spot_pressures = []
+        for i in range(400):
+            a_pressure = [0, 0]
+            if 4 > int(board[(i * 2) + 1]):
+                spot_x = i % 20
+                spot_y = int(i / 20)
+                to_check = [(-1, -1), (0, -1), (1, -1),
+                            (-1, 0), (1, 0),
+                            (-1, 1), (0, 1), (1, 1)]
 
+                for check in to_check:
+                    check_x = spot_x + check[0]
+                    check_y = spot_y + check[1]
+                    check_spot = (check_y * 20) + check_x
+                    if check_x >= 0 and check_x < 20 and \
+                       check_y >= 0 and check_y < 20 and \
+                       4 == int(board[(check_spot * 2) + 1]):
+                        player_pressure = int(board[check_spot * 2])
+                        a_pressure[player_pressure - 1] += 1
+
+            spot_pressures.append(a_pressure)
+
+
+        for i in range(400):
+                greatest_index = -1
+                greatest_value = -1
+                a_pressure = spot_pressures[i]
+                for j in range(len(a_pressure)):
+
+                    if a_pressure[j] > greatest_value:
+                        greatest_index = j
+                        greatest_value = a_pressure[j]
+                    elif a_pressure[j] == greatest_value:
+                        greatest_index = -1
+
+                if -1 < greatest_index:
+                    player_color = greatest_index + 1
+                    if 0 == int(board[(i * 2) + 1]):
+                        board[i * 2] = str(player_color)
+                        board[(i * 2) + 1] = str(1)
+                    elif player_color != int(board[i * 2]):
+                        board[(i * 2) + 1] = str(int(board[(i * 2) + 1]) - 1)
+                    else:
+                        board[(i * 2) + 1] = str(int(board[(i * 2) + 1]) + 1)
 
         print('BOARD: ' + str(board))
         board = ''.join(board)
