@@ -49,24 +49,39 @@ def add_move(game_id, player_id, turn_number, spot):
 
         game = query_db('SELECT board FROM game WHERE game_id = ?', [game_id], True)
         board = list(game['board'])
+
+        spot_duplicates = {} 
+        for move in moves:
+            spot = int(move['spot'])
+            if spot not in spot_duplicates.keys():
+                spot_duplicates[spot] = False
+            else:
+                spot_duplicates[spot] = True
+
         for move in moves:
             spot = int(move['spot']) 
             spot_x = spot % 20
             spot_y = int(spot / 20)
             
-            updates = [(-1, -1, 1), (0, -1, 2), (1, -1, 1),
-                       (-1, 0, 2) , (0, 0, 4) , (1, 0, 2),
-                       (-1, 1, 1) , (0, 1, 2) , (1, 1, 1)]
+            if spot_duplicates[spot]:
+                print('DUPLICATE DEDICATED')
+                board[spot * 2] = str(9)
+                board[(spot * 2) + 1] = str(9)
+            else:
+                updates = [(-1, -1, 1), (0, -1, 2), (1, -1, 1),
+                           (-1, 0, 2) , (0, 0, 4) , (1, 0, 2),
+                           (-1, 1, 1) , (0, 1, 2) , (1, 1, 1)]
 
-            for update in updates:
-                update_x = spot_x + update[0]
-                update_y = spot_y + update[1]
-                update_spot = ((update_y * 20) + update_x) * 2
-                if update_x >= 0 and update_x < 20 and \
-                   update_y >= 0 and update_y < 20:
+                for update in updates:
+                    update_x = spot_x + update[0]
+                    update_y = spot_y + update[1]
+                    update_spot = ((update_y * 20) + update_x) * 2
+                    if update_x >= 0 and update_x < 20 and \
+                       update_y >= 0 and update_y < 20:
+                        if 4 == update[2] or int(board[update_spot + 1]) == 0:
+                            board[update_spot] = str(move['player_color'])
+                            board[update_spot + 1] = str(update[2])
 
-                    board[update_spot] = str(move['player_color'])
-                    board[update_spot + 1] = str(update[2])
 
         print('BOARD: ' + str(board))
         board = ''.join(board)

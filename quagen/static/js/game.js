@@ -8,10 +8,14 @@ function updateBoard(board) {
     const level = parseInt(board.charAt(i + 1));
     if ('1' == board.charAt(i)) {
       spot.classList.add('blue');
+      spot.classList.remove('red');
       spot.style.opacity = level * .25;
     } else if ('2' == board.charAt(i)) {
       spot.classList.add('red');
+      spot.classList.remove('blue');
       spot.style.opacity = level * .25;
+    } else if ('9' == board.charAt(i)) {
+      spot.classList.add('black');
     }
   }
 }
