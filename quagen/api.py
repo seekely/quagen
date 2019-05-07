@@ -17,9 +17,11 @@ def game_new():
 
 @bp.route('/game/<string:game_id>', methods = ['GET'])
 def game_view(game_id):
+    game = model.get_game(game_id)
+    return jsonify(game=game)
 
-    print('SESSION' + str(session))
-
+@bp.route('/game/<game_id>/move/<int:spot>', methods = ['GET', 'POST'])
+def game_move(game_id, spot):
     game = model.get_game(game_id)
     if 'player_id' not in session.keys():
         session['player_id'] = uuid.uuid4().hex
@@ -32,12 +34,6 @@ def game_view(game_id):
         game_ids = session['game_ids'].copy()
         game_ids.append(game_id)
         session['game_ids'] = game_ids
-
-    return jsonify(game=game)
-
-@bp.route('/game/<game_id>/move/<int:spot>', methods = ['GET', 'POST'])
-def game_move(game_id, spot):
-    game = model.get_game(game_id)
 
     model.add_move(game_id, session['player_id'], game['turn_number'] + 1, spot)
     return 'Move made!' + str(spot)
