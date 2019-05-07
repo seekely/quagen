@@ -2,13 +2,15 @@
 <html>
     <head>
         <title>Let's play a game</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v1">
 
     </head>
 
     <body>
-        Hello everybody
-
+        <p>
+            Hello everybody
+        </p>
         <div id="board" data-game="{{ game.game_id }}" data-turn="{{ game.turn_number }}" data-board="{{ game.board }}">
         {% for i in range(game['spaces']) %}
             <button id="spot{{ i }}" data-spot="{{ i }}" class="button" type="button"></button>
@@ -18,7 +20,7 @@
         {% endfor %}
         </div>
 
-        <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/game.js') }}?v1"></script>
 
     </body>
 

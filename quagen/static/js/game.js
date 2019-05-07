@@ -6,17 +6,24 @@ function updateBoard(board) {
     const spotId = i / 2;
     const spot = document.getElementById('spot' + spotId);
     const level = parseInt(board.charAt(i + 1));
+    const trans = [.10, .30, .50];
     if ('1' == board.charAt(i)) {
       spot.classList.add('blue');
       spot.classList.remove('red');
-      spot.style.opacity = level * .25;
+      spot.style.opacity = trans[level - 1];
     } else if ('2' == board.charAt(i)) {
       spot.classList.add('red');
       spot.classList.remove('blue');
-      spot.style.opacity = level * .25;
+      spot.style.opacity = trans[level - 1];
     } else if ('9' == board.charAt(i)) {
       spot.classList.add('black');
     }
+
+    if ('9' == board.charAt(i) 
+     || '4' == board.charAt(i+1)) {
+      spot.disabled = true;
+    }
+
   }
 }
 

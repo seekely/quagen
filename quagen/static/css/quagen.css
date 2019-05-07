@@ -1,8 +1,20 @@
 
 
-.button  {
-    padding: 8px 8px;
+.button, .button:disabled {
+    margin: 1px;
+    height: 25px;
+    width: 25px;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
 }
+
+.button:active {
+    background:yellow;
+    opacity: 1;
+}
+
 
 .black {background-color: #000000;} 
 .blue {background-color: #008CBA;} 
