@@ -1,3 +1,11 @@
+function updateGame(game) {
+
+  for (var i = 0; i < game['score'].length; i++) {
+    const score = document.getElementById('score' + (i + 1));
+    score.innerHTML = game['score'][i];
+  }
+
+}
 
 function updateBoard(board) {
   console.log('BOARD STATE ' + board);
@@ -6,7 +14,7 @@ function updateBoard(board) {
     const spotId = i / 2;
     const spot = document.getElementById('spot' + spotId);
     const level = parseInt(board.charAt(i + 1));
-    const trans = [.10, .30, .50];
+    const trans = [.10, .30, .50, 1];
     if ('1' == board.charAt(i)) {
       spot.classList.add('blue');
       spot.classList.remove('red');
@@ -75,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (xhr.status === 200) {
             const game = xhr.response['game'];
             updateBoard(game['board']);
+            updateGame(game);
           } else {
             console.error(xhr.statusText);
           }

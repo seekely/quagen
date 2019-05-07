@@ -11,6 +11,11 @@
         <p>
             Hello everybody
         </p>
+        <p>
+            Player 1: <span id='score1'></span>
+            Player 2: <span id='score2'></span>
+        </p>
+
         <div id="board" data-game="{{ game.game_id }}" data-turn="{{ game.turn_number }}" data-board="{{ game.board }}">
         {% for i in range(game['spaces']) %}
             <button id="spot{{ i }}" data-spot="{{ i }}" class="button" type="button"></button>
@@ -20,7 +25,7 @@
         {% endfor %}
         </div>
 
-        <script src="{{ url_for('static', filename='js/game.js') }}?v1"></script>
+        <script src="{{ url_for('static', filename='js/game.js') }}?v4"></script>
 
     </body>
 

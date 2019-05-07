@@ -10,7 +10,20 @@ def create_game(game_id):
     return write_db('INSERT INTO game (game_id, board, time_created) VALUES (?, ?, ?)',  [game_id, board, time_created])
 
 def get_game(game_id):
-    return query_db('SELECT game_id, board, dimension_x, dimension_y, player_count, turn_number, time_created, time_completed, time_started FROM game WHERE game_id = ?',  [game_id], True)
+    game = query_db('SELECT game_id, board, dimension_x, dimension_y, player_count, turn_number, time_created, time_completed, time_started FROM game WHERE game_id = ?',  [game_id], True)
+
+    board = game['board']
+    score = [0, 0]
+    for i in range(400):
+        player = int(board[i * 2])
+        value = int(board[i * 2 + 1])
+        if 4 == value:
+            score[player - 1] += 1
+
+    game['score'] = score;
+
+    return game;
+
 
 def add_player(game_id, player_id):
 
