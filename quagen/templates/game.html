@@ -8,7 +8,7 @@
     </head>
 
     <body>
-        <div>
+        <section>
             <p>
                 Hello everybody
             </p>
@@ -29,16 +29,16 @@
                 </tr>
                 {% endfor %}
             </table>
-        </div>
+        </section>
 
-        <div id="board" data-gameId="{{ game.game_id }}" >
+        <section id="board" data-gameId="{{ game.game_id }}" >
         {% for y in range(game['settings']['dimension_y']) %}
             {% for x in range(game['settings']['dimension_x']) %}
                 <button id="spot-{{ x }}-{{ y }}" data-spotX="{{ x }}" data-spotY="{{ y }}" class="button" type="button"></button>
             {% endfor %}
             <br />
         {% endfor %}
-        </div>
+        </section>
 
         <script src="{{ url_for('static', filename='js/game.js') }}?v9"></script>
 

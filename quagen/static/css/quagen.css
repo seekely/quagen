@@ -19,7 +19,11 @@ th, td {
 }
 
 div {
+}
+
+section {
     margin-top: 1em;
+    margin-left: 25px;
 }
 
 .button, .button:disabled {
