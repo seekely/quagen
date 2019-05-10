@@ -1,3 +1,4 @@
+import copy
 from time import time
 
 from quagen import utils 
@@ -12,34 +13,45 @@ class Game:
         'power': 4              # Default amount of power acquired for a spot to turn solid
     }
 
+
     def __init__(self, params = {}):
         self._game_id = params.get('game_id', utils.generate_id())
         self._past_moves = params.get('past_moves', [])
         self._players = params.get('players', {})
+        self._settings = params.get('settings', Game.DEFAULT_SETTINGS)
         self._turn_moves = params.get('turn_moves', {})
         self._turn_number = params.get('turn_number', 0)
-        self._settings = params.get('settings', Game.DEFAULT_SETTINGS)
         self._time_created = params.get('time_created', int(time())) 
         self._time_completed = params.get('time_completed', None)
         self._time_started = params.get('time_started', None)
 
         self._board = Board(params.get('board', {}), self._settings)
 
+        # Init scores dictionary for each player and black
+        scores_count = self._settings['player_count'] + 1
+        scores = [{'controlled': 0, 'pressuring': 0, 'projected': 0}] * scores_count
+        self._scores = params.get('scores', scores)
+
+
     @property
     def game_id(self):
         return self._game_id
+
 
     @property
     def time_created(self):
         return self._time_created
 
+
     @property
     def time_completed(self):
         return self._time_completed
 
+
     @property
     def time_started(self):
         return self._time_started
+
 
     def as_dict(self, shared_with_client = True):
         '''
@@ -59,6 +71,7 @@ class Game:
             'past_moves':       self._past_moves,
             'turn_number':      self._turn_number,
             'settings':         self._settings,
+            'scores':           self._scores,
             'time_created':     self._time_created,
             'time_completed':   self._time_completed,
             'time_started':     self._time_started
@@ -68,6 +81,7 @@ class Game:
             game['turn_moves'] = self._turn_moves
 
         return game
+
 
     def start(self):
         '''
@@ -97,10 +111,11 @@ class Game:
             print('Valid player add')
             player_added = True
             self._players[player_id] = {
-                'color': player_count + 1
+                'color': player_count + 1,
             }
 
         return player_added
+
 
     def add_move(self, player_id, x, y):
         '''
@@ -132,7 +147,6 @@ class Game:
         return valid_move
 
 
-
     def process_turn(self):
         '''
         Applies the pending moves to the board and takes the game to the 
@@ -151,6 +165,7 @@ class Game:
 
             self._board.apply_moves(list(self._turn_moves.values()))
             self._board.apply_power()
+            self._calculate_scores()
             self._past_moves.append([list(self._turn_moves.values())])
             self._turn_moves = {}
             self._turn_number += 1
@@ -159,6 +174,37 @@ class Game:
             processed_turn = True
 
         return processed_turn
+
+    def _calculate_scores(self):
+
+        scores_count = self._settings['player_count'] + 1
+        self._scores = [{'controlled': 0, 'pressuring': 0, 'projected': 0} for i in range(scores_count)] 
+
+        max_power = self._settings['power']
+        for x in range(len(self._board.spots)):
+            for y in range(len(self._board.spots[x])):
+                color = self._board.spots[x][y]['color']
+                power = self._board.spots[x][y]['power']
+
+                if max_power == power:
+                    self._scores[color]['controlled'] += 1
+                elif 0 < power:
+                    self._scores[color]['pressuring'] += 1
+
+        temp_board = Board(copy.deepcopy(self._board.spots), copy.deepcopy(self._settings))
+        while 0 < temp_board.apply_power():
+            pass
+
+        for x in range(len(temp_board.spots)):
+            for y in range(len(temp_board.spots[x])):
+                color = temp_board.spots[x][y]['color']
+                power = temp_board.spots[x][y]['power']
+
+                if max_power == power:
+                    self._scores[color]['projected'] += 1
+
+
+
 
 class Board:
 
@@ -172,9 +218,11 @@ class Board:
         self._spots = spots
         self._settings = settings
 
+
     @property
     def spots(self):
         return self._spots
+
 
     def generate(self):
         ''' 
@@ -191,6 +239,7 @@ class Board:
                 }
                 row.append(spot)
             self._spots.append(row)
+
 
     def validate_move(self, x, y):
         '''
@@ -226,6 +275,9 @@ class Board:
         '''
         Spots on the board progress their power level based on the pressure 
         applied by surronding spots.
+
+        Returns:
+            (int) Number of spots which changed power
         '''
 
         # Each spot on the board will undergo pressure to change based on 
@@ -233,7 +285,7 @@ class Board:
         self._update_pressures()
 
         # Apply the calculated pressure to each spot on the board.
-        self._update_powers()
+        return self._update_powers()
 
 
     def _check_bounds(self, x, y):
@@ -274,6 +326,7 @@ class Board:
 
         return list(deduped_moves.values())
 
+
     def _update_pressures(self):
         '''
         Goes through each spot on the board and updates the pressures on the 
@@ -294,6 +347,7 @@ class Board:
             for y in range(len(self._spots[x])):
                 new_pressures = self._calculate_pressures_for_spot(x, y, spots_to_check)
                 self._spots[x][y]['pressures'] = new_pressures
+
 
     def _calculate_pressures_for_spot(self, x, y, spots_to_check):
         '''
@@ -326,6 +380,7 @@ class Board:
 
         return new_pressures
 
+
     def _get_pressuring_color(self, x, y):
         '''
         Grabs the player color which is currently applying the most pressure 
@@ -353,11 +408,17 @@ class Board:
 
         return greatest_color
 
+
     def _update_powers(self):
         '''
         Go through each spot on the board and update the spot's power level 
         based on the current spot pressures.
+
+        Returns:
+            (int) Number of spots which changed power
         '''
+        spots_changed = 0
+
         for x in range(len(self._spots)):
             for y in range(len(self._spots[x])):
 
@@ -373,6 +434,8 @@ class Board:
                 if (None != pressure_color and
                     self._settings['power'] > control_power):
 
+                    spots_changed += 1
+
                     # If no color had exerted pressure on the spot previously
                     if Board.COLOR_NO_PLAYER == control_color:
                         self._spots[x][y]['color'] = pressure_color
@@ -387,4 +450,6 @@ class Board:
                         self._spots[x][y]['power'] -= 1
                         if 0 == self._spots[x][y]['power']:
                             self._spots[x][y]['color'] = Board.COLOR_NO_PLAYER
+
+        return spots_changed
 

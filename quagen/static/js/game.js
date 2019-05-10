@@ -1,11 +1,36 @@
-function updateGame(game) {
+function grabGame(gameId) {
 
-/**
-  for (var i = 0; i < game['score'].length; i++) {
-    const score = document.getElementById('score' + (i + 1));
-    score.innerHTML = game['score'][i];
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'json';
+  xhr.open("GET", "/api/v1/game/" + gameId, true);
+  xhr.onload = function (e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        const game = xhr.response['game'];
+        updateBoard(game['board']);
+        updateGame(game);
+      } else {
+        console.error(xhr.statusText);
+      }
+    }
+  };
+  xhr.onerror = function (e) {
+    console.error(xhr.statusText);
+  };
+  xhr.send(null);
+
+}
+
+function updateGame(game) {
+  
+  for (var i = 0; i < game['scores'].length; i++) {
+    const titles = ['controlled', 'pressuring', 'projected'];
+    
+    for (let title of titles) {
+      const score = document.getElementById('player-' + title + '-' + i);
+      score.innerHTML = game['scores'][i][title];
+    }
   }
-**/
 
 }
 
@@ -45,12 +70,9 @@ function updateBoard(board) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  const game = document.getElementById('game');
-  const gameId = game.getAttribute('data-gameId');
-  const board = game.getAttribute('data-board');
+  const board = document.getElementById('board');
+  const gameId = board.getAttribute('data-gameId');
   const buttons = document.getElementsByClassName('button');
-
-  updateBoard(board);
 
   for (let button of buttons) {
 
@@ -78,30 +100,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   }
 
+  grabGame(gameId);
 
   setInterval(
 
     () => {
-
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = 'json';
-      xhr.open("GET", "/api/v1/game/" + gameId, true);
-      xhr.onload = function (e) {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            const game = xhr.response['game'];
-            updateBoard(game['board']);
-            updateGame(game);
-          } else {
-            console.error(xhr.statusText);
-          }
-        }
-      };
-      xhr.onerror = function (e) {
-        console.error(xhr.statusText);
-      };
-      xhr.send(null);
-
+      grabGame(gameId);
     }
 
     , 5000);

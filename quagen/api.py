@@ -1,7 +1,7 @@
 import uuid
 
 from flask import Blueprint
-from flask import jsonify
+from flask import json
 from flask import session
 
 from quagen.game import Game
@@ -14,12 +14,12 @@ def game_new():
     game = Game()
     game.start()
     queries.insert_game(game)
-    return jsonify(game=game.as_dict())
+    return json.jsonify(game=game.as_dict())
 
 @bp.route('/game/<string:game_id>', methods = ['GET'])
 def game_view(game_id):
     game = queries.get_game(game_id)
-    return jsonify(game=game.as_dict())
+    return json.jsonify(game=game.as_dict())
 
 @bp.route('/game/<game_id>/move/<int:x>/<int:y>', methods = ['GET', 'POST'])
 def game_move(game_id, x, y):
@@ -33,4 +33,4 @@ def game_move(game_id, x, y):
         game.process_turn()
         queries.update_game(game)
 
-    return jsonify({'x': x, 'y': y})
+    return json.jsonify({'x': x, 'y': y})
