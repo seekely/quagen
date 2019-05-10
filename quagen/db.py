@@ -53,3 +53,23 @@ def init_app(app):
     """
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+
+def query_db(query, args = (), one = False):
+
+    connection = get_db()
+
+    cur = connection.execute(query, args)
+    rv = [dict((cur.description[idx][0], value)
+               for idx, value in enumerate(row)) for row in cur.fetchall()]
+    return (rv[0] if rv else None) if one else rv
+
+def write_db(query, args = (), commit = True):
+    
+    connection = get_db()
+
+    cur = connection.execute(query, args)
+    
+    if commit:
+        connection.commit()
+
+    return cur.lastrowid    

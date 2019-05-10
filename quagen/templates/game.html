@@ -16,12 +16,12 @@
             Player 2: <span id='score2'></span>
         </p>
 
-        <div id="board" data-game="{{ game.game_id }}" data-turn="{{ game.turn_number }}" data-board="{{ game.board }}">
-        {% for i in range(game['spaces']) %}
-            <button id="spot{{ i }}" data-spot="{{ i }}" class="button" type="button"></button>
-            {% if 0 == ((i + 1) % game['dimension_x']) %}
-                <br />
-            {% endif %}
+        <div id="game" data-gameId="{{ game.game_id }}" data-turn="{{ game.turn_number }}" data-board="{{ game.board }}">
+        {% for y in range(game['settings']['dimension_y']) %}
+            {% for x in range(game['settings']['dimension_x']) %}
+                <button id="spot-{{ x }}-{{ y }}" data-spotX="{{ x }}" data-spotY="{{ y }}" class="button" type="button"></button>
+            {% endfor %}
+            <br />
         {% endfor %}
         </div>
 

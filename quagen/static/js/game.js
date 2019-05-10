@@ -1,45 +1,52 @@
 function updateGame(game) {
 
+/**
   for (var i = 0; i < game['score'].length; i++) {
     const score = document.getElementById('score' + (i + 1));
     score.innerHTML = game['score'][i];
   }
+**/
 
 }
 
 function updateBoard(board) {
-  console.log('BOARD STATE ' + board);
 
-  for (var i = 0; i < board.length; i += 2) {
-    const spotId = i / 2;
-    const spot = document.getElementById('spot' + spotId);
-    const level = parseInt(board.charAt(i + 1));
-    const trans = [.10, .30, .50, 1];
-    if ('1' == board.charAt(i)) {
-      spot.classList.add('blue');
-      spot.classList.remove('red');
-      spot.style.opacity = trans[level - 1];
-    } else if ('2' == board.charAt(i)) {
-      spot.classList.add('red');
-      spot.classList.remove('blue');
-      spot.style.opacity = trans[level - 1];
-    } else if ('9' == board.charAt(i)) {
-      spot.classList.add('black');
+  for (let x = 0; x < board.length; x++) {
+    for (let y = 0; y < board[x].length; y++) { 
+
+      const spot = document.getElementById('spot-' + x + '-' + y);
+      const color = board[x][y]['color']
+      const power = board[x][y]['power'];
+      const trans = [.10, .30, .50, 1];
+      if (1 == color) {
+        spot.classList.remove('black');
+        spot.classList.remove('blue');
+        spot.classList.add('red');
+        spot.style.opacity = trans[power - 1];
+      } else if (2 == color) {
+        spot.classList.remove('black');
+        spot.classList.remove('red');
+        spot.classList.add('blue');
+        spot.style.opacity = trans[power - 1];
+      } else if (0 == color) {
+        spot.classList.remove('blue');
+        spot.classList.remove('red');
+        spot.classList.add('black');
+        spot.style.opacity = trans[power - 1];
+      }
+
+      if (4 == power) {
+        spot.disabled = true;
+      }
     }
-
-    if ('9' == board.charAt(i) 
-     || '4' == board.charAt(i+1)) {
-      spot.disabled = true;
-    }
-
   }
 }
 
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  const game = document.getElementById('board');
-  const gameId = game.getAttribute('data-game');
+  const game = document.getElementById('game');
+  const gameId = game.getAttribute('data-gameId');
   const board = game.getAttribute('data-board');
   const buttons = document.getElementsByClassName('button');
 
@@ -48,10 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
   for (let button of buttons) {
 
     button.addEventListener('mouseup', () => {
-      const spot = button.getAttribute('data-spot');
+      const spot_x = button.getAttribute('data-spotX');
+      const spot_y = button.getAttribute('data-spotY');
 
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/api/v1/game/" + gameId + "/move/" + spot, true);
+      xhr.open("GET", "/api/v1/game/" + gameId + "/move/" + spot_x + "/" + spot_y, true);
       xhr.onload = function (e) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
