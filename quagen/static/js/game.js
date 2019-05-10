@@ -1,4 +1,10 @@
+var projected = false;
+
 function grabGame(gameId) {
+
+  if (projected) {
+    return;
+  }
 
   var xhr = new XMLHttpRequest();
   xhr.responseType = 'json';
@@ -9,6 +15,28 @@ function grabGame(gameId) {
         const game = xhr.response['game'];
         updateBoard(game['board']);
         updateGame(game);
+      } else {
+        console.error(xhr.statusText);
+      }
+    }
+  };
+  xhr.onerror = function (e) {
+    console.error(xhr.statusText);
+  };
+  xhr.send(null);
+
+}
+
+function grabProjected(gameId) {
+
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'json';
+  xhr.open("GET", "/api/v1/game/" + gameId + "/projected", true);
+  xhr.onload = function (e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        const game = xhr.response['game'];
+        updateBoard(game['board']);
       } else {
         console.error(xhr.statusText);
       }
@@ -58,10 +86,17 @@ function updateBoard(board) {
         spot.classList.remove('red');
         spot.classList.add('black');
         spot.style.opacity = trans[power - 1];
+      } else if (-1 == color) {
+        spot.classList.remove('blue');
+        spot.classList.remove('red');
+        spot.classList.remove('black');
+        spot.style.opacity = 1;
       }
 
       if (4 == power) {
         spot.disabled = true;
+      } else {
+        spot.disabled = false;
       }
     }
   }
@@ -111,6 +146,18 @@ document.addEventListener('DOMContentLoaded', function() {
     , 5000);
 
 
+  const optionProjected = document.getElementById('option-projected');
+  optionProjected.addEventListener('mouseup', () => {
+
+    if (optionProjected.checked) {
+      projected = false;
+      grabGame(gameId);
+    } else {
+      projected = true;
+      grabProjected(gameId);
+    }
+
+  });
 
 });
 

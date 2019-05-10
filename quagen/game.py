@@ -32,6 +32,10 @@ class Game:
         return self._game_id
 
     @property
+    def board(self):
+        return self._board
+
+    @property
     def time_created(self):
         return self._time_created
 
