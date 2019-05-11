@@ -358,11 +358,7 @@ class Board:
         '''
 
         # (x, y) list of surronding spots to check relative to the current spot
-        spots_to_check = [
-            (-1, -1), (0, -1), (1, -1)
-          , (-1, 0), (1, 0)
-          , (-1, 1), (0, 1), (1, 1)
-        ]
+        spots_to_check = self._get_pressure_spots_to_check()
 
         # Go through every spot on the board and calculate the spots new 
         # pressure
@@ -370,6 +366,45 @@ class Board:
             for y in range(len(self._spots[x])):
                 new_pressures = self._calculate_pressures_for_spot(x, y, spots_to_check)
                 self._spots[x][y]['pressures'] = new_pressures
+
+    def _get_pressure_spots_to_check(self):
+        '''
+        Returns:
+            List of (x,y) tuples of relative spots to check for pressure based 
+            on game settings 
+        '''
+        pressure_setting = self._settings['pressure']
+
+        # p represents the spot being pressured
+        # 1 represents a spot pressuring
+        # 0 represents no pressure
+        spots_to_check = None
+        if 'cross' == pressure_setting:
+            # 0 1 0
+            # 1 p 1
+            # 0 1 0
+            spots_to_check = [
+              (0, -1), (-1, 0), (1, 0), (0, 1)
+            ] 
+
+        elif 'diagonal' == pressure_setting:
+            # 1 0 1
+            # 0 p 0
+            # 1 0 1
+            spots_to_check = [
+               (-1, -1), (1, -1), (-1, 1), (1, 1)
+            ] 
+        else:
+            # 1 1 1
+            # 1 p 1
+            # 1 1 1
+            spots_to_check = [
+               (-1, -1), (0, -1), (1, -1)
+              , (-1, 0), (1, 0)
+              , (-1, 1), (0, 1), (1, 1)
+            ]
+
+        return spots_to_check
 
     def _calculate_pressures_for_spot(self, x, y, spots_to_check):
         '''
