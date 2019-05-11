@@ -13,7 +13,7 @@ function grabGame(gameId) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
         const game = xhr.response['game'];
-        updateBoard(game['board']);
+        updateBoard(game['board'], game['settings']);
         updateGame(game);
       } else {
         console.error(xhr.statusText);
@@ -36,7 +36,7 @@ function grabProjected(gameId) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
         const game = xhr.response['game'];
-        updateBoard(game['board']);
+        updateBoard(game['board'], game['settings']);
       } else {
         console.error(xhr.statusText);
       }
@@ -62,42 +62,39 @@ function updateGame(game) {
 
 }
 
-function updateBoard(board) {
+function updateBoard(board, settings) {
 
   for (let x = 0; x < board.length; x++) {
     for (let y = 0; y < board[x].length; y++) { 
 
       const spot = document.getElementById('spot-' + x + '-' + y);
-      const color = board[x][y]['color']
-      const power = board[x][y]['power'];
-      const trans = [.10, .30, .50, 1];
-      if (1 == color) {
-        spot.classList.remove('black');
-        spot.classList.remove('blue');
-        spot.classList.add('red');
-        spot.style.opacity = trans[power - 1];
-      } else if (2 == color) {
-        spot.classList.remove('black');
-        spot.classList.remove('red');
-        spot.classList.add('blue');
-        spot.style.opacity = trans[power - 1];
-      } else if (0 == color) {
-        spot.classList.remove('blue');
-        spot.classList.remove('red');
-        spot.classList.add('black');
-        spot.style.opacity = trans[power - 1];
-      } else if (-1 == color) {
-        spot.classList.remove('blue');
-        spot.classList.remove('red');
-        spot.classList.remove('black');
-        spot.style.opacity = 1;
+
+      const maxPower = settings['power'];
+
+      const curColor = parseInt(spot.getAttribute('data-color'));
+      const curPower = parseInt(spot.getAttribute('data-power'));
+      const newColor = board[x][y]['color']
+      const newPower = board[x][y]['power'];
+
+      if (curColor != newColor) {
+        spot.classList.remove('player-color-' + curColor);
+        spot.classList.add('player-color-' + newColor);
       }
 
-      if (4 == power) {
+      if (maxPower == newPower) {
         spot.disabled = true;
+        spot.style.opacity = 1
+      } else if (0 <= newColor) {
+        spot.disabled = false;
+        spot.style.opacity = (.60 / maxPower) * newPower;
       } else {
         spot.disabled = false;
+        spot.style.opacity = 1
       }
+
+      spot.setAttribute('data-color', newColor);
+      spot.setAttribute('data-power', newPower);
+
     }
   }
 }
@@ -106,17 +103,17 @@ function updateBoard(board) {
 document.addEventListener('DOMContentLoaded', function() {
 
   const board = document.getElementById('board');
-  const gameId = board.getAttribute('data-gameId');
+  const gameId = board.getAttribute('data-game-id');
   const buttons = document.getElementsByClassName('button');
 
   for (let button of buttons) {
 
     button.addEventListener('mouseup', () => {
-      const spot_x = button.getAttribute('data-spotX');
-      const spot_y = button.getAttribute('data-spotY');
+      const spotX = button.getAttribute('data-x');
+      const spotY = button.getAttribute('data-y');
 
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/api/v1/game/" + gameId + "/move/" + spot_x + "/" + spot_y, true);
+      xhr.open("GET", "/api/v1/game/" + gameId + "/move/" + spotX + "/" + spotY, true);
       xhr.onload = function (e) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {

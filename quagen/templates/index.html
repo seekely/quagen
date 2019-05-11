@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Let's play a game</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v9">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v9">
+
+    </head>
+
+    <body>
+        <section>
+            <p>
+                Welcome to Quagen! One day, I'll tell you what this is.
+            </p>
+            <div>
+                <form id="create-game">
+                    <p>
+                        Players: 
+                        <input type="radio" name="player_count" value="2" checked> 2
+                        <input type="radio" name="player_count" value="3"> 3
+                        <input type="radio" name="player_count" value="4"> 4
+                    </p>
+                    <p>
+                        Board size:
+                        <input type="radio" name="board_size" value="20" checked> 20x20
+                        <input type="radio" name="board_size" value="30"> 30x30
+                        <input type="radio" name="board_size" value="40"> 40x40
+                    </p>
+                    <p>
+                        Pressure:
+                        <input type="radio" name="pressure" value="surronding" checked> Surronding
+                        <input type="radio" name="pressure" value="cross"> Cross
+                        <input type="radio" name="pressure" value="diagonal"> Diagonal
+                    </p>
+                    <p>
+                        Max power:
+                        <input type="radio" name="power" value="4" checked> 4
+                        <input type="radio" name="power" value="5"> 5
+                        <input type="radio" name="power" value="6"> 6
+                        <input type="radio" name="power" value="7"> 7
+                        <input type="radio" name="power" value="8"> 8
+                    </p>
+                    <p>
+                        <input type="submit" value="Create game">
+                    </p>
+                </form>
+            </div>
+        </section>
+
+        <script src="{{ url_for('static', filename='js/index.js') }}?v9"></script>
+
+    </body>
+</html> 
+

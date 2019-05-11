@@ -20,7 +20,7 @@
                     <th>Projected</th>
                 </tr>
                 {% for i in range(game['settings']['player_count'] + 1) %} 
-                    {% set colors = ['Black', 'Red', 'Blue'] %}
+                    {% set colors = ['Black', 'Blue', 'Red', 'Green', 'Yellow'] %}
                 <tr>
                     <td>{{ colors[i] }}</td>
                     <td id="player-controlled-{{ i }}">--</td>
@@ -34,10 +34,10 @@
             </div>
         </section>
 
-        <section id="board" data-gameId="{{ game.game_id }}" >
+        <section id="board" data-game-id="{{ game.game_id }}" >
         {% for y in range(game['settings']['dimension_y']) %}
             {% for x in range(game['settings']['dimension_x']) %}
-                <button id="spot-{{ x }}-{{ y }}" data-spotX="{{ x }}" data-spotY="{{ y }}" class="button" type="button"></button>
+                <button id="spot-{{ x }}-{{ y }}" data-x="{{ x }}" data-y="{{ y }}" data-color="-1" data-power="0" class="button" type="button"></button>
             {% endfor %}
             <br />
         {% endfor %}

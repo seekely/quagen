@@ -7,10 +7,11 @@ class Game:
 
     '''(dict) Default mutable settings for a game'''
     DEFAULT_SETTINGS = {
-        'dimension_x': 20,      # Default width of the game board
-        'dimension_y': 20,      # Default height of the game board
-        'player_count': 2,      # Default number of players in a game
-        'power': 4              # Default amount of power acquired for a spot to turn solid
+        'dimension_x': 20,          # Width of the game board
+        'dimension_y': 20,          # Height of the game board
+        'player_count': 2,          # Number of players in a game
+        'power': 4 ,                # Amount of power acquired for a spot to turn solid
+        'pressure': 'surronding'    # Where a max power spot exerts pressure
     }
 
     def __init__(self, params = {}):

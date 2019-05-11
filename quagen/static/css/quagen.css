@@ -1,5 +1,7 @@
 body {
     padding-bottom: 50px;
+    white-space: nowrap;
+
 }
 
 p {
@@ -43,6 +45,8 @@ section {
 }
 
 
-.black {background-color: #000000;} 
-.blue {background-color: #008CBA;} 
-.red {background-color: #f44336;}  
+.player-color-0 {background-color: #000000;} 
+.player-color-1 {background-color: #008cba;} 
+.player-color-2 {background-color: #f44336;}  
+.player-color-3 {background-color: #16d74f;}  
+.player-color-4 {background-color: #ffc300;}  
