@@ -18,12 +18,14 @@ class Game:
         self._game_id = params.get('game_id', utils.generate_id())
         self._past_moves = params.get('past_moves', [])
         self._players = params.get('players', {})
-        self._settings = params.get('settings', Game.DEFAULT_SETTINGS)
         self._turn_moves = params.get('turn_moves', {})
         self._turn_number = params.get('turn_number', 0)
         self._time_created = params.get('time_created', int(time())) 
         self._time_completed = params.get('time_completed', None)
         self._time_started = params.get('time_started', None)
+
+        self._settings = copy.deepcopy(Game.DEFAULT_SETTINGS)  
+        self._settings.update(params.get('settings', {}))
 
         self._board = Board(params.get('board', {}), self._settings)
         self._scores = params.get('scores', self._board.calculate_scores())
@@ -35,6 +37,10 @@ class Game:
     @property
     def board(self):
         return self._board
+
+    @property
+    def settings(self):
+        return self._settings
 
     @property
     def time_created(self):
@@ -126,7 +132,8 @@ class Game:
         valid_move = False
         print('Adding move at ' + str(x) + " " + str(y) + " for player " + player_id )
 
-        if (player_id in self._players.keys() and 
+        if (None is not self._time_started and 
+            player_id in self._players.keys() and 
             player_id not in self._turn_moves.keys() and
             self._board.validate_move(x, y)):
 
@@ -157,7 +164,7 @@ class Game:
             self._board.apply_moves(list(self._turn_moves.values()))
             self._board.apply_power()
             self._scores = self._board.calculate_scores()
-            self._past_moves.append([list(self._turn_moves.values())])
+            self._past_moves.append(list(self._turn_moves.values()))
             self._turn_moves = {}
             self._turn_number += 1
 

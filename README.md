@@ -17,4 +17,6 @@ The quickest way to get started is with `virtualenv` and a few pip installs.
 
 Open up http://127.0.0.1:5000 to play/debug!
 
+    python -m pytest tests -W ignore::DeprecationWarning
+
 [flask]: http://flask.pocoo.org/
