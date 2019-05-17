@@ -109,7 +109,7 @@ class Game:
 
         return player_added
 
-    def add_move(self, player_id, x, y):
+    def add_move(self, player_id, x, y, log=True):
         '''
         Adds a move to the game after validation. A move is not applied 
         to the board until after all moves have been taken and 
@@ -124,7 +124,8 @@ class Game:
             True on a valid move, false otherwise
         ''' 
         valid_move = False
-        print('Adding move at ' + str(x) + " " + str(y) + " for player " + player_id )
+        if log:
+            print('Adding move at ' + str(x) + " " + str(y) + " for player " + player_id )
 
         if (player_id in self._players.keys() and 
             player_id not in self._turn_moves.keys() and
@@ -133,7 +134,8 @@ class Game:
             player_color = self._players[player_id]['color']
             self._turn_moves[player_id] = [x, y, player_color]
 
-            print('Valid move')
+            if log: 
+                print('Valid move')
             valid_move = True
 
         return valid_move
@@ -165,6 +167,17 @@ class Game:
             processed_turn = True
 
         return processed_turn
+
+    def get_allowed_spots(self):
+        '''
+        Gets the list of allowed moves on the board
+
+        Returns:
+             Allowed (x, y) pair list
+        '''
+        allowed_spots = self._board.get_allowed_spots()
+        return allowed_spots
+
 
 class Board:
 
@@ -225,6 +238,30 @@ class Board:
         for move in deduped_moves:
             self._spots[move[0]][move[1]]['color'] = move[2]
             self._spots[move[0]][move[1]]['power'] = self._settings['power']
+
+        
+    def get_allowed_spots(self):
+        '''
+        Finds the spots that are still allowed in the game.
+        
+        Returns
+            (list) of pairs (x, y) allowed spots on the board
+        ''' 
+        max_power = self._settings['power']
+        allowed_spots = []
+        for x in range(len(self._spots)):
+            for y in range(len(self._spots[x])):
+
+                power = self._spots[x][y]['power']
+                
+                # A spot at max power is firmly in the hands of the current 
+                # color and is not allowed
+                if power < max_power:
+                    allowed_spot = (x, y)
+                    allowed_spots.append(allowed_spot)
+
+        return allowed_spots
+
 
     def apply_power(self):
         '''
