@@ -7,6 +7,7 @@ from flask import session
 
 from quagen.game import Game
 from quagen import queries
+from quagen import ai
 
 bp = Blueprint('api', __name__)
 
@@ -19,14 +20,22 @@ def game_new():
         'player_count': int(request.values.get('player_count')),
         'power': int(request.values.get('power')),
         'pressure': request.values.get('pressure'),
+        'ai_in_play': int(request.values.get('ai_in_play'))
     };
-
     # BECAUSE 60x60 broke things for now
     settings['dimension_x'] = 20
     settings['dimension_y'] = 20
 
     game = Game({'settings': settings})
     game.start()
+
+    # add the AI player right away
+    if settings['ai_in_play']:
+        ai_player = 'AI'
+        game.add_player(ai_player)
+        #init at turn 0
+        game._settings['ai_last_turn'] = 0
+
     queries.insert_game(game)
     return json.jsonify(game=game.as_dict())
 
@@ -41,17 +50,29 @@ def game_projected(game_id):
     projected_board = game.board.project()
     game = game.as_dict()
     game['board'] = projected_board.spots
-
     return json.jsonify(game=game)
 
 @bp.route('/game/<game_id>/move/<int:x>/<int:y>', methods = ['GET', 'POST'])
 def game_move(game_id, x, y):
-
-    game = queries.get_game(game_id)        
-    if 'player_id' in session.keys():    
+    
+    game = queries.get_game(game_id)
+    ai_in_play = game._settings['ai_in_play'] 
+    
+    if 'player_id' in session.keys():
         player_id = session['player_id']
         print('Taking turn for player ' + player_id)
         game.add_player(player_id)
+        
+        # hack so that AI plays only the first time
+        if ai_in_play and game._settings['ai_last_turn'] == game._turn_number:
+            ai_strength = game._settings['ai_in_play']
+            ai_player = 'AI'
+            print('Taking turn for player ' + ai_player, 'strength', ai_strength)
+            ai_x, ai_y = ai.ai_move(game, ai_player, ai_strength, verbose=False)
+            game.add_move(ai_player, ai_x, ai_y)
+            game._settings['ai_last_turn'] += 1
+        
+        # add_move needs to be after the AI move otherwise the projection uses it
         game.add_move(player_id, int(x), int(y))
         game.process_turn()
         queries.update_game(game)
