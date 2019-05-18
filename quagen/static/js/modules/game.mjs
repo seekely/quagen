@@ -4,13 +4,18 @@ export class Game {
 
   constructor(gameId) {
     this.gameId = gameId;
-    this.turnsCompleted = 0;
     this.settings = {};
     this.boardCurrent = [];
     this.boardProjected = [];
+    this.moveHistory = [];
+    this.moveLast = [];
     this.scores = {};
-    this.movesHistory = [];
-    this.movesLast = [];
+    this.turnCompleted = 0;
+    this.turnMoved = 0;
+    this.timeCompleted = null;
+    this.timeCreated = 0;
+    this.timeStarted = null;
+    this.timeUpdated = 0;
   }
 
   /**
@@ -18,23 +23,21 @@ export class Game {
    */
   update(properties) {
 
-    this.settings = properties['settings'];
-    this.movesHistory = properties['past_moves'];     
+    this.boardCurrent = properties['board'];
+    this.boardProjected = properties['projected'];
     this.scores = properties['scores']; 
-    this.currentTurn = properties['turn_number']; 
+    this.settings = properties['settings'];
+    this.turnCompleted = properties['turn_completed']; 
+    this.timeCompleted = properties['time_completed'];
+    this.timeCreated = properties['time_created'];
+    this.timeStarted = properties['time_started'];
+    this.timeUpdated = properties['time_updated'];
 
-    this.movesHistory = properties['past_moves'];     
-    if (0 < this.movesHistory.length) {
-      this.movesLast = this.movesHistory.slice(-1)[0] 
+    this.moveHistory = properties['history'];     
+    if (0 < this.moveHistory.length) {
+      this.moveLast = this.moveHistory.slice(-1)[0] 
     }
 
-    if ('board' in properties) {
-      this.boardCurrent = properties['board'];
-    }
-
-    if ('projected' in properties) {
-      this.boardProjected = properties['projected'];
-    }
   }
 
 }
@@ -44,7 +47,8 @@ export class GamePoll {
   constructor(gameObj) {
     this.game = gameObj; 
     this.inFlight = false;
-    this.timeBetweenPoll = 2000;
+    this.turnChange = true;
+    this.timeBetweenPoll = 1000;
   }
 
   start() {
@@ -66,20 +70,25 @@ export class GamePoll {
 
     this.inFlight = true;
     const self = this;
-    const xhr = new XMLHttpRequest();
+    const timeUpdated = self.game.timeUpdated;
+    const queryString = `?updatedAfter=${ timeUpdated }`;
 
+    const xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
-    xhr.open('GET', `/api/v1/game/${ self.game.gameId }`);
+    xhr.open('GET', `/api/v1/game/${ self.game.gameId }${ queryString }`);
 
     xhr.addEventListener('load', (event) => {
-      const gameDict = xhr.response['game'];
-      self.game.update(gameDict);
-
+      
+      if (200 == xhr.status && timeUpdated < xhr.response['game']['time_updated']) {
+        const gameDict = xhr.response['game'];
+        self.game.update(gameDict);
+      }
+       
       self.inFlight = false;
     });
 
     xhr.addEventListener('error', (event) => {
-      self.inFlight = true;
+      self.inFlight = false;
     });
 
     xhr.send(null);
@@ -137,8 +146,10 @@ export class GameView {
   updateBoard() {
 
     let board = this.game.boardCurrent;
-    const movesLast = this.game.movesLast; 
+    const moveLast = this.game.moveLast; 
     const maxPower = this.game.settings['power'];
+    const turnCompleted = this.game.turnCompleted;
+    const turnMoved = this.game.turnMoved;
     const elmProjected = document.getElementById('option-projected');
 
     if (elmProjected.checked) {
@@ -154,7 +165,7 @@ export class GameView {
         const newClass = `player-color-${ newColor }`;
 
         let inLastMove = false;
-        for (const move of movesLast) {
+        for (const move of moveLast) {
           if (move[0] == x && move[1] == y) {
             inLastMove = true;
             break;
@@ -165,6 +176,10 @@ export class GameView {
           elmSpot.classList.add('button-move');
         } else {
           elmSpot.classList.remove('button-move');
+        }
+
+        if (turnCompleted >= turnMoved) {
+          elmSpot.classList.remove('button-pending');
         }
 
         if (!elmSpot.classList.contains(newClass)) {
@@ -202,18 +217,30 @@ export class GameView {
     for (const button of buttons) {
 
       button.addEventListener('mouseup', () => {
+        const turnCompleted = self.game.turnCompleted;
+        const turnMoved = self.game.turnMoved;
         const spotX = button.getAttribute('data-x');
         const spotY = button.getAttribute('data-y');
         const xhr = new XMLHttpRequest();
 
-        xhr.responseType = 'json';
-        xhr.open('GET', `/api/v1/game/${ self.game.gameId }/move/${ spotX }/${ spotY }`);
+        if (turnMoved <= turnCompleted) {
 
-        xhr.addEventListener('load', (event) => {
-        });
+          self.game.turnMoved = turnCompleted + 1;
+          button.classList.add('button-pending');
 
-        xhr.addEventListener('error', (event) => {
-        });
+          xhr.responseType = 'json';
+          xhr.open('GET', `/api/v1/game/${ self.game.gameId }/move/${ spotX }/${ spotY }`);
+
+          xhr.addEventListener('load', (event) => {
+            if (200 != xhr.status) {
+              self.game.turnMoved = 0;
+            } 
+          });
+
+          xhr.addEventListener('error', (event) => {
+            self.game.turnMoved = 0;
+          });
+        }
 
         xhr.send(null);
       });

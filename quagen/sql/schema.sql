@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS game (
     time_created        INTEGER     NOT NULL,
     time_completed      INTEGER     DEFAULT NULL,
     time_started        INTEGER     DEFAULT NULL,
+    time_updated        INTEGER     NOT NULL,
 
     PRIMARY KEY(game_id)
 );

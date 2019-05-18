@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Let's play a game</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v9">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v9">
+        <title>Quagen | Let's play a game</title>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v11">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v11">
 
     </head>
 
@@ -55,7 +57,7 @@
         </section>
 
         <script type="module">
-            import { init } from '{{ url_for("static", filename="js/pages/index.js") }}?v10';
+            import { init } from '{{ url_for("static", filename="js/pages/index.js") }}?v11';
 
             window.onload = () => {
                 init();

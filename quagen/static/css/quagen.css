@@ -50,6 +50,13 @@ section {
   z-index: 2;
 }
 
+.button-pending {
+  outline: 3px solid black;
+  outline-offset: 1px;
+  z-index: 2;
+}
+
+
 .player-color-0 {background-color: #000000;} 
 .player-color-1 {background-color: #008cba;} 
 .player-color-2 {background-color: #f44336;}  

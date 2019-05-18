@@ -16,13 +16,14 @@ class Game:
 
     def __init__(self, params = {}):
         self._game_id = params.get('game_id', utils.generate_id())
-        self._past_moves = params.get('past_moves', [])
+        self._history = params.get('history', [])
         self._players = params.get('players', {})
         self._turn_moves = params.get('turn_moves', {})
-        self._turn_number = params.get('turn_number', 0)
+        self._turn_completed = params.get('turn_completed', 0)
         self._time_created = params.get('time_created', int(time())) 
         self._time_completed = params.get('time_completed', None)
         self._time_started = params.get('time_started', None)
+        self._time_updated = params.get('time_updated', int(time()))
 
         self._settings = copy.deepcopy(Game.DEFAULT_SETTINGS)  
         self._settings.update(params.get('settings', {}))
@@ -54,6 +55,13 @@ class Game:
     def time_started(self):
         return self._time_started
 
+    @property
+    def time_updated(self):
+        return self._time_updated
+
+    def updated(self):
+        self._time_updated = int(time())
+
     def as_dict(self, shared_with_client = True):
         '''
         Converts the relevant parts of this object to a dictionary 
@@ -68,14 +76,15 @@ class Game:
         game = {
             'game_id':          self._game_id,
             'board':            self._board.spots,
+            'history':          self._history,
             'players':          self._players,
-            'past_moves':       self._past_moves,
-            'turn_number':      self._turn_number,
             'settings':         self._settings,
             'scores':           self._scores,
+            'turn_completed':   self._turn_completed,
             'time_created':     self._time_created,
             'time_completed':   self._time_completed,
-            'time_started':     self._time_started
+            'time_started':     self._time_started,
+            'time_updated':     self._time_updated
         }
 
         if not shared_with_client:
@@ -166,11 +175,11 @@ class Game:
             self._board.apply_moves(list(self._turn_moves.values()))
             self._board.apply_power()
             self._scores = self._board.calculate_scores()
-            self._past_moves.append(list(self._turn_moves.values()))
+            self._history.append(list(self._turn_moves.values()))
             self._turn_moves = {}
-            self._turn_number += 1
+            self._turn_completed += 1
 
-            print('Processed turn to ' + str(self._turn_number))
+            print('Processed turn to ' + str(self._turn_completed))
             processed_turn = True
 
         return processed_turn

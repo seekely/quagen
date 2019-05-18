@@ -2,6 +2,7 @@ import uuid
 
 from flask import Blueprint
 from flask import json
+from flask import make_response
 from flask import request
 from flask import session
 
@@ -37,17 +38,29 @@ def game_new():
         game._settings['ai_last_turn'] = 0
 
     queries.insert_game(game)
-    return json.jsonify(game=game.as_dict())
+    return json.jsonify(game = game.as_dict())
 
 @bp.route('/game/<string:game_id>', methods = ['GET'])
 def game_view(game_id):
-    game = queries.get_game(game_id)
-    game_dict = game.as_dict()
+    response = make_response(json.jsonify({'error': 'Not found'}), 404)
+    updated_after = int(request.values.get('updatedAfter', 0))
 
-    game_projected = game.board.project()
-    game_dict['projected'] = game_projected.spots
-    
-    return json.jsonify(game=game_dict)
+    game = queries.get_game(game_id)
+    if None != game:
+        game_dict = game.as_dict()
+
+        if game_dict['time_updated'] <= updated_after:
+            game_dict = {
+                'game_id': game_dict['game_id'],
+                'time_updated': game_dict['time_updated']
+            }
+        else:
+            projected_board = game.board.project()
+            game_dict['projected'] = projected_board.spots
+
+        response = json.jsonify(game = game_dict)
+
+    return response
 
 @bp.route('/game/<game_id>/move/<int:x>/<int:y>', methods = ['GET', 'POST'])
 def game_move(game_id, x, y):
@@ -61,7 +74,7 @@ def game_move(game_id, x, y):
         game.add_player(player_id)
         
         # hack so that AI plays only the first time
-        if ai_in_play and game._settings['ai_last_turn'] == game._turn_number:
+        if ai_in_play and game._settings['ai_last_turn'] == game._turn_completed:
             ai_strength = game._settings['ai_in_play']
             ai_player = 'AI'
             print('Taking turn for player ' + ai_player, 'strength', ai_strength)
