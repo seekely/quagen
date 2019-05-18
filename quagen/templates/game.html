@@ -3,12 +3,12 @@
     <head>
         <title>Let's play a game</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v9">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v9">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v10">
 
     </head>
 
     <body>
-        <section>
+        <section id="scoreboard">
             <p>
                 Hello everybody
             </p>
@@ -34,16 +34,19 @@
             </div>
         </section>
 
-        <section id="board" data-game-id="{{ game.game_id }}" >
+        <section id="board">
         {% for y in range(game['settings']['dimension_y']) %}
             {% for x in range(game['settings']['dimension_x']) %}
-                <button id="spot-{{ x }}-{{ y }}" data-x="{{ x }}" data-y="{{ y }}" data-color="-1" data-power="0" class="button" type="button"></button>
+                <button id="spot-{{ x }}-{{ y }}" data-x="{{ x }}" data-y="{{ y }}" class="button" type="button"></button>
             {% endfor %}
             <br />
         {% endfor %}
         </section>
 
-        <script src="{{ url_for('static', filename='js/game.js') }}?v9"></script>
+        <script type="module">
+          import { init } from '{{ url_for("static", filename="js/pages/game.js") }}?v10';
+          init('{{ game.game_id }}');
+        </script>
 
     </body>
 

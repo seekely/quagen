@@ -1,7 +1,6 @@
+'use strict';
 
-
-
-document.addEventListener('DOMContentLoaded', function() {
+export function init(gameId) {
 
   var form = document.getElementById("create-game");
 
@@ -27,7 +26,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
   });
 
-
-
-
-});
+}

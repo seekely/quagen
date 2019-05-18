@@ -42,15 +42,12 @@ def game_new():
 @bp.route('/game/<string:game_id>', methods = ['GET'])
 def game_view(game_id):
     game = queries.get_game(game_id)
-    return json.jsonify(game=game.as_dict())
+    game_dict = game.as_dict()
 
-@bp.route('/game/<string:game_id>/projected', methods = ['GET'])
-def game_projected(game_id):
-    game = queries.get_game(game_id)
-    projected_board = game.board.project()
-    game = game.as_dict()
-    game['board'] = projected_board.spots
-    return json.jsonify(game=game)
+    game_projected = game.board.project()
+    game_dict['projected'] = game_projected.spots
+    
+    return json.jsonify(game=game_dict)
 
 @bp.route('/game/<game_id>/move/<int:x>/<int:y>', methods = ['GET', 'POST'])
 def game_move(game_id, x, y):
