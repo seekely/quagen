@@ -44,9 +44,15 @@ section {
     opacity: 1;
 }
 
+.button-move {
+  outline: 3px solid black;
+  outline-offset: 1px;
+  z-index: 2;
+}
 
 .player-color-0 {background-color: #000000;} 
 .player-color-1 {background-color: #008cba;} 
 .player-color-2 {background-color: #f44336;}  
 .player-color-3 {background-color: #16d74f;}  
 .player-color-4 {background-color: #ffc300;}  
+

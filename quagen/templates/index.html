@@ -55,8 +55,11 @@
         </section>
 
         <script type="module">
-          import { init } from '{{ url_for("static", filename="js/pages/index.js") }}?v10';
-          init();
+            import { init } from '{{ url_for("static", filename="js/pages/index.js") }}?v10';
+
+            window.onload = () => {
+                init();
+            };
         </script>
 
 

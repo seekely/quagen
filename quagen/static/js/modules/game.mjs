@@ -9,7 +9,8 @@ export class Game {
     this.boardCurrent = [];
     this.boardProjected = [];
     this.scores = {};
-    this.history = [];
+    this.movesHistory = [];
+    this.movesLast = [];
   }
 
   /**
@@ -18,9 +19,14 @@ export class Game {
   update(properties) {
 
     this.settings = properties['settings'];
-    this.history = properties['past_moves'];     
+    this.movesHistory = properties['past_moves'];     
     this.scores = properties['scores']; 
     this.currentTurn = properties['turn_number']; 
+
+    this.movesHistory = properties['past_moves'];     
+    if (0 < this.movesHistory.length) {
+      this.movesLast = this.movesHistory.slice(-1)[0] 
+    }
 
     if ('board' in properties) {
       this.boardCurrent = properties['board'];
@@ -72,7 +78,7 @@ export class GamePoll {
       self.inFlight = false;
     });
 
-    xhr.addEventListener("error", (event) => {
+    xhr.addEventListener('error', (event) => {
       self.inFlight = true;
     });
 
@@ -92,7 +98,6 @@ export class GameView {
    * 
    */
   start() {
-
    const self = this;
     setInterval(() => {
         self.update();
@@ -105,10 +110,8 @@ export class GameView {
    * 
    */
   update() {
-
     this.updateScoreboard();
     this.updateBoard();
-
   }
 
   /**
@@ -120,7 +123,7 @@ export class GameView {
     const titles = ['controlled', 'pressuring', 'projected'];
 
     for (let i = 0; i < scores.length; i++) {      
-      for (let title of titles) {
+      for (const title of titles) {
         const elmScore = document.getElementById(`player-${ title }-${ i }`);
         elmScore.innerHTML = scores[i][title];
       }
@@ -134,6 +137,7 @@ export class GameView {
   updateBoard() {
 
     let board = this.game.boardCurrent;
+    const movesLast = this.game.movesLast; 
     const maxPower = this.game.settings['power'];
     const elmProjected = document.getElementById('option-projected');
 
@@ -149,9 +153,23 @@ export class GameView {
         const newColor = board[x][y]['color'];
         const newClass = `player-color-${ newColor }`;
 
+        let inLastMove = false;
+        for (const move of movesLast) {
+          if (move[0] == x && move[1] == y) {
+            inLastMove = true;
+            break;
+          }
+        }
+
+        if (inLastMove) {
+          elmSpot.classList.add('button-move');
+        } else {
+          elmSpot.classList.remove('button-move');
+        }
+
         if (!elmSpot.classList.contains(newClass)) {
 
-          for (let oldColor of [-1, 0, 1, 2, 3]) {
+          for (const oldColor of [-1, 0, 1, 2, 3]) {
             elmSpot.classList.remove(`player-color-${ oldColor}`);
           }
 
@@ -181,7 +199,7 @@ export class GameView {
     const gameId = self.game.gameId;
     const buttons = document.getElementsByClassName('button');
 
-    for (let button of buttons) {
+    for (const button of buttons) {
 
       button.addEventListener('mouseup', () => {
         const spotX = button.getAttribute('data-x');
@@ -194,7 +212,7 @@ export class GameView {
         xhr.addEventListener('load', (event) => {
         });
 
-        xhr.addEventListener("error", (event) => {
+        xhr.addEventListener('error', (event) => {
         });
 
         xhr.send(null);

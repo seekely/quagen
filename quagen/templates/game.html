@@ -44,8 +44,12 @@
         </section>
 
         <script type="module">
-          import { init } from '{{ url_for("static", filename="js/pages/game.js") }}?v10';
-          init('{{ game.game_id }}');
+            import { init } from '{{ url_for("static", filename="js/pages/game.js") }}?v10';
+
+            window.onload = () => {
+                init('{{ game.game_id }}');
+            };
+
         </script>
 
     </body>

@@ -1,27 +1,26 @@
 'use strict';
 
-export function init(gameId) {
+export function init() {
 
-  var form = document.getElementById("create-game");
+  const form = document.getElementById('create-game');
 
-  form.addEventListener("submit", function (event) {
+  form.addEventListener('submit', function (event) {
     event.preventDefault();
 
-    var formData = new FormData(form);
-    var xhr = new XMLHttpRequest();
+    const formData = new FormData(form);
+
+    const xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
+    xhr.open('POST', '/api/v1/game/new');
 
-    xhr.addEventListener("load", function(event) {
+    xhr.addEventListener('load', function(event) {
       const game = xhr.response['game'];
-      window.location.href = "/game/" + game['game_id'];
-
+      window.location.href = `/game/${ game['game_id'] }`;
     });
 
-    xhr.addEventListener("error", function(event) {
-      alert('Oops! Something went wrong.');
+    xhr.addEventListener('error', function(event) {
     });
 
-    xhr.open("POST", "/api/v1/game/new");
     xhr.send(formData);
 
   });
