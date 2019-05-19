@@ -96,7 +96,6 @@ class Game:
         '''
         Readies a game after all players joined and settings finalized
         '''
-        self._board.generate()
         self._time_started = int(time())
 
     def add_player(self, player_id):
@@ -207,6 +206,10 @@ class Board:
         self._spots = spots
         self._settings = settings
 
+        if {} == self._spots:
+            self.generate()
+
+
     @property
     def spots(self):
         return self._spots
@@ -279,10 +282,13 @@ class Board:
         return allowed_spots
 
 
-    def apply_power(self):
+    def apply_power(self, project = False):
         '''
         Spots on the board progress their power level based on the pressure 
         applied by surronding spots.
+
+        Args:
+            project (bool): If we are applying power during a board projection
 
         Returns:
             (int) Number of spots which changed power
@@ -296,9 +302,10 @@ class Board:
         # Apply the calculated pressure to each spot on the board.
         changed = self._update_powers()
 
-        # Update the pressures again as there are likely new maxed out power 
-        # spots, and we want the scores to accurately reflect pressures.
-        self._update_pressures()  
+        if not project:
+            # Update the pressures again as there are likely new maxed out power 
+            # spots, and we want the scores to accurately reflect those pressures.
+            self._update_pressures()  
 
         return changed
 
@@ -312,7 +319,7 @@ class Board:
             final projected state.
         '''
         projected_board = Board(copy.deepcopy(self._spots), copy.deepcopy(self._settings))
-        while 0 < projected_board.apply_power():
+        while 0 < projected_board.apply_power(True):
             pass
 
         return projected_board
@@ -340,8 +347,8 @@ class Board:
                   for i in range(scores_count)] 
 
         # Iterate on every spot on the board 
-        for x in range(len(self._spots)):
-            for y in range(len(self._spots[x])):
+        for x in range(self._settings['dimension_x']):
+            for y in range(self._settings['dimension_y']):
 
                 power = self._spots[x][y]['power']
                 color_control = self._spots[x][y]['color']
@@ -377,8 +384,8 @@ class Board:
         Returns:
             (bool) True if the coordinates are within the bounds of the board. 
         '''
-        return (0 <= x and x < len(self._spots) and 
-                0 <= y and y < len(self._spots[x])) 
+        return (0 <= x < self._settings['dimension_x'] and 
+                0 <= y < self._settings['dimension_y']) 
 
     def _dedupe_moves(self, moves):
         '''
@@ -415,8 +422,8 @@ class Board:
 
         # Go through every spot on the board and calculate the spots new 
         # pressure
-        for x in range(len(self._spots)):
-            for y in range(len(self._spots[x])):
+        for x in range(self._settings['dimension_x']):
+            for y in range(self._settings['dimension_y']):
                 new_pressures = self._calculate_pressures_for_spot(x, y, spots_to_check)
                 self._spots[x][y]['pressures'] = new_pressures
 
@@ -472,6 +479,7 @@ class Board:
         Returns:
             (list) List of pressures on a spot indexed by color
         ''' 
+        max_power = self._settings['power']
 
         new_pressures = [0] * len(self._spots[x][y]['pressures'])
         for check_spot in spots_to_check:
@@ -481,7 +489,7 @@ class Board:
             # If the spot we are checking has reached max power, it 
             # applies pressure
             if (self._check_bounds(check_x, check_y) and
-                self._settings['power'] == self._spots[check_x][check_y]['power']):
+                max_power == self._spots[check_x][check_y]['power']):
                
                 # Increase the pressure on this spot for the color controlling 
                 # the checked spot
@@ -527,8 +535,8 @@ class Board:
         '''
         spots_changed = 0
 
-        for x in range(len(self._spots)):
-            for y in range(len(self._spots[x])):
+        for x in range(self._settings['dimension_x']):
+            for y in range(self._settings['dimension_y']):
 
                 control_color = self._spots[x][y]['color']
                 control_power = self._spots[x][y]['power']
@@ -560,4 +568,3 @@ class Board:
                             self._spots[x][y]['color'] = Board.COLOR_NO_PLAYER
 
         return spots_changed
-
