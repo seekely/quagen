@@ -40,6 +40,10 @@ class Game:
         return self._board
 
     @property
+    def history(self):
+        return self._history
+
+    @property
     def settings(self):
         return self._settings
 
@@ -58,6 +62,10 @@ class Game:
     @property
     def time_updated(self):
         return self._time_updated
+
+    @property 
+    def turn_completed(self):
+        return self._turn_completed
 
     def updated(self):
         self._time_updated = int(time())
@@ -183,17 +191,6 @@ class Game:
 
         return processed_turn
 
-    def get_allowed_spots(self):
-        '''
-        Gets the list of allowed moves on the board
-
-        Returns:
-             Allowed (x, y) pair list
-        '''
-        allowed_spots = self._board.get_allowed_spots()
-        return allowed_spots
-
-
 class Board:
 
     '''(int) When no player controls the board spot'''
@@ -230,6 +227,25 @@ class Board:
                 row.append(spot)
             self._spots.append(row)
 
+    def get_valid_moves(self):
+        '''
+        Find the spots still allowed to be choosen by a player.
+        
+        Returns
+            (list) of (x, y) pairs of valid moves
+        ''' 
+        max_power = self._settings['power']
+        valid_moves = []
+        for x in range(self._settings['dimension_x']):
+            for y in range(self._settings['dimension_y']):
+                power = self._spots[x][y]['power']
+                
+                # Only spots not at max power are valid moves
+                if power < max_power:
+                    valid_moves.append((x, y))
+
+        return valid_moves
+
     def validate_move(self, x, y):
         '''
         Validates if a move at a given spot is allowed.
@@ -257,30 +273,6 @@ class Board:
         for move in deduped_moves:
             self._spots[move[0]][move[1]]['color'] = move[2]
             self._spots[move[0]][move[1]]['power'] = self._settings['power']
-
-        
-    def get_allowed_spots(self):
-        '''
-        Finds the spots that are still allowed in the game.
-        
-        Returns
-            (list) of pairs (x, y) allowed spots on the board
-        ''' 
-        max_power = self._settings['power']
-        allowed_spots = []
-        for x in range(len(self._spots)):
-            for y in range(len(self._spots[x])):
-
-                power = self._spots[x][y]['power']
-                
-                # A spot at max power is firmly in the hands of the current 
-                # color and is not allowed
-                if power < max_power:
-                    allowed_spot = (x, y)
-                    allowed_spots.append(allowed_spot)
-
-        return allowed_spots
-
 
     def apply_power(self, project = False):
         '''
@@ -349,7 +341,6 @@ class Board:
         # Iterate on every spot on the board 
         for x in range(self._settings['dimension_x']):
             for y in range(self._settings['dimension_y']):
-
                 power = self._spots[x][y]['power']
                 color_control = self._spots[x][y]['color']
                 color_pressure = self._get_pressuring_color(x, y)

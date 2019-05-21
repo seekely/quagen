@@ -23,9 +23,6 @@ def game_new():
         'pressure': request.values.get('pressure'),
         'ai_in_play': int(request.values.get('ai_in_play'))
     };
-    # BECAUSE 60x60 broke things for now
-    settings['dimension_x'] = 20
-    settings['dimension_y'] = 20
 
     game = Game({'settings': settings})
     game.start()
@@ -75,10 +72,10 @@ def game_move(game_id, x, y):
         
         # hack so that AI plays only the first time
         if ai_in_play and game._settings['ai_last_turn'] == game._turn_completed:
-            ai_strength = game._settings['ai_in_play']
+            ai_strength = game._settings['ai_in_play'] - 1
             ai_player = 'AI'
             print('Taking turn for player ' + ai_player, 'strength', ai_strength)
-            ai_x, ai_y = ai.ai_move(game, ai_player, ai_strength, verbose=False)
+            ai_x, ai_y = ai.choose_move(game, 1, ai_strength)
             game.add_move(ai_player, ai_x, ai_y)
             game._settings['ai_last_turn'] += 1
         
