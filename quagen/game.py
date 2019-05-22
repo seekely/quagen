@@ -29,7 +29,10 @@ class Game:
         self._settings.update(params.get('settings', {}))
 
         self._board = Board(params.get('board', {}), self._settings)
-        self._scores = params.get('scores', self._board.calculate_scores())
+        
+        self._scores = []
+        if None != self._time_started:
+            self._scores = params.get('scores', self._board.calculate_scores())
 
     @property
     def game_id(self):
@@ -105,6 +108,7 @@ class Game:
         Readies a game after all players joined and settings finalized
         '''
         self._time_started = int(time())
+        self._board.generate()
 
     def add_player(self, player_id):
         '''
@@ -202,10 +206,6 @@ class Board:
     def __init__(self, spots = {}, settings = {}):
         self._spots = spots
         self._settings = settings
-
-        if {} == self._spots:
-            self.generate()
-
 
     @property
     def spots(self):

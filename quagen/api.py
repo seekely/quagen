@@ -6,9 +6,9 @@ from flask import make_response
 from flask import request
 from flask import session
 
-from quagen.game import Game
 from quagen import queries
-from quagen import ai
+from quagen.ai.projection import ProjectionAI
+from quagen.game import Game
 
 bp = Blueprint('api', __name__)
 
@@ -74,8 +74,10 @@ def game_move(game_id, x, y):
         if ai_in_play and game._settings['ai_last_turn'] == game._turn_completed:
             ai_strength = game._settings['ai_in_play'] - 1
             ai_player = 'AI'
-            print('Taking turn for player ' + ai_player, 'strength', ai_strength)
-            ai_x, ai_y = ai.choose_move(game, 1, ai_strength)
+            print('Taking turn for player ' + ai_player, 'strength', ai_strength)            
+            ai_method = ProjectionAI(game, 1, ai_strength)
+            ai_x, ai_y = ai_method.choose_move()
+
             game.add_move(ai_player, ai_x, ai_y)
             game._settings['ai_last_turn'] += 1
         

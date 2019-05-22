@@ -15,7 +15,7 @@ def test_as_dict():
     '''
     params = {
         'game_id': '1245',
-        'turn_number': 5,
+        'turn_completed': 5,
         'turn_moves': {'0': '234', '1': '234'},
         'settings': {
             'player_count': 3,
@@ -28,7 +28,7 @@ def test_as_dict():
     # Not shared with client -- internal only 
     a_dict = a_game.as_dict(False)
     assert '1245' == a_dict['game_id']
-    assert 5 == a_dict['turn_number']
+    assert 5 == a_dict['turn_completed']
     assert {'0': '234', '1': '234'} == a_dict['turn_moves']
     assert 3 == a_dict['settings']['player_count']
     assert 6 == a_dict['settings']['power']
@@ -187,9 +187,9 @@ def test_process_turn(mock_calculate_scores, mock_apply_power, mock_apply_moves)
     a_game.add_move('player2', 3, 3)
 
     assert a_game.process_turn()
-    assert a_game._turn_number == 1
+    assert a_game._turn_completed == 1
     assert {} == a_game._turn_moves
-    assert [[[1, 1, 1], [3, 3, 2]]] == a_game._past_moves
+    assert [[[1, 1, 1], [3, 3, 2]]] == a_game._history
     mock_apply_moves.assert_called_once()
     mock_apply_power.assert_called_once()
     mock_calculate_scores.assert_called()
@@ -216,12 +216,12 @@ def test_process_turn_multiple(mock_calculate_scores, mock_apply_power, mock_app
     a_game.add_move('player2', 3, 4)
     a_game.add_move('player1', 5, 9)
     assert a_game.process_turn()
-    assert a_game._turn_number == 2
+    assert a_game._turn_completed == 2
     assert {} == a_game._turn_moves
     assert [
             [[1, 1, 1], [3, 3, 2]],
             [[3, 4, 2], [5, 9, 1]]
-           ] == a_game._past_moves
+           ] == a_game._history
     assert 2 == mock_apply_moves.call_count
     assert 2 == mock_apply_power.call_count
     mock_calculate_scores.assert_called()
@@ -241,12 +241,12 @@ def test_process_turn_missing_players(mock_apply_moves):
     a_game.add_move('player1', 1, 1)
     a_game.add_move('player3', 3, 3)
     assert not a_game.process_turn()
-    assert a_game._turn_number == 0
+    assert a_game._turn_completed == 0
     mock_apply_moves.assert_not_called()
 
     a_game.add_move('player2', 5, 5)
     assert a_game.process_turn()
-    assert a_game._turn_number == 1
+    assert a_game._turn_completed == 1
     mock_apply_moves.assert_called_once()
 
 ##################
