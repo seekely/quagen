@@ -29,12 +29,12 @@ def test_choose_move():
     ai1 = ProjectionAI(game, 1, 0)
     move1 = ai1.choose_move()
     game.add_move('ai1', move1[0], move1[1])
-    assert (18, 12) == move1
+    assert (19, 4) == move1
 
     ai2 = ProjectionAI(game, 1, 1)
     move2 = ai2.choose_move()
     game.add_move('ai2', move2[0], move2[1])
-    assert (16, 9) == move2
+    assert (16, 8) == move2
 
     game.process_turn()
 
@@ -42,11 +42,11 @@ def test_choose_move():
     ai1 = ProjectionAI(game, 1, 0)
     move1 = ai1.choose_move()
     game.add_move('ai1', move1[0], move1[1])
-    assert (18, 7) == move1
+    assert (12, 0) == move1
 
     ai2 = ProjectionAI(game, 1, 1)
     move2 = ai2.choose_move()
     game.add_move('ai2', move2[0], move2[1])
-    assert (17, 6) == move2
+    assert (2, 10) == move2
 
     game.process_turn()

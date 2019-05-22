@@ -59,7 +59,7 @@ class AI(object, metaclass=ABCMeta):
         return projected_board.calculate_scores()
 
 
-    def get_valid_moves(self):
+    def get_movable_spots(self):
         ''' 
         Provides a list of valid moves for the AI to make after some simple 
         filtering.
@@ -68,7 +68,7 @@ class AI(object, metaclass=ABCMeta):
             (list) of (x,y) tuples.
 
         '''        
-        valid_moves = self._game.board.get_valid_moves()
+        valid_moves = self._game.board.get_movable_spots()
 
         # Removes moves too close to the edge in early game.
         self._filter_edge_moves(valid_moves)

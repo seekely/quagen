@@ -17,7 +17,7 @@ class Simulation:
     def run(self):
 
         self._game.start()
-        while (0 < len(self._game.board.get_valid_moves())):
+        while (0 < len(self._game.board.get_movable_spots())):
             for ai_player in self._ai_players:
                 ai_name = ai_player[0]
                 ai_logic = ai_player[1]

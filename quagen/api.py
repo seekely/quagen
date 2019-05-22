@@ -7,7 +7,7 @@ from flask import request
 from flask import session
 
 from quagen import queries
-from quagen.ai.projection import ProjectionAI
+from quagen.ai.biased import BiasedAI
 from quagen.game import Game
 
 bp = Blueprint('api', __name__)
@@ -75,7 +75,7 @@ def game_move(game_id, x, y):
             ai_strength = game._settings['ai_in_play'] - 1
             ai_player = 'AI'
             print('Taking turn for player ' + ai_player, 'strength', ai_strength)            
-            ai_method = ProjectionAI(game, 1, ai_strength)
+            ai_method = BiasedAI(game, 1, ai_strength)
             ai_x, ai_y = ai_method.choose_move()
 
             game.add_move(ai_player, ai_x, ai_y)

@@ -29,12 +29,12 @@ def test_choose_move():
     ai1 = BiasedAI(game, 1, 0)
     move1 = ai1.choose_move()
     game.add_move('ai1', move1[0], move1[1])
-    assert (19, 10) == move1
+    assert (18, 11) == move1
 
     ai2 = BiasedAI(game, 1, 1)
     move2 = ai2.choose_move()
     game.add_move('ai2', move2[0], move2[1])
-    assert (19, 3) == move2
+    assert (12, 7) == move2
 
     game.process_turn()
 
@@ -42,11 +42,11 @@ def test_choose_move():
     ai1 = BiasedAI(game, 1, 0)
     move1 = ai1.choose_move()
     game.add_move('ai1', move1[0], move1[1])
-    assert (17, 1) == move1
+    assert (15, 3) == move1
 
     ai2 = BiasedAI(game, 1, 1)
     move2 = ai2.choose_move()
     game.add_move('ai2', move2[0], move2[1])
-    assert (1, 5) == move2
+    assert (15, 7) == move2
 
     game.process_turn()

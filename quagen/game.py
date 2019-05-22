@@ -227,7 +227,7 @@ class Board:
                 row.append(spot)
             self._spots.append(row)
 
-    def get_valid_moves(self):
+    def get_movable_spots(self):
         '''
         Find the spots still allowed to be choosen by a player.
         
