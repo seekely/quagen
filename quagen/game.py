@@ -47,6 +47,10 @@ class Game:
         return self._history
 
     @property
+    def scores(self):
+        return self._scores
+
+    @property
     def settings(self):
         return self._settings
 

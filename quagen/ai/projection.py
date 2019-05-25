@@ -12,7 +12,7 @@ class ProjectionAI(AI):
 
     ''' (list) For each strength level, the number of spots on the board the 
             AI will score before choosing a move'''
-    SPOT_CANDIDATE_COUNT = [4, 8, 16, 32]
+    SPOT_CANDIDATE_COUNT = [4, 16, 32]
 
     def get_max_strength(self):
         '''
@@ -68,8 +68,8 @@ class ProjectionAI(AI):
         candidate_spots = []
         while (len(candidate_spots) < num_candidates and
                len(available_spots) > 0):
-            a_move = available_spots.pop()
-            candidate_spots.append(a_move)
+            spot = available_spots.pop()
+            candidate_spots.append(spot)
 
         return candidate_spots
 
@@ -86,15 +86,15 @@ class ProjectionAI(AI):
 
         '''
         best_candidate = None
-        best_projection = -1
+        best_score = -1
 
-        for a_move in candidate_spots:
-            scores = self.project_move(a_move)
+        for spot in candidate_spots:
+            scores = self.project_move(spot)
             projected_score = scores[self._color]['projected']
-            print('Scored ' + str(a_move) + ' at ' + str(projected_score))
+            print('Scored ' + str(spot) + ' at ' + str(projected_score))
 
-            if projected_score > best_projection:
-                best_candidate = a_move
-                best_projection = projected_score
+            if projected_score > best_score:
+                best_candidate = spot
+                best_score = projected_score
 
         return best_candidate

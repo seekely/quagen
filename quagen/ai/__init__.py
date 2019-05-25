@@ -39,7 +39,7 @@ class AI(object, metaclass=ABCMeta):
         '''
         pass 
 
-    def project_move(self, move):
+    def project_move(self, move, color = None):
         '''
         Provides the projected scores for a move on the board
         
@@ -49,10 +49,12 @@ class AI(object, metaclass=ABCMeta):
         Returns:
             (list): Scores of the projected game with the move in place. 
         '''
+        if color is None:
+            color = self._color
 
         # We need to copy the board since we are adding a move to the game and 
         # do not want to affect the real/original game.
-        projected_move = (move[0], move[1], self._color)
+        projected_move = (move[0], move[1], color)
         projected_board = deepcopy(self._game.board)
         projected_board.apply_moves([projected_move])
 
