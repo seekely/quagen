@@ -5,6 +5,7 @@ from quagen.game import Game
 from quagen.ai.biased import BiasedAI
 from quagen.ai.distributed import DistributedAI
 from quagen.ai.projection import ProjectionAI
+from quagen.ai.previous import PreviousAI
 from quagen.ai.random import RandomAI
 
 class Simulation:
@@ -38,8 +39,8 @@ class Simulation:
 def simulate_game(number):
     game = Game()
     simulation = Simulation(game)
-    simulation.add_player(BiasedAI(game, 1, 2))
-    simulation.add_player(DistributedAI(game, 2, 2))
+    simulation.add_player(PreviousAI(game, 1, 2))
+    simulation.add_player(BiasedAI(game, 2, 2))
     simulation.run()
     return game
 

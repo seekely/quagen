@@ -6,16 +6,16 @@ from quagen.utils import chunk_list
 
 class DistributedAI(AI):
     '''
-    Much like the ProjectionAI, this primarily relies on selecting X  
-    spot candidates from the board and using the projected score to decide the 
-    best move. But here, we inject some hand crafted rules and weights 
-    when choosing both the candidate spots and best spot. 
-     '''
+    Selects X candidate spots and chooses the spot with the highest 
+    projected score. X is determined by the strength of the AI. To select 
+    candidate spots, the AI will divde up the board into equal chunks and 
+    randomly select a spot from each chunk. This gives the AI a set of 
+    candidate spots distributed throughout the whole board. 
+    '''
 
     '''(list) For each strength level, number of spots on the board the AI 
-    will randomly glance at to make a move'''
+    will project to select a move'''
     SPOT_CANDIDATE_COUNT = [3, 12, 32]
-
 
     def get_max_strength(self):
         '''
@@ -51,12 +51,13 @@ class DistributedAI(AI):
             # distributed all over the board without having to look at 
             # every spot.
             distributed_count = DistributedAI.SPOT_CANDIDATE_COUNT[self._strength]
-            distributed_spots = self._get_distributed_candidates(available_spots, distributed_count)
+            distributed_spots = self._get_distributed_candidates(available_spots, 
+                                                                 distributed_count)
 
             candidate_spots += distributed_spots
             available_spots = [spot for spot in available_spots if spot not in candidate_spots]
 
-            # Pick the best of the candidates according to the AI's criteria
+            # Pick the best of the candidates according to projection
             choosen_spot = self._evaluate_candidates(candidate_spots)
 
         return choosen_spot

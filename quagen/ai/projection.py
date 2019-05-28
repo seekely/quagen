@@ -6,7 +6,7 @@ from quagen.utils import chunk_list
 
 class ProjectionAI(AI):
     '''
-    Randomly selects X spot candidates and chooses the spot with the highest 
+    Randomly selects X candidate spots and chooses the spot with the highest 
     projected score as the move. X is determined by the strength of the AI. 
     '''
 
@@ -42,7 +42,7 @@ class ProjectionAI(AI):
             random.shuffle(available_spots)
             choosen_spot = available_spots.pop()
         else:
-            # Randomly pick our spot candidates 
+            # Randomly pick our candidate spots 
             candidate_spots = self._choose_candidates(available_spots, num_candidates)
 
             # Pick the best of the candidates
@@ -76,7 +76,7 @@ class ProjectionAI(AI):
     def _evaluate_candidates(self, candidate_spots):
         '''
         Projects every candidate and chooses the spot with the highest 
-        projected score
+        projected score.
     
         Args: 
             candidate_spots (list): Spots to evaluate

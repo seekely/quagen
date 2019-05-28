@@ -1,4 +1,5 @@
 from copy import deepcopy
+import itertools
 import random
 
 from quagen.ai import AI
@@ -6,15 +7,17 @@ from quagen.utils import chunk_list
 
 class BiasedAI(AI):
     '''
-    Much like the ProjectionAI, this primarily relies on selecting X  
-    spot candidates from the board and using the projected score to decide the 
-    best move. But here, we inject some hand crafted rules and weights 
-    when choosing both the candidate spots and best spot. 
-     '''
+    Selects X candidate spots and chooses the spot with the highest 
+    weighted score. X is determined by the strength of the AI. While this AI 
+    still primarily relies on projected score, we bias the AI to look at spots 
+    which typically produce higher projected scores. This AI will also weigh 
+    the projected score with other feature of the board state to influence 
+    the AI to better choose between roughly equal projected scores. 
+    '''
 
-    '''(list) For each strength level, number of spots on the board the AI 
-    will randomly glance at to make a move'''
-    RANDOM_CANDIDATE_COUNT = [3, 12, 24]
+    '''(list) For each strength level, number of equally distributed spots on 
+    the board the AI will consider.'''
+    DISTRIBUTED_CANDIDATE_COUNT = [3, 12, 24]
 
     '''(int) For each strength level, number of spots on the board the AI 
     will look at which are around players' previous moves.'''
@@ -23,17 +26,15 @@ class BiasedAI(AI):
     '''(int) Number of turns to look back on for previous moves'''
     LOOKBACK_TURNS = 3
 
-    '''(list) For each strength level, the number of top projected spots the 
-    AI will augment with additional information to try and make a better 
-    spot choice'''
-    AUGMENT_COUNT = [2, 4, 32]
+    '''(int) Space range away from the center for opening move'''
+    OPENING_RADIUS = 3
 
     def get_max_strength(self):
         '''
         Returns:
             (int) The max strength / level of this AI
         '''
-        return len(BiasedAI.RANDOM_CANDIDATE_COUNT) - 1
+        return len(BiasedAI.DISTRIBUTED_CANDIDATE_COUNT) - 1
 
     def choose_move(self):
         '''
@@ -50,14 +51,21 @@ class BiasedAI(AI):
         choosen_spot = None
 
         if 0 == self._game.turn_completed:
-            # At the start of the game, we can just choose any spot as they 
-            # will all project equally
-            random.shuffle(available_spots)
-            choosen_spot = available_spots.pop()
+            # At the start of the game, we will choose a random spot towards 
+            # the middle of the board
+            center_x = int(self._game.settings['dimension_x'] / 2)
+            pick_x = random.randint(center_x - BiasedAI.OPENING_RADIUS
+                                  , center_x + BiasedAI.OPENING_RADIUS)
+
+            center_y = int(self._game.settings['dimension_y'] / 2)
+            pick_y = random.randint(center_y - BiasedAI.OPENING_RADIUS
+                                  , center_y + BiasedAI.OPENING_RADIUS)
+
+            choosen_spot = (pick_x, pick_y)
         else:
-            # Let's look at spots which are around other recent moves. 
-            # Doubling down on a recent move or countering an opponent's move 
-            # is powerful depending on the board state and stage of the game.
+            # Let's look at spots which are around opponents' recent moves. 
+            # Countering an opponent's move typically has a high projection 
+            # depending on the board state and stage of the game.
             lookback_count = BiasedAI.LOOKBACK_CANDIDATE_COUNT[self._strength]
             lookback_turns = BiasedAI.LOOKBACK_TURNS
             lookback_spots = self._get_lookback_candidates(
@@ -67,16 +75,16 @@ class BiasedAI(AI):
             
             candidate_spots += lookback_spots
             available_spots = [spot for spot in available_spots if spot not in candidate_spots]
-            print('Looking at ' + str(lookback_spots))
+
             # All the available spots should be in (x, y) order. We'll divide 
             # up the board into chunks and randomly pick candidates 
             # equally from each chunk. This lets the AI project spots 
             # distributed all over the board without having to look at 
-            # every spot.
-            random_count = BiasedAI.RANDOM_CANDIDATE_COUNT[self._strength]
-            random_spots = self._get_distributed_candidates(available_spots, random_count)
+            # every spot on the board.
+            distributed_count = BiasedAI.DISTRIBUTED_CANDIDATE_COUNT[self._strength]
+            distrubted_spots = self._get_distributed_candidates(available_spots, distributed_count)
 
-            candidate_spots += random_spots
+            candidate_spots += distrubted_spots
             available_spots = [spot for spot in available_spots if spot not in candidate_spots]
 
             # Pick the best of the candidates according to the AI's criteria
@@ -86,42 +94,39 @@ class BiasedAI(AI):
 
     def _get_lookback_candidates(self, available_spots, num_candidates, num_turns):
         '''
-        Looks around recent moves made by all players and randomly chooses a 
+        Looks around recent moves made by opponents' and randomly chooses a 
         handful of available spots
 
         Args:
             available_spots (list): All spots to choose from 
             num_candidates (int): Number of spots to choose 
             num_turns (int): Number of turns to look back in history
-            radius (int): Number of spots around a spot to look
 
         Returns:
             (list) of choosen candidates
         '''
         candidate_spots = []
 
-        # Grab all spots around recent moves
-        lookback_spots = []
-        for i in range(num_turns):
-            if i < len(self._game.history):
-                past_moves = self._game.history[-i]
-                for past_move in past_moves:
-                    print('Looking at ' + str(past_move))
-                    if past_move[2] == self._color:
-                        print('Passed on ' + str(past_move))
-                        continue
+        # Combines all the recent moves into one long list -- exclude moves 
+        # made by this AI
+        past_moves = self._game.history[-num_turns:]
+        past_moves = list(itertools.chain.from_iterable(past_moves))
+        past_moves = [move for move in past_moves if move[2] != self._color]
 
-                    for x in range(-1, 2):
-                        for y in range(-1, 2):
-                            spot = (past_move[0] + x, past_move[1] + y)                      
-                            if spot in available_spots:
-                                lookback_spots.append(spot)                     
+        # Select spots immediately surronding each past move
+        lookback_spots = []
+        for past_move in past_moves:
+
+            for x in range(-1, 2):
+                for y in range(-1, 2):
+                    spot = (past_move[0] + x, past_move[1] + y)                      
+                    if spot in available_spots:
+                        lookback_spots.append(spot)                     
 
         # Randomly select out the desired count of candidates
         random.shuffle(lookback_spots)
         while (len(candidate_spots) < num_candidates and
                len(lookback_spots) > 0):
-
             candidate_spots.append(lookback_spots.pop())
 
         return candidate_spots
@@ -160,34 +165,6 @@ class BiasedAI(AI):
 
         return candidate_spots
 
-    def _get_augment_candidates(self, candidate_spots, num_candidates):
-        '''
-        Selects the top X candidates for augmentation based on each spot's 
-        projected score
-
-        Args:
-            candidate_spots (list): Spots to choose from
-            num_candidates (int): Number of spots to choose 
-
-        Returns:
-            (list) of spots to augment
-        ''' 
-        augmented_candidates = []
-        for spot in candidate_spots:
-            cur_projected = self._game.scores[self._color]['projected']
-            new_projected = self.project_move(spot)[self._color]['projected']
-            
-            augmented_candidates.append({
-                'coords': spot, 
-                'projected': new_projected,
-                'gain_ai': new_projected - cur_projected 
-            })
-             
-        augmented_candidates.sort(key = lambda spot: spot['projected'], reverse = True)
-        augmented_candidates = augmented_candidates[:num_candidates]
-
-        return augmented_candidates
-
     def _evaluate_candidates(self, candidate_spots):
         '''
         Projects every candidate and chooses the spot with the highest 
@@ -203,28 +180,19 @@ class BiasedAI(AI):
         best_candidate = None
         best_score = -1
 
-        # Project the score for all candidate spots and select the top X 
-        # scores for augmentation
-        augment_count = BiasedAI.AUGMENT_COUNT[self._strength]
-        augmented_candidates = self._get_augment_candidates(candidate_spots, augment_count) 
-
         # Augment each selected spot with additional information which will 
         # be used to reach a final spot score.
-        #(self._augment_candidate(spot) for spot in augmented_candidates)
-        for spot in augmented_candidates:
-            self._augment_candidate(spot)
-
+        augmented_candidates = [self._augment_candidate(spot) for spot in candidate_spots]
+            
         # Score all the augmented candidates using the augmented fields
         self._score_candidates(augmented_candidates)
 
         # Choose the highest scoring candidate
-        for spot in augmented_candidates:        
-            augmented_score = spot['score']
-            print('Scored ' + str(spot))
+        augmented_candidates.sort(key=lambda spot: spot['score'], reverse=True)
+        best_candidate = augmented_candidates[0]['coords']
 
-            if augmented_score > best_score:
-                best_candidate = spot['coords']
-                best_score = augmented_score
+        for spot in augmented_candidates:
+            print('Scored ' + str(spot))
 
         return best_candidate
 
@@ -235,11 +203,20 @@ class BiasedAI(AI):
         the spot.
 
         Args:
-            spot (dict): Spot in the form of {'coords': (x, y), 'projection': 5}
+            spot (tuple): Spot in the form of (x, y)
         
         '''
-        spot['gain_opponents'] = 0 #self._calculate_opponent_gain(spot['coords'])
-
+        cur_projected = self._game.scores[self._color]['projected']
+        new_projected = self.project_move(spot)[self._color]['projected']
+            
+        augmented_candidate = {
+            'coords': spot, 
+            'projected': new_projected,
+            'gain_ai': new_projected - cur_projected,
+            'gain_opponents': self._calculate_opponent_gain(spot)
+        }
+             
+        return augmented_candidate
 
     def _score_candidates(self, augmented_candidates):
         '''
@@ -249,23 +226,18 @@ class BiasedAI(AI):
             augmented_candidates (list): Spots augmented with  _augment_candidate
 
         '''
-        weights = [
-            {'field': 'gain_ai', 'weight': 1, 'max': 0},
-            {'field': 'gain_opponents', 'weight': 0, 'max': 0}
-        ]
 
-        # Find the max value for every field
+        board_size = (self._game.settings['dimension_x'] 
+                    * self._game.settings['dimension_y'])
+        
         for spot in augmented_candidates:
-            for weight in weights:
-                weight['max'] = max(weight['max'], spot[weight['field']])
-    
-        # Give every spot a score by normalizing each field value and 
-        # multiplying against the weight
-        for spot in augmented_candidates:
-            score = 0
-            for weight in weights:
-                normalized = float(spot[weight['field']]) / max(1, weight['max'])
-                score += normalized * weight['weight']
+            score = spot['gain_ai']
+
+            # If the AI has the lead, let this AI consider the moves of 
+            # the opponent to perhaps play defense if the gains for the 
+            # opponent on a spot are enough to outweight our gains.
+            if self._game.is_leading(self._color, 'projected'):
+                score += spot['gain_opponents'] * .34
 
             spot['score'] = score
 

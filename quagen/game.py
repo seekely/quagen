@@ -199,6 +199,31 @@ class Game:
 
         return processed_turn
 
+    def is_leading(self, player_color, field = 'controlled'):
+        '''
+        Determines if the passed player leads in score
+
+        Args:
+            player_color (int): Color to judge
+            field (string): Optional field in the scores to check
+
+        Returns:
+            True if the passed player color has the outright lead
+        '''
+        leading_color = 0
+        leading_score = -1
+        is_tied = False
+
+        for i in range(len(self._scores)):
+            cur_score = self._scores[i][field]
+            if cur_score > leading_score:
+                leading_color = i 
+                leading_score = cur_score
+            elif cur_score == leading_score:
+                is_tied = True
+
+        return player_color == leading_color and not is_tied
+
 class Board:
 
     '''(int) When no player controls the board spot'''
