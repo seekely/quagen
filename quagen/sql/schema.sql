@@ -8,3 +8,16 @@ CREATE TABLE IF NOT EXISTS game (
 
     PRIMARY KEY(game_id)
 );
+
+CREATE TABLE IF NOT EXISTS game_event (
+    event_id            TEXT        NOT NULL,
+    game_id             TEXT        NOT NULL,
+    data                TEXT        NOT NULL,
+    processed           INTEGER     DEFAULT 0,
+    time_created        INTEGER     NOT NULL,
+
+    PRIMARY KEY(event_id),
+    FOREIGN KEY(game_id) REFERENCES game(game_id)
+);
+
+CREATE INDEX idx_processed ON game_event(processed);

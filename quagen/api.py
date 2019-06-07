@@ -7,7 +7,6 @@ from flask import request
 from flask import session
 
 from quagen import queries
-from quagen.ai.biased import BiasedAI
 from quagen.game import Game
 
 bp = Blueprint('api', __name__)
@@ -35,6 +34,8 @@ def game_new():
         game._settings['ai_last_turn'] = 0
 
     queries.insert_game(game)
+    queries.insert_game_event(game.game_id, {'type': 'start'})
+
     return json.jsonify(game = game.as_dict())
 
 @bp.route('/game/<string:game_id>', methods = ['GET'])
@@ -63,27 +64,17 @@ def game_view(game_id):
 def game_move(game_id, x, y):
     
     game = queries.get_game(game_id)
-    ai_in_play = game._settings['ai_in_play'] 
     
     if 'player_id' in session.keys():
         player_id = session['player_id']
-        print('Taking turn for player ' + player_id)
-        game.add_player(player_id)
-        
-        # hack so that AI plays only the first time
-        if ai_in_play and game._settings['ai_last_turn'] == game._turn_completed:
-            ai_strength = game._settings['ai_in_play'] - 1
-            ai_player = 'AI'
-            print('Taking turn for player ' + ai_player, 'strength', ai_strength)            
-            ai_method = BiasedAI(game, 1, ai_strength)
-            ai_x, ai_y = ai_method.choose_move()
 
-            game.add_move(ai_player, ai_x, ai_y)
-            game._settings['ai_last_turn'] += 1
-        
-        # add_move needs to be after the AI move otherwise the projection uses it
-        game.add_move(player_id, int(x), int(y))
-        game.process_turn()
-        queries.update_game(game)
+        event = {
+            'type': 'move',
+            'player_id': player_id,
+            'x': int(x),
+            'y': int(y)
+        }
+        queries.insert_game_event(game_id, event)
+        print('Taking turn for player ' + player_id)
 
     return json.jsonify({'x': x, 'y': y})
