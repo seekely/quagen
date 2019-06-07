@@ -40,9 +40,6 @@ class Worker:
         game.process_turn()
         queries.update_game(game)
 
-        event_ids = [event['id'] for event in events]
-        queries.update_processed_events(event_ids)
-
         ai_in_play = game._settings['ai_in_play'] 
         # hack so that AI plays only the first time
         if ai_in_play and game._settings['ai_last_turn'] == game._turn_completed:
@@ -56,6 +53,8 @@ class Worker:
             game._settings['ai_last_turn'] += 1
             queries.update_game(game)
 
+        event_ids = [event['id'] for event in events]
+        queries.update_processed_events(event_ids)
 
 
 
