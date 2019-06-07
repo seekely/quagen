@@ -1,4 +1,3 @@
-import click
 import os
 import sqlite3
 import types
@@ -72,11 +71,7 @@ def create():
             script = f.read()
             conn.executescript(script)
 
-@click.command('create-db')
-def create_command():
-    '''
-    Allows database to be init from the command line
-    '''
-    create()
-    click.echo('Initialized the database.')
 
+if __name__ == '__main__':
+    create()
+    print('Initialized the database.')

@@ -28,7 +28,6 @@ def create_app():
 
     # register the database commands
     app.teardown_appcontext(db.close)
-    app.cli.add_command(db.create_command)
     db.set_context(g)
 
     # apply the blueprints to the app
