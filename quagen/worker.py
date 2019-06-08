@@ -39,7 +39,7 @@ class Worker:
                 ai_strength = game.settings['ai_strength']
                 print(f'Taking turn for AI { ai_id } with strength { ai_strength }') 
             
-                ai_method = BiasedAI(game, 1, ai_strength)
+                ai_method = BiasedAI(game, (i + 1), ai_strength)
                 ai_x, ai_y = ai_method.choose_move()
 
                 game.add_move(ai_id, ai_x, ai_y)
