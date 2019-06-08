@@ -16,15 +16,6 @@ bp = Blueprint('web', __name__)
 def index():
     return render_template('index.html')
 
-@bp.route('/game/new', methods = ['POST'])
-def game_new():
-    game = Game()
-    game.start()
-    queries.insert_game(game)
-
-    return redirect(url_for('web.game_view', game_id = game.game_id)) 
-
-
 @bp.route('/game/<string:game_id>', methods = ['GET'])
 def game_view(game_id):
     if 'player_id' not in session.keys():
