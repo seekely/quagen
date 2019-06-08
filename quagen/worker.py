@@ -40,18 +40,17 @@ class Worker:
         game.process_turn()
         queries.update_game(game)
 
-        ai_in_play = game._settings['ai_in_play'] 
-        # hack so that AI plays only the first time
-        if ai_in_play and game._settings['ai_last_turn'] == game._turn_completed:
-            ai_strength = game._settings['ai_in_play'] - 1
-            ai_player = 'AI'
-            print('Taking turn for player ' + ai_player, 'strength', ai_strength)            
-            ai_method = BiasedAI(game, 1, ai_strength)
-            ai_x, ai_y = ai_method.choose_move()
+        for ai_id in game.settings['ai_count']:
+            if not game.has_moved(ai_id):
+        
+                ai_strength = game.settings['ai_difficulty']
+                print(f'Taking turn for AI {ai_id} with strength {game.settings['ai_strength']}')            
+            
+                ai_method = BiasedAI(game, 1, ai_strength)
+                ai_x, ai_y = ai_method.choose_move()
 
-            game.add_move(ai_player, ai_x, ai_y)
-            game._settings['ai_last_turn'] += 1
-            queries.update_game(game)
+                game.add_move(ai_id, ai_x, ai_y)
+                queries.update_game(game)
 
         event_ids = [event['id'] for event in events]
         queries.update_processed_events(event_ids)

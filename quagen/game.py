@@ -7,9 +7,11 @@ class Game:
 
     '''(dict) Default mutable settings for a game'''
     DEFAULT_SETTINGS = {
+        'ai_count': 0,              # Number of AI players
+        'ai_difficulty': 0,         # AI difficulty level
         'dimension_x': 20,          # Width of the game board
         'dimension_y': 20,          # Height of the game board
-        'player_count': 2,          # Number of players in a game
+        'player_count': 2,          # Total number of players in a game (including AI)
         'power': 4 ,                # Amount of power acquired for a spot to turn solid
         'pressure': 'surronding'    # Where a max power spot exerts pressure
     }
@@ -114,12 +116,16 @@ class Game:
         self._time_started = int(time())
         self._board.generate()
 
-    def add_player(self, player_id):
+        for i in range(self._settings['ai_count']):
+            self.add_player(i, True)
+
+    def add_player(self, player_id, ai = False):
         '''
         Adds a player to play the game if space is available
 
         Args:
             player_id (str): Id of the player 
+            ai (bool): If the player is AI controlled
 
         Returns:
             True on successful addition to the game, false otherwise
@@ -135,9 +141,22 @@ class Game:
             player_added = True
             self._players[player_id] = {
                 'color': player_count + 1,
+                'ai': ai
             }
 
         return player_added
+
+    def is_player(self, player_id):
+        '''
+        If the player is currently involved in this game
+
+        Args:
+            player_id (str): Id of the player to check
+
+        Returns:
+            True if this player is in the game, false otherwise
+        '''
+        return player_id in self._player.keys() 
 
     def add_move(self, player_id, x, y, log=True):
         '''
@@ -154,22 +173,32 @@ class Game:
             True on a valid move, false otherwise
         ''' 
         valid_move = False
-        if log:
-            print('Adding move at ' + str(x) + " " + str(y) + " for player " + player_id )
+        print('Adding move at ' + str(x) + " " + str(y) + " for player " + player_id )
 
-        if (None is not self._time_started and 
-            player_id in self._players.keys() and 
-            player_id not in self._turn_moves.keys() and
+        if (self._time_started is not None and 
+            self.is_player(player_id) and 
+            not self.has_moved(player_id) and
             self._board.validate_move(x, y)):
 
             player_color = self._players[player_id]['color']
             self._turn_moves[player_id] = [x, y, player_color]
 
-            if log: 
-                print('Valid move')
+            print('Valid move')
             valid_move = True
 
         return valid_move
+
+    def has_moved(self, player_id):
+        '''
+        If a player has taken a move for the current turn
+        
+        Args:
+            player_id (str): Player to check
+
+        Returns:
+            (bool) True if the player took a move this turn, false otherwise 
+        '''
+        return player_id in self._turn_moves.keys()
 
     def process_turn(self):
         '''

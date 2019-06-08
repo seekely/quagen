@@ -15,23 +15,17 @@ bp = Blueprint('api', __name__)
 def game_new():
 
     settings = {
+        'ai_count': int(request.values.get('ai_count')),
+        'ai_difficulty': int(request.values.get('ai_difficulty')),
         'dimension_x': int(request.values.get('board_size')),
         'dimension_y': int(request.values.get('board_size')),
         'player_count': int(request.values.get('player_count')),
         'power': int(request.values.get('power')),
-        'pressure': request.values.get('pressure'),
-        'ai_in_play': int(request.values.get('ai_in_play'))
+        'pressure': request.values.get('pressure')
     };
 
     game = Game({'settings': settings})
     game.start()
-
-    # add the AI player right away
-    if settings['ai_in_play']:
-        ai_player = 'AI'
-        game.add_player(ai_player)
-        #init at turn 0
-        game._settings['ai_last_turn'] = 0
 
     queries.insert_game(game)
     queries.insert_game_event(game.game_id, {'type': 'start'})

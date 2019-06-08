@@ -7,6 +7,7 @@ class RandomAI(AI):
     Literally picks a random spot to move. More useful for benchmarking other 
     AIs than used against a human in a real game.
     '''
+    
     def get_max_strength(self):
         '''
         Returns:
