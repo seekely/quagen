@@ -31,26 +31,29 @@ class Worker:
         events = queries.get_unprocessed_game_events(game_id)
 
         print('EVENTS ' + str(events))
+
+        for i in range(game.settings['ai_count']):
+            ai_id = str(i)
+            if not game.has_moved(ai_id):
+        
+                ai_strength = game.settings['ai_strength']
+                print(f'Taking turn for AI { ai_id } with strength { ai_strength }') 
+            
+                ai_method = BiasedAI(game, 1, ai_strength)
+                ai_x, ai_y = ai_method.choose_move()
+
+                game.add_move(ai_id, ai_x, ai_y)
     
         for event in events:
             if 'move' == event['type']:
                 game.add_player(event['player_id'])
                 game.add_move(event['player_id'], event['x'], event['y'])
 
-        game.process_turn()
+        turn_complete = game.process_turn()
         queries.update_game(game)
 
-        for ai_id in game.settings['ai_count']:
-            if not game.has_moved(ai_id):
-        
-                ai_strength = game.settings['ai_difficulty']
-                print(f'Taking turn for AI {ai_id} with strength {game.settings['ai_strength']}')            
-            
-                ai_method = BiasedAI(game, 1, ai_strength)
-                ai_x, ai_y = ai_method.choose_move()
-
-                game.add_move(ai_id, ai_x, ai_y)
-                queries.update_game(game)
+        if turn_complete:
+            queries.insert_game_event(game.game_id, {'type': 'turn_complete'})
 
         event_ids = [event['id'] for event in events]
         queries.update_processed_events(event_ids)

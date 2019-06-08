@@ -8,7 +8,7 @@ class Game:
     '''(dict) Default mutable settings for a game'''
     DEFAULT_SETTINGS = {
         'ai_count': 0,              # Number of AI players
-        'ai_difficulty': 0,         # AI difficulty level
+        'ai_strength': 0,         # AI difficulty level
         'dimension_x': 20,          # Width of the game board
         'dimension_y': 20,          # Height of the game board
         'player_count': 2,          # Total number of players in a game (including AI)
@@ -117,7 +117,7 @@ class Game:
         self._board.generate()
 
         for i in range(self._settings['ai_count']):
-            self.add_player(i, True)
+            self.add_player(str(i), True)
 
     def add_player(self, player_id, ai = False):
         '''
@@ -156,7 +156,7 @@ class Game:
         Returns:
             True if this player is in the game, false otherwise
         '''
-        return player_id in self._player.keys() 
+        return player_id in self._players.keys() 
 
     def add_move(self, player_id, x, y, log=True):
         '''

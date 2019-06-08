@@ -45,6 +45,9 @@ class BiasedAI(AI):
             (tuple) Board coordinates in the form of (x, y) 
         '''
         available_spots = self.get_movable_spots()
+        # @hack rseekely should do something smarter when we are out of moves
+        if 0 == len(available_spots):
+            return (0, 0)
 
         # The potential spots we are going to project and ultimately choose from
         candidate_spots = []

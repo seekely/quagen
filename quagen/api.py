@@ -16,7 +16,7 @@ def game_new():
 
     settings = {
         'ai_count': int(request.values.get('ai_count')),
-        'ai_difficulty': int(request.values.get('ai_difficulty')),
+        'ai_strength': int(request.values.get('ai_strength')),
         'dimension_x': int(request.values.get('board_size')),
         'dimension_y': int(request.values.get('board_size')),
         'player_count': int(request.values.get('player_count')),
