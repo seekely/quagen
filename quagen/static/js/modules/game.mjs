@@ -184,7 +184,7 @@ export class GameView {
 
         if (!elmSpot.classList.contains(newClass)) {
 
-          for (const oldColor of [-1, 0, 1, 2, 3]) {
+          for (const oldColor of [-1, 0, 1, 2, 3, 4]) {
             elmSpot.classList.remove(`player-color-${ oldColor}`);
           }
 

@@ -14,6 +14,9 @@ The quickest way to get started is with `virtualenv` and a few pip installs.
     set FLASK_ENV=development    
     flask create-db
     flask run
+     
+    set PYTHONPATH=.
+    python quagen\worker.py
 
 Open up http://127.0.0.1:5000 to play/debug!
 
