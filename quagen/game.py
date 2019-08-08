@@ -461,20 +461,40 @@ class Board:
 
     def _update_pressures(self):
         '''
-        Goes through each spot on the board and updates the pressures on the 
-        spot by each color by counting the surronding spots which have 
-        already reached max power level. 
+        Goes through each max power color controlled spot on the board and 
+        exerts pressure on the appropriate surronding spots. 
         '''
-
-        # (x, y) list of surronding spots to check relative to the current spot
-        spots_to_check = self._get_pressure_spots_to_check()
-
-        # Go through every spot on the board and calculate the spots new 
-        # pressure
+        max_power = self._settings['power']
+        
+        # Reset all the pressure counts on every spot to 0        
+        pressure_count = len(self._spots[0][0]['pressures'])
         for x in range(self._settings['dimension_x']):
             for y in range(self._settings['dimension_y']):
-                new_pressures = self._calculate_pressures_for_spot(x, y, spots_to_check)
-                self._spots[x][y]['pressures'] = new_pressures
+                self._spots[x][y]['pressures'] = [0] * pressure_count
+
+        # (x, y) list of surronding spots to exert pressure on relative to the 
+        # current spot
+        spots_to_check = self._get_pressure_spots_to_check()
+
+        # Go through every spot on the board and exert pressure on the 
+        # appropriate surronding spots.
+        for x in range(self._settings['dimension_x']):
+            for y in range(self._settings['dimension_y']):
+
+                # Only spots at max power/completley in control exert pressure
+                if max_power == self._spots[x][y]['power']:
+                    
+                    control_color = self._spots[x][y]['color']
+                    for check_spot in spots_to_check:
+                        check_x = x + check_spot[0]
+                        check_y = y + check_spot[1]
+                        
+                        try:
+                            if check_y >= 0 and check_x:
+                                self._spots[check_x][check_y]['pressures'][control_color] += 1
+                        except IndexError:
+                            # Exception is faster than bounds check
+                            continue
 
     def _get_pressure_spots_to_check(self):
         '''
@@ -484,8 +504,8 @@ class Board:
         '''
         pressure_setting = self._settings['pressure']
 
-        # p represents the spot being pressured
-        # 1 represents a spot pressuring
+        # p represents the spot exerting pressure
+        # 1 represents a spot being pressured
         # 0 represents no pressure
         spots_to_check = None
         if 'cross' == pressure_setting:
@@ -514,38 +534,6 @@ class Board:
             ]
 
         return spots_to_check
-
-    def _calculate_pressures_for_spot(self, x, y, spots_to_check):
-        '''
-        Calculate the pressure on a single board spot by looking at the passed 
-        spots to check.
-
-        Args:
-            (int) x: Horizontal spot for pressure calculation
-            (int) y: Vertical spot for pressure calculation
-            (list) spots_to_check: Tuples of relative (x,y) spots to check
-
-        Returns:
-            (list) List of pressures on a spot indexed by color
-        ''' 
-        max_power = self._settings['power']
-
-        new_pressures = [0] * len(self._spots[x][y]['pressures'])
-        for check_spot in spots_to_check:
-            check_x = x + check_spot[0]
-            check_y = y + check_spot[1]
-            
-            # If the spot we are checking has reached max power, it 
-            # applies pressure
-            if (self._check_bounds(check_x, check_y) and
-                max_power == self._spots[check_x][check_y]['power']):
-               
-                # Increase the pressure on this spot for the color controlling 
-                # the checked spot
-                pressure_color = self._spots[check_x][check_y]['color']
-                new_pressures[pressure_color] += 1
-
-        return new_pressures
 
     def _get_pressuring_color(self, x, y):
         '''
