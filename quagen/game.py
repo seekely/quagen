@@ -490,7 +490,7 @@ class Board:
                         check_y = y + check_spot[1]
                         
                         try:
-                            if check_y >= 0 and check_x:
+                            if check_y >= 0 and check_x >= 0:
                                 self._spots[check_x][check_y]['pressures'][control_color] += 1
                         except IndexError:
                             # Exception is faster than bounds check
