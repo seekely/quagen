@@ -1,6 +1,6 @@
 import random
 
-from quagen.ai.projection import ProjectionAI
+from quagen.ai.distributed import ProjectionAI
 from quagen.game import Game
 
 def test_choose_move():
@@ -29,12 +29,12 @@ def test_choose_move():
     ai1 = ProjectionAI(game, 1, 0)
     move1 = ai1.choose_move()
     game.add_move('ai1', move1[0], move1[1])
-    assert (19, 4) == move1
+    assert (1, 8) == move1
 
     ai2 = ProjectionAI(game, 1, 1)
     move2 = ai2.choose_move()
     game.add_move('ai2', move2[0], move2[1])
-    assert (13, 1) == move2
+    assert (13, 4) == move2
 
     game.process_turn()
 
@@ -42,11 +42,11 @@ def test_choose_move():
     ai1 = ProjectionAI(game, 1, 0)
     move1 = ai1.choose_move()
     game.add_move('ai1', move1[0], move1[1])
-    assert (15, 4) == move1
+    assert (4, 1) == move1
 
     ai2 = ProjectionAI(game, 1, 1)
     move2 = ai2.choose_move()
     game.add_move('ai2', move2[0], move2[1])
-    assert (1, 8) == move2
+    assert (15, 6) == move2
 
     game.process_turn()

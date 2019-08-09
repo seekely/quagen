@@ -3,9 +3,7 @@ import statistics
 
 from quagen.game import Game
 from quagen.ai.biased import BiasedAI
-from quagen.ai.distributed import DistributedAI
 from quagen.ai.projection import ProjectionAI
-from quagen.ai.previous import PreviousAI
 from quagen.ai.random import RandomAI
 
 class Simulation:

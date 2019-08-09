@@ -6,13 +6,16 @@ from quagen.utils import chunk_list
 
 class ProjectionAI(AI):
     '''
-    Randomly selects X candidate spots and chooses the spot with the highest 
-    projected score as the move. X is determined by the strength of the AI. 
+    Selects X candidate spots and chooses the spot with the highest 
+    projected score. X is determined by the strength of the AI. To select 
+    candidate spots, the AI will divde up the board into equal chunks and 
+    randomly select a spot from each chunk. This gives the AI a set of 
+    candidate spots distributed throughout the whole board. 
     '''
 
-    ''' (list) For each strength level, the number of spots on the board the 
-            AI will score before choosing a move'''
-    SPOT_CANDIDATE_COUNT = [4, 16, 32]
+    '''(list) For each strength level, number of spots on the board the AI 
+    will project to select a move'''
+    SPOT_CANDIDATE_COUNT = [3, 12, 32]
 
     def get_max_strength(self):
         '''
@@ -29,10 +32,9 @@ class ProjectionAI(AI):
         Returns:
             (tuple) Board coordinates in the form of (x, y) 
         '''
-        num_candidates = ProjectionAI.SPOT_CANDIDATE_COUNT[self._strength]
         available_spots = self.get_movable_spots()
 
-        # The spots we are going to project and ultimately choose from
+        # The potential spots we are going to project and ultimately choose from
         candidate_spots = []
         choosen_spot = None
 
@@ -42,41 +44,62 @@ class ProjectionAI(AI):
             random.shuffle(available_spots)
             choosen_spot = available_spots.pop()
         else:
-            # Randomly pick our candidate spots 
-            candidate_spots = self._choose_candidates(available_spots, num_candidates)
+            
+            # All the available spots should be in (x, y) order. We'll divide 
+            # up the board into chunks and randomly pick candidates 
+            # equally from each chunk. This lets the AI project spots 
+            # distributed all over the board without having to look at 
+            # every spot.
+            distributed_count = ProjectionAI.SPOT_CANDIDATE_COUNT[self._strength]
+            distributed_spots = self._get_distributed_candidates(available_spots, 
+                                                                 distributed_count)
 
-            # Pick the best of the candidates
+            candidate_spots += distributed_spots
+            available_spots = [spot for spot in available_spots if spot not in candidate_spots]
+
+            # Pick the best of the candidates according to projection
             choosen_spot = self._evaluate_candidates(candidate_spots)
 
         return choosen_spot
 
-
-    def _choose_candidates(self, available_spots, num_candidates):
+    def _get_distributed_candidates(self, available_spots, num_candidates):
         '''
-        Randomly chooses candidate spots from the list of available spots
-
+        Randomly chooses spots equally distributed from the available spots
+    
         Args:
-            available_spots (list): Spots to choose from
+            available_spots (list): All spots to choose from
             num_candidates (int): Number of spots to choose
 
         Returns:
             (list) of choosen candidates
         '''
-        available_spots = deepcopy(available_spots)
-        random.shuffle(available_spots)
-
         candidate_spots = []
+
+        # Break up and shuffle the available spots 
+        distributed_chunks = chunk_list(available_spots, num_candidates)
+        random.shuffle(distributed_chunks)
+        for spots in distributed_chunks:
+            random.shuffle(spots)
+            
+        # Grab candidates until we hit spot count or run out of spots.
+        i = 0;
         while (len(candidate_spots) < num_candidates and
-               len(available_spots) > 0):
-            spot = available_spots.pop()
-            candidate_spots.append(spot)
+               len(distributed_chunks) > 0):
+
+                spots = distributed_chunks[i]
+                if len(spots) > 0:
+                    candidate_spots.append(spots.pop())
+                else:
+                    del distributed_chunks[i]
+
+                i = (i + 1) if i < (len(distributed_chunks) - 1) else 0
 
         return candidate_spots
 
     def _evaluate_candidates(self, candidate_spots):
         '''
         Projects every candidate and chooses the spot with the highest 
-        projected score.
+        projected score
     
         Args: 
             candidate_spots (list): Spots to evaluate
@@ -88,7 +111,8 @@ class ProjectionAI(AI):
         best_candidate = None
         best_score = -1
 
-        for spot in candidate_spots:
+        # Choose the highest scoring candidate
+        for spot in candidate_spots:        
             scores = self.project_move(spot)
             projected_score = scores[self._color]['projected']
             print('Scored ' + str(spot) + ' at ' + str(projected_score))
