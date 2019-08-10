@@ -1,14 +1,17 @@
+"""
+Defines base AI
+"""
 from abc import ABCMeta
 from abc import abstractmethod
 from copy import deepcopy
 
 
-class AI(object, metaclass=ABCMeta):
+class AI(metaclass=ABCMeta):
     """
     A base class for all AI approaches
     """
 
-    """(int) To avoid the AI making a very dumb move early, minimum x and y 
+    """(int) To avoid the AI making a very dumb move early, minimum x and y
     spacing from the board edge in early game"""
     EARLY_SPACING = 3
 
@@ -23,13 +26,12 @@ class AI(object, metaclass=ABCMeta):
     @abstractmethod
     def choose_move(self):
         """
-        Asks the AI to choose a next move given the current state of the 
-        game and board. 
+        Asks the AI to choose a next move given the current state of the
+        game and board.
 
         Returns:
-            (tuple) Board coordinates in the form of (x, y) 
+            (tuple) Board coordinates in the form of (x, y)
         """
-        pass
 
     @abstractmethod
     def get_max_strength(self):
@@ -37,17 +39,16 @@ class AI(object, metaclass=ABCMeta):
         Returns:
             (int) The max strength / level of this AI
         """
-        pass
 
     def project_move(self, move, color=None):
         """
         Provides the projected scores for a move on the board
-        
+
         Args:
-            move (tuple): Spot coordinates in the form of (x, y) 
+            move (tuple): Spot coordinates in the form of (x, y)
 
         Returns:
-            (list): Scores of the projected game with the move in place. 
+            (list): Scores of the projected game with the move in place.
         """
         if color is None:
             color = self._color
@@ -61,8 +62,8 @@ class AI(object, metaclass=ABCMeta):
         return projected_board.calculate_scores()
 
     def get_movable_spots(self):
-        """ 
-        Provides a list of valid moves for the AI to make after some simple 
+        """
+        Provides a list of valid moves for the AI to make after some simple
         filtering.
 
         Returns:
@@ -78,7 +79,7 @@ class AI(object, metaclass=ABCMeta):
 
     def _filter_edge_moves(self, valid_moves):
         """
-        Playing a move near the edge in the early game is really weak and 
+        Playing a move near the edge in the early game is really weak and
         makes the AI look dumb. We'll avoid those edge moves in the first few
         turns even if the AI thinks they look promising.
         """

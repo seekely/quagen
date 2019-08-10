@@ -1,3 +1,6 @@
+"""
+Test biased AI
+"""
 import random
 
 from quagen.ai.biased import BiasedAI

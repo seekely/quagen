@@ -1,3 +1,7 @@
+"""
+Test game
+"""
+# pylint: disable=protected-access
 import mock
 
 from quagen.game import Board
@@ -25,11 +29,11 @@ def test_as_dict():
 
     # Not shared with client -- internal only
     a_dict = a_game.as_dict(False)
-    assert "1245" == a_dict["game_id"]
-    assert 5 == a_dict["turn_completed"]
+    assert a_dict["game_id"] == "1245"
+    assert a_dict["turn_completed"] == 5
     assert {"0": "234", "1": "234"} == a_dict["turn_moves"]
-    assert 3 == a_dict["settings"]["player_count"]
-    assert 6 == a_dict["settings"]["power"]
+    assert a_dict["settings"]["player_count"] == 3
+    assert a_dict["settings"]["power"] == 6
 
     # Shared with client -- sensitive info held back
     a_dict = a_game.as_dict()
@@ -38,7 +42,7 @@ def test_as_dict():
 
 @mock.patch("quagen.game.Board.generate")
 def test_game_start(mock_generate):
-    """ 
+    """
     Assert game has started
     """
     a_game = Game()
@@ -98,8 +102,8 @@ def test_game_add_move():
     assert a_game.add_move("player1", 3, 4)
     assert a_game.add_move("player2", 4, 5)
 
-    assert [3, 4, 1] == a_game._turn_moves["player1"]
-    assert [4, 5, 2] == a_game._turn_moves["player2"]
+    assert a_game._turn_moves["player1"] == [3, 4, 1]
+    assert a_game._turn_moves["player2"] == [4, 5, 2]
 
     # Fill up 4 moves for player game
     a_game = Game()
@@ -228,8 +232,8 @@ def test_process_turn_multiple(
     assert a_game._turn_completed == 2
     assert {} == a_game._turn_moves
     assert [[[1, 1, 1], [3, 3, 2]], [[3, 4, 2], [5, 9, 1]]] == a_game._history
-    assert 2 == mock_apply_moves.call_count
-    assert 2 == mock_apply_power.call_count
+    assert mock_apply_moves.call_count == 2
+    assert mock_apply_power.call_count == 2
     mock_calculate_scores.assert_called()
 
 
@@ -265,7 +269,7 @@ def test_process_turn_missing_players(mock_apply_moves):
 
 
 def test_board_generate():
-    """ 
+    """
     Empty board generates with appropriate dimensions
     """
     settings = {"dimension_x": 34, "dimension_y": 43, "player_count": 2}
@@ -275,7 +279,7 @@ def test_board_generate():
     assert settings["dimension_x"] == len(a_board.spots)
     assert settings["dimension_y"] == len(a_board.spots[0])
     assert Board.COLOR_NO_PLAYER == a_board.spots[17][13]["color"]
-    assert 0 == a_board.spots[17][13]["power"]
+    assert a_board.spots[17][13]["power"] == 0
     assert [0, 0, 0] == a_board.spots[17][13]["pressures"]
 
 
@@ -350,7 +354,7 @@ def test_apply_moves():
 
 def test_apply_moves_with_duplicates():
     """
-    Players went in the same spot on the board 
+    Players went in the same spot on the board
     """
     settings = {"dimension_x": 34, "dimension_y": 43, "player_count": 4, "power": 5}
     a_board = Board({}, settings)

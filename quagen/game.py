@@ -1,3 +1,8 @@
+"""
+Contains the crux logic for the game
+"""
+# pylint: disable=too-many-instance-attributes
+
 import copy
 from time import time
 
@@ -5,9 +10,11 @@ from quagen import utils
 
 
 class Game:
+    """
+    The game
+    """
 
     """(dict) Default mutable settings for a game"""
-
     DEFAULT_SETTINGS = {
         "ai_count": 0,  # Number of AI players
         "ai_strength": 0,  # AI difficulty level
@@ -18,7 +25,10 @@ class Game:
         "pressure": "surronding",  # Where a max power spot exerts pressure
     }
 
-    def __init__(self, params={}):
+    def __init__(self, params=None):
+        if params is None:
+            params = {}
+
         self._game_id = params.get("game_id", utils.generate_id())
         self._history = params.get("history", [])
         self._players = params.get("players", {})
@@ -35,59 +45,70 @@ class Game:
         self._board = Board(params.get("board", {}), self._settings)
 
         self._scores = []
-        if None != self._time_started:
+        if self._time_started is not None:
             self._scores = params.get("scores", self._board.calculate_scores())
 
     @property
     def game_id(self):
+        """Game id """
         return self._game_id
 
     @property
     def board(self):
+        """Game board"""
         return self._board
 
     @property
     def history(self):
+        """Move history"""
         return self._history
 
     @property
     def scores(self):
+        """Game scores"""
         return self._scores
 
     @property
     def settings(self):
+        """Game settings"""
         return self._settings
 
     @property
     def time_created(self):
+        """Timestamp when game created"""
         return self._time_created
 
     @property
     def time_completed(self):
+        """Timestamp when game completed"""
         return self._time_completed
 
     @property
     def time_started(self):
+        """Timestamp when game started"""
         return self._time_started
 
     @property
     def time_updated(self):
+        """Timestamp last time game state changed"""
         return self._time_updated
 
     @property
     def turn_completed(self):
+        """Last turn completed"""
         return self._turn_completed
 
     def updated(self):
+        """Indicate the game state updated"""
         self._time_updated = int(time())
 
     def as_dict(self, shared_with_client=True):
         """
-        Converts the relevant parts of this object to a dictionary 
-    
+        Converts the relevant parts of this object to a dictionary
+
         Attr:
-            shared_with_client (bool): If the data will be shared with the 
-            client, in which case we will want to keep some data out. 
+            shared_with_client (bool): If the data will be shared with the
+            client, in which case we will want to keep some data out.
 
         Returns:
             (dict): Game object as a dictionary
@@ -121,13 +142,13 @@ class Game:
         for i in range(self._settings["ai_count"]):
             self.add_player(str(i), True)
 
-    def add_player(self, player_id, ai=False):
+    def add_player(self, player_id, is_ai=False):
         """
         Adds a player to play the game if space is available
 
         Args:
-            player_id (str): Id of the player 
-            ai (bool): If the player is AI controlled
+            player_id (str): Id of the player
+            is_ai (bool): If the player is AI controlled
 
         Returns:
             True on successful addition to the game, false otherwise
@@ -143,7 +164,7 @@ class Game:
 
             print("Valid player add")
             player_added = True
-            self._players[player_id] = {"color": player_count + 1, "ai": ai}
+            self._players[player_id] = {"color": player_count + 1, "ai": is_ai}
 
         return player_added
 
@@ -159,17 +180,17 @@ class Game:
         """
         return player_id in self._players.keys()
 
-    def add_move(self, player_id, x, y, log=True):
+    def add_move(self, player_id, x, y):
         """
-        Adds a move to the game after validation. A move is not applied 
-        to the board until after all moves have been taken and 
+        Adds a move to the game after validation. A move is not applied
+        to the board until after all moves have been taken and
         process_turn() is called.
 
         Args:
             player_id (str): id of the player making a move
             x (int): Horizontal spot of the move on the board
             y (int): Vertical spot of the move on the board
-        
+
         Returns:
             True on a valid move, false otherwise
         """
@@ -194,22 +215,22 @@ class Game:
     def has_moved(self, player_id):
         """
         If a player has taken a move for the current turn
-        
+
         Args:
             player_id (str): Player to check
 
         Returns:
-            (bool) True if the player took a move this turn, false otherwise 
+            (bool) True if the player took a move this turn, false otherwise
         """
         return player_id in self._turn_moves.keys()
 
     def process_turn(self):
         """
-        Applies the pending moves to the board and takes the game to the 
-        next turn. 
+        Applies the pending moves to the board and takes the game to the
+        next turn.
 
         Returns:
-            True when successfully processed 
+            True when successfully processed
         """
         processed_turn = False
 
@@ -217,8 +238,6 @@ class Game:
 
             # For historical sake, the game only cares about the color which
             # took the move. The player ids would be gratuitous.
-            moves = list(self._turn_moves.values())
-
             self._board.apply_moves(list(self._turn_moves.values()))
             self._board.apply_power()
             self._scores = self._board.calculate_scores()
@@ -266,22 +285,23 @@ class Board:
     """(int) When the two players make a move on the same board spot"""
     COLOR_COLLISION = 0
 
-    def __init__(self, spots={}, settings={}):
-        self._spots = spots
-        self._settings = settings
+    def __init__(self, spots=None, settings=None):
+        self._spots = {} if spots is None else spots
+        self._settings = {} if settings is None else settings
 
     @property
     def spots(self):
+        """All the spots on the board"""
         return self._spots
 
     def generate(self):
-        """ 
+        """
         Generates the board based on the current game settings
         """
         self._spots = []
-        for x in range(self._settings["dimension_x"]):
+        for _x in range(self._settings["dimension_x"]):
             row = []
-            for y in range(self._settings["dimension_y"]):
+            for _y in range(self._settings["dimension_y"]):
                 spot = {
                     "color": Board.COLOR_NO_PLAYER,
                     "power": 0,
@@ -293,7 +313,7 @@ class Board:
     def get_movable_spots(self):
         """
         Find the spots still allowed to be choosen by a player.
-        
+
         Returns
             (list) of (x, y) pairs of valid moves
         """
@@ -312,9 +332,9 @@ class Board:
     def validate_move(self, x, y):
         """
         Validates if a move at a given spot is allowed.
-        
+
         Args:
-            x (int): Horizontal spot on the board 
+            x (int): Horizontal spot on the board
             y (int): Vertical spot on the board
 
         Returns:
@@ -327,9 +347,9 @@ class Board:
 
     def apply_moves(self, moves):
         """
-        Takes a list of validated moves from all players and places them on 
+        Takes a list of validated moves from all players and places them on
         the board by setting the spot at the max power level.
-        
+
         Args:
             moves (list): List of move tuples in the form of (x, y, color)
         """
@@ -341,7 +361,7 @@ class Board:
 
     def apply_power(self, project=False):
         """
-        Spots on the board progress their power level based on the pressure 
+        Spots on the board progress their power level based on the pressure
         applied by surronding spots.
 
         Args:
@@ -368,29 +388,29 @@ class Board:
 
     def project(self):
         """
-        Simulates the final board if there were no further player input by 
-        repeatedly applying power until no more spots change hands. 
+        Simulates the final board if there were no further player input by
+        repeatedly applying power until no more spots change hands.
 
         Returns:
-            (Board): A new instance of the board with all spots in their 
+            (Board): A new instance of the board with all spots in their
             final projected state.
         """
         projected_board = Board(
             copy.deepcopy(self._spots), copy.deepcopy(self._settings)
         )
-        while 0 < projected_board.apply_power(True):
+        while projected_board.apply_power(True) > 0:
             pass
 
         return projected_board
 
     def calculate_scores(self, project=True):
         """
-        Calculates current scoring of the board for each player color and 
+        Calculates current scoring of the board for each player color and
         black
 
         Args:
-            project (bool): Add a 'projected' score for each player color by 
-            simulating the rest of the game based on the current board state 
+            project (bool): Add a 'projected' score for each player color by
+            simulating the rest of the game based on the current board state
             with no furthe player input.
 
         Returns:
@@ -427,7 +447,7 @@ class Board:
         if project:
             projected_board = self.project()
             projected_scores = projected_board.calculate_scores(project=False)
-            for i in range(len(scores)):
+            for i in range(len(scores)):  # pylint: disable=consider-using-enumerate
                 scores[i]["projected"] = projected_scores[i]["controlled"]
 
         return scores
@@ -435,29 +455,29 @@ class Board:
     def _check_bounds(self, x, y):
         """
         Check if a given x and y are within the bounds of the board.
-        
+
         Args:
             x (int): Horizontal spot on the board
             y (int): Vertical spot on the board
-        
+
         Returns:
-            (bool) True if the coordinates are within the bounds of the board. 
+            (bool) True if the coordinates are within the bounds of the board.
         """
         return (
             0 <= x < self._settings["dimension_x"]
             and 0 <= y < self._settings["dimension_y"]
         )
 
-    def _dedupe_moves(self, moves):
+    def _dedupe_moves(self, moves):  # pylint: disable=no-self-use
         """
-        Takes a list of moves from all players and reduces moves in the same 
+        Takes a list of moves from all players and reduces moves in the same
         spot to a collision.
 
         Args:
             moves (list): List of move tuples in the form of (x, y, color)
 
         Returns:
-            (list) List of moves with the moves in the same spot replaced by a 
+            (list) List of moves with the moves in the same spot replaced by a
             single collision move.
         """
         deduped_moves = {}
@@ -473,8 +493,8 @@ class Board:
 
     def _update_pressures(self):
         """
-        Goes through each max power color controlled spot on the board and 
-        exerts pressure on the appropriate surronding spots. 
+        Goes through each max power color controlled spot on the board and
+        exerts pressure on the appropriate surronding spots.
         """
         max_power = self._settings["power"]
 
@@ -490,6 +510,7 @@ class Board:
 
         # Go through every spot on the board and exert pressure on the
         # appropriate surronding spots.
+        # pylint: disable=too-many-nested-blocks
         for x in range(self._settings["dimension_x"]):
             for y in range(self._settings["dimension_y"]):
 
@@ -513,8 +534,8 @@ class Board:
     def _get_pressure_spots_to_check(self):
         """
         Returns:
-            List of (x,y) tuples of relative spots to check for pressure based 
-            on game settings 
+            List of (x,y) tuples of relative spots to check for pressure based
+            on game settings
         """
         pressure_setting = self._settings["pressure"]
 
@@ -522,13 +543,13 @@ class Board:
         # 1 represents a spot being pressured
         # 0 represents no pressure
         spots_to_check = None
-        if "cross" == pressure_setting:
+        if pressure_setting == "cross":
             # 0 1 0
             # 1 p 1
             # 0 1 0
             spots_to_check = [(0, -1), (-1, 0), (1, 0), (0, 1)]
 
-        elif "diagonal" == pressure_setting:
+        elif pressure_setting == "diagonal":
             # 1 0 1
             # 0 p 0
             # 1 0 1
@@ -552,20 +573,21 @@ class Board:
 
     def _get_pressuring_color(self, x, y):
         """
-        Grabs the player color which is currently applying the most pressure 
+        Grabs the player color which is currently applying the most pressure
         on a spot.
         Args:
             (int) x: Horizontal spot for pressure calculation
             (int) y: Vertical spot for pressure calculation
 
         Returns
-            (int): The color which applies the greatest pressure. In case of a 
-            tie, return None. 
+            (int): The color which applies the greatest pressure. In case of a
+            tie, return None.
         """
         greatest_color = None
         greatest_pressure = -1
         checking = self._spots[x][y]["pressures"]
 
+        # pylint: disable=consider-using-enumerate
         for i in range(len(checking)):
             if greatest_pressure < checking[i]:
                 greatest_color = i
@@ -579,7 +601,7 @@ class Board:
 
     def _update_powers(self):
         """
-        Go through each spot on the board and update the spot's power level 
+        Go through each spot on the board and update the spot's power level
         based on the current spot pressures.
 
         Returns:
@@ -599,7 +621,10 @@ class Board:
 
                 # If we have a pressuring color and this spot has not already
                 # powered up as far as it can go, apply power changes
-                if None != pressure_color and self._settings["power"] > control_power:
+                if (
+                    pressure_color is not None
+                    and self._settings["power"] > control_power
+                ):
 
                     spots_changed += 1
 
@@ -615,7 +640,7 @@ class Board:
                     # If a different color is exerting the most pressure
                     else:
                         self._spots[x][y]["power"] -= 1
-                        if 0 == self._spots[x][y]["power"]:
+                        if self._spots[x][y]["power"] == 0:
                             self._spots[x][y]["color"] = Board.COLOR_NO_PLAYER
 
         return spots_changed

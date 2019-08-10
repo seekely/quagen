@@ -1,3 +1,6 @@
+"""
+Test random AI
+"""
 import random
 
 from quagen.ai.random import RandomAI

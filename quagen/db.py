@@ -1,6 +1,11 @@
+"""
+Interact with the SQLite database
+"""
+# @hack rseekely uggggh context crap
+# pylint: disable=invalid-name,global-statement
+
 import os
 import sqlite3
-import types
 
 from werkzeug.local import Local
 
@@ -10,14 +15,17 @@ context = Local()
 
 
 def set_context(new_context):
+    """
+    Set thread context for sharing db connection
+    """
     global context
     context = new_context
 
 
 def get_connection():
     """
-    Retrieve the connection to the configured database to the configured 
-    database. Makes a connection if none already exists. 
+    Retrieve the connection to the configured database to the configured
+    database. Makes a connection if none already exists.
 
     Returns:
         (Connection): Database connection
@@ -32,11 +40,13 @@ def get_connection():
     return context.db
 
 
-def query(query, args=(), one=False):
-
+def query(statement, args=(), one=False):
+    """
+    Query the database
+    """
     conn = get_connection()
 
-    cur = conn.execute(query, args)
+    cur = conn.execute(statement, args)
     rv = [
         dict((cur.description[idx][0], value) for idx, value in enumerate(row))
         for row in cur.fetchall()
@@ -45,19 +55,21 @@ def query(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
-def write(query, args=(), commit=True):
-
+def write(statement, args=(), commit=True):
+    """
+    Writes to the database
+    """
     conn = get_connection()
 
-    cur = conn.execute(query, args)
+    cur = conn.execute(statement, args)
     if commit:
         conn.commit()
 
     return cur.lastrowid
 
 
-def close(e=None):
-    """ 
+def close(error=None):
+    """
     Close any existing database connection
     """
     global context
@@ -65,6 +77,9 @@ def close(e=None):
 
     if conn is not None:
         conn.close()
+
+    if error:
+        pass
 
 
 def create():

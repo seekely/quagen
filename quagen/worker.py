@@ -1,5 +1,7 @@
+"""
+Background worker
+"""
 import signal
-import sqlite3
 import time
 
 from quagen import config
@@ -8,12 +10,19 @@ from quagen.ai.biased import BiasedAI
 
 
 class Worker:
+    """
+    Background worker
+    """
+
     def __init__(self):
         self._keep_alive = True
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
 
     def run(self):
+        """
+        Run
+        """
 
         while self._keep_alive:
             unprocessed_game_ids = queries.get_unprocessed_game_ids()
@@ -24,9 +33,18 @@ class Worker:
             time.sleep(1)
 
     def stop(self, signum=None, frame=None):
+        """
+        Stop
+        """
         self._keep_alive = False
+        if signum or frame:
+            pass
 
+    # pylint: disable=no-self-use
     def _process_game(self, game_id):
+        """
+        Process a game
+        """
         game = queries.get_game(game_id)
         events = queries.get_unprocessed_game_events(game_id)
 
@@ -45,7 +63,7 @@ class Worker:
                 game.add_move(ai_id, ai_x, ai_y)
 
         for event in events:
-            if "move" == event["type"]:
+            if event["type"] == "move":
                 game.add_player(event["player_id"])
                 game.add_move(event["player_id"], event["x"], event["y"])
 
@@ -59,8 +77,15 @@ class Worker:
         queries.update_processed_events(event_ids)
 
 
-if __name__ == "__main__":
+def main():
+    """
+    Main
+    """
     config.init()
 
     worker = Worker()
     worker.run()
+
+
+if __name__ == "__main__":
+    main()

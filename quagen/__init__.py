@@ -1,3 +1,6 @@
+"""
+Creates main Flask application
+"""
 import os
 
 from flask import Flask
@@ -31,8 +34,8 @@ def create_app():
     db.set_context(g)
 
     # apply the blueprints to the app
-    app.register_blueprint(api.bp, url_prefix="/api/v1")
-    app.register_blueprint(web.bp)
+    app.register_blueprint(api.BLUEPRINT, url_prefix="/api/v1")
+    app.register_blueprint(web.BLUEPRINT)
 
     # make url_for('index') == url_for('web.index')
     app.add_url_rule("/", endpoint="index")

@@ -1,3 +1,6 @@
+"""
+Database queries
+"""
 import json
 import time
 
@@ -19,7 +22,7 @@ def get_game(game_id):
     game = None
     row = db.query("SELECT game_id, data  FROM game WHERE game_id = ?", [game_id], True)
 
-    if None != row:
+    if row is not None:
         data = json.loads(row["data"])
         game = Game(data)
 
@@ -29,7 +32,7 @@ def get_game(game_id):
 def get_unprocessed_game_ids():
     """
     Get the ids of games which have unprocessed game events
-    
+
     Returns:
         (list) of game ids
     """
@@ -41,7 +44,7 @@ def get_unprocessed_game_ids():
 
 def get_unprocessed_game_events(game_id):
     """
-    Retrieve the unprocessed game events from a specific game 
+    Retrieve the unprocessed game events from a specific game
 
     Returns:
         (list) of unprocessed game ids
@@ -80,7 +83,7 @@ def insert_game_event(game_id, event):
 
     Attr:
         game_id (str): The game this event belongs to
-        event (dict): Event dictionary 
+        event (dict): Event dictionary
     """
     event["id"] = utils.generate_id()
     db.write(
@@ -113,7 +116,7 @@ def update_game(game):
 def update_processed_events(event_ids):
     """
     Marks event ids as processed
-    
+
     Attr:
         event_ids (list): Now processed event ids
     """

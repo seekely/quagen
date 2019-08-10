@@ -1,3 +1,6 @@
+"""
+Test projection AI
+"""
 import random
 
 from quagen.ai.distributed import ProjectionAI

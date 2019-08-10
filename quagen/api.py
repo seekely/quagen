@@ -1,5 +1,6 @@
-import uuid
-
+"""
+API for Quagen frontend to interact with backend.
+"""
 from flask import Blueprint
 from flask import json
 from flask import make_response
@@ -9,12 +10,14 @@ from flask import session
 from quagen import queries
 from quagen.game import Game
 
-bp = Blueprint("api", __name__)
+BLUEPRINT = Blueprint("api", __name__)
 
 
-@bp.route("/game/new", methods=["POST"])
+@BLUEPRINT.route("/game/new", methods=["POST"])
 def game_new():
-
+    """
+    Creates a new Quagen game
+    """
     settings = {
         "ai_count": int(request.values.get("ai_count")),
         "ai_strength": int(request.values.get("ai_strength")),
@@ -34,13 +37,16 @@ def game_new():
     return json.jsonify(game=game.as_dict())
 
 
-@bp.route("/game/<string:game_id>", methods=["GET"])
+@BLUEPRINT.route("/game/<string:game_id>", methods=["GET"])
 def game_view(game_id):
+    """
+    Grabs the current state of a Quagen game
+    """
     response = make_response(json.jsonify({"error": "Not found"}), 404)
     updated_after = int(request.values.get("updatedAfter", 0))
 
     game = queries.get_game(game_id)
-    if None != game:
+    if game:
         game_dict = game.as_dict()
 
         if game_dict["time_updated"] <= updated_after:
@@ -57,12 +63,13 @@ def game_view(game_id):
     return response
 
 
-@bp.route("/game/<game_id>/move/<int:x>/<int:y>", methods=["GET", "POST"])
+@BLUEPRINT.route("/game/<game_id>/move/<int:x>/<int:y>", methods=["GET", "POST"])
 def game_move(game_id, x, y):
-
+    """
+    Makes a move for a Quagen game
+    """
     game = queries.get_game(game_id)
-
-    if "player_id" in session.keys():
+    if game and "player_id" in session.keys():
         player_id = session["player_id"]
 
         event = {"type": "move", "player_id": player_id, "x": int(x), "y": int(y)}

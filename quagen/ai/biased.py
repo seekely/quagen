@@ -1,4 +1,6 @@
-from copy import deepcopy
+"""
+Defines a biased/weight AI
+"""
 import itertools
 import random
 
@@ -8,19 +10,19 @@ from quagen.utils import chunk_list
 
 class BiasedAI(AI):
     """
-    Selects X candidate spots and chooses the spot with the highest weighted 
-    score. X is determined by the strength of the AI. While this AI still 
-    primarily relies on projected score, we bias the AI to look at spots which 
-    typically produce higher projected scores. This AI will also weigh the 
-    projected score with other feature of the board state to influence the AI 
-    to better choose between roughly equal projected scores. 
+    Selects X candidate spots and chooses the spot with the highest weighted
+    score. X is determined by the strength of the AI. While this AI still
+    primarily relies on projected score, we bias the AI to look at spots which
+    typically produce higher projected scores. This AI will also weigh the
+    projected score with other feature of the board state to influence the AI
+    to better choose between roughly equal projected scores.
     """
 
-    """(list) For each strength level, number of equally distributed spots on 
+    """(list) For each strength level, number of equally distributed spots on
     the board the AI will consider."""
     DISTRIBUTED_CANDIDATE_COUNT = [3, 12, 24]
 
-    """(int) For each strength level, number of spots on the board the AI 
+    """(int) For each strength level, number of spots on the board the AI
     will look at which are around players' previous moves."""
     LOOKBACK_CANDIDATE_COUNT = [1, 4, 8]
 
@@ -39,22 +41,22 @@ class BiasedAI(AI):
 
     def choose_move(self):
         """
-        Asks the AI to choose a next move given the current state of the 
-        game and board. 
+        Asks the AI to choose a next move given the current state of the
+        game and board.
 
         Returns:
-            (tuple) Board coordinates in the form of (x, y) 
+            (tuple) Board coordinates in the form of (x, y)
         """
         available_spots = self.get_movable_spots()
         # @hack rseekely should do something smarter when we are out of moves
-        if 0 == len(available_spots):
+        if not available_spots:
             return (0, 0)
 
         # The potential spots we are going to project and ultimately choose from
         candidate_spots = []
         choosen_spot = None
 
-        if 0 == self._game.turn_completed:
+        if self._game.turn_completed == 0:
             # At the start of the game, we will choose a random spot towards
             # the middle of the board
             center_x = int(self._game.settings["dimension_x"] / 2)
@@ -105,12 +107,12 @@ class BiasedAI(AI):
 
     def _get_lookback_candidates(self, available_spots, num_candidates, num_turns):
         """
-        Looks around recent moves made by opponents' and randomly chooses a 
+        Looks around recent moves made by opponents' and randomly chooses a
         handful of available spots
 
         Args:
-            available_spots (list): All spots to choose from 
-            num_candidates (int): Number of spots to choose 
+            available_spots (list): All spots to choose from
+            num_candidates (int): Number of spots to choose
             num_turns (int): Number of turns to look back in history
 
         Returns:
@@ -136,15 +138,16 @@ class BiasedAI(AI):
 
         # Randomly select out the desired count of candidates
         random.shuffle(lookback_spots)
-        while len(candidate_spots) < num_candidates and len(lookback_spots) > 0:
+        while len(candidate_spots) < num_candidates and lookback_spots:
             candidate_spots.append(lookback_spots.pop())
 
         return candidate_spots
 
+    # pylint: disable=no-self-use
     def _get_distributed_candidates(self, available_spots, num_candidates):
         """
         Randomly chooses spots equally distributed from the available spots
-    
+
         Args:
             available_spots (list): All spots to choose from
             num_candidates (int): Number of spots to choose
@@ -162,10 +165,10 @@ class BiasedAI(AI):
 
         # Grab candidates until we hit spot count or run out of spots.
         i = 0
-        while len(candidate_spots) < num_candidates and len(distributed_chunks) > 0:
+        while len(candidate_spots) < num_candidates and distributed_chunks:
 
             spots = distributed_chunks[i]
-            if len(spots) > 0:
+            if spots:
                 candidate_spots.append(spots.pop())
             else:
                 del distributed_chunks[i]
@@ -176,10 +179,10 @@ class BiasedAI(AI):
 
     def _evaluate_candidates(self, candidate_spots):
         """
-        Projects every candidate and chooses the spot with the highest 
+        Projects every candidate and chooses the spot with the highest
         projected score
-    
-        Args: 
+
+        Args:
             candidate_spots (list): Spots to evaluate
 
         Returns:
@@ -187,7 +190,6 @@ class BiasedAI(AI):
 
         """
         best_candidate = None
-        best_score = -1
 
         # Augment each selected spot with additional information which will
         # be used to reach a final spot score.
@@ -209,13 +211,13 @@ class BiasedAI(AI):
 
     def _augment_candidate(self, spot):
         """
-        Augments the candidate spot with additional metadata/information 
-        gathered from the game/board to help influence the final scoring of 
+        Augments the candidate spot with additional metadata/information
+        gathered from the game/board to help influence the final scoring of
         the spot.
 
         Args:
             spot (tuple): Spot in the form of (x, y)
-        
+
         """
         cur_projected = self._game.scores[self._color]["projected"]
         new_projected = self.project_move(spot)[self._color]["projected"]
@@ -237,11 +239,6 @@ class BiasedAI(AI):
             augmented_candidates (list): Spots augmented with  _augment_candidate
 
         """
-
-        board_size = (
-            self._game.settings["dimension_x"] * self._game.settings["dimension_y"]
-        )
-
         for spot in augmented_candidates:
             score = spot["gain_ai"]
 
@@ -255,12 +252,12 @@ class BiasedAI(AI):
 
     def _calculate_opponent_gain(self, spot):
         """
-        Calculates the average gain in projected scoring for each opponent if 
+        Calculates the average gain in projected scoring for each opponent if
         the opponent were to go in the passed spot.
-        
+
         Args:
             spot: (x, y) spot to evalulate
-        
+
         Returns:
             (int) Average projected gain for opponents' moving in the spot.
         """

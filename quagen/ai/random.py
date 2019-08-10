@@ -1,3 +1,6 @@
+"""
+Defines an AI which picks randomly
+"""
 import random
 
 from quagen.ai import AI
@@ -5,7 +8,7 @@ from quagen.ai import AI
 
 class RandomAI(AI):
     """
-    Literally picks a random spot to move. More useful for benchmarking other 
+    Literally picks a random spot to move. More useful for benchmarking other
     AIs than used against a human in a real game.
     """
 
@@ -18,11 +21,11 @@ class RandomAI(AI):
 
     def choose_move(self):
         """
-        Asks the AI to choose a next move given the current state of the 
-        game and board. 
+        Asks the AI to choose a next move given the current state of the
+        game and board.
 
         Returns:
-            (tuple) Board coordinates in the form of (x, y) 
+            (tuple) Board coordinates in the form of (x, y)
         """
         available_spots = self.get_movable_spots()
         random.shuffle(available_spots)
