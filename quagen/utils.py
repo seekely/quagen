@@ -1,8 +1,10 @@
 import math
 import uuid
 
+
 def generate_id():
     return uuid.uuid4().hex
+
 
 def chunk_list(to_chunk, num_chunks):
     num_chunks = min(num_chunks, len(to_chunk))
