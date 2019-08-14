@@ -18,9 +18,11 @@ project in your own direction!
 Quagen is built with Python (>= 3.7), Javascript, [Flask][flask], 
 [Svelte][svelte], and [SQLite][sqlite]. 
 
-## Setting up
+### Setting up
 
 At some point this will all be containerized, but for now... 
+
+**!!! NOTE !!! Make sure you have Python 3.7 or greater installed** 
 
     cd quagen
      
@@ -35,7 +37,7 @@ At some point this will all be containerized, but for now...
     export FLASK_ENV=development    
     flask create-db
 
-## Running
+### Running
 
 Two processes are required for Quagen. Once both are up and running, navigate 
 to http://127.0.0.1:5000 to play/debug!
