@@ -1,25 +1,85 @@
+Quagen is a Go-like game where players make simultaneous moves to control 
+territory on a grid board. You can see an in-development preview at 
+https://quagen.io/.
 
-Development
-===========
+# Contributions 
 
-Quagen is built using Python on top of the [Flask][flask] microframework.  
-The quickest way to get started is with `virtualenv` and a few pip installs.
+This is currently a personal side project, but I welcome contributions! Before 
+embarking on any big change or contribution, I encourage  opening a discussion 
+ticket first so we can align and avoid either one of us wasting effort. When 
+opening a pull request, ensure your code has tests and follows the code styling 
+tools. 
+  
+The repository is under the MIT license, so feel free to fork and take the 
+project in your own direction!
+
+# Development
+
+Quagen is built with Python (>= 3.7), Javascript, [Flask][flask], 
+[Svelte][svelte], and [SQLite][sqlite]. 
+
+## Setting up
+
+At some point this will all be containerized, but for now... 
 
     cd quagen
-    virtualenv venv
-    venv\Scripts\activate
-    pip install -r requirements.txt
      
-    set FLASK_APP=quagen
-    set FLASK_ENV=development    
+    # Python virtual environment for dependencies
+    virtualenv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
+     
+    # Init the SQL database
+    export FLASK_APP=quagen
+    export FLASK_ENV=development    
     flask create-db
+
+## Running
+
+Two processes are required for Quagen. Once both are up and running, navigate 
+to http://127.0.0.1:5000 to play/debug!
+
+    # Run the front-end server
+    cd quagen
+    source venv/bin/activate
+    export FLASK_APP=quagen
+    export FLASK_ENV=development   
     flask run
      
-    set PYTHONPATH=.
+    # Run the background worker
+    cd quagen
+    source venv/bin/activate
+    export PYTHONPATH=.
     python quagen\worker.py
 
-Open up http://127.0.0.1:5000 to play/debug!
+### Testing
 
+You can run all Python tests by running the following: 
+
+    cd quagen
+    source venv/bin/activate
     python -m pytest tests -W ignore::DeprecationWarning
 
+### Conventions
+
+All Python code is auto-formatted using [Black][black] and further linted using [Pylint][pylint]:
+
+    cd quagen
+    source venv/bin/activate
+      
+    # Run the formatter
+    black .
+     
+    # Run pylint
+    pylint quagen
+    pylint tests
+
+
+
+
 [flask]: http://flask.pocoo.org/
+[svelte]: https://svelte.dev/
+[sqlite]: https://www.sqlite.org/
+[black]: https://black.readthedocs.io
+[pylint]: https://www.pylint.org/
