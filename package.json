@@ -19,6 +19,6 @@
     "autobuild": "rollup -c -w",
     "dev": "run-p start:dev autobuild",
     "start": "sirv public --single",
-    "start:dev": "sirv public --single --dev --port 5001"
+    "start:dev": "sirv public --single --dev --port 5001 --host 0.0.0.0"
   }
 }

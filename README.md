@@ -15,14 +15,14 @@ project in your own direction!
 
 # Development
 
-Quagen is built with Python (>= 3.7), Javascript, [Flask][flask], 
+Quagen is built with Python (>= 3.7), NodeJS(>= 10.16), [Flask][flask], 
 [Svelte][svelte], and [SQLite][sqlite]. 
 
 ### Setting up
 
 At some point this will all be containerized, but for now... 
 
-**!!! NOTE !!! Make sure you have Python 3.7 or greater installed** 
+**!!! NOTE !!! Make sure you have Python 3.7 or greater and Node 10.16 or greater installed** 
 
     cd quagen
      
@@ -36,13 +36,16 @@ At some point this will all be containerized, but for now...
     export FLASK_APP=quagen
     export FLASK_ENV=development    
     flask create-db
+     
+    # Node dependencies 
+    npm install 
 
 ### Running
 
-Two processes are required for Quagen. Once both are up and running, navigate 
-to http://127.0.0.1:5000 to play/debug!
+To develop Quagen, you need to fire up three(!!!) processes. Once all three are up and running, navigate 
+to http://127.0.0.1:5001 to play/debug!
 
-    # Run the front-end server
+    # Run the API server
     cd quagen
     source venv/bin/activate
     export FLASK_APP=quagen
@@ -54,6 +57,9 @@ to http://127.0.0.1:5000 to play/debug!
     source venv/bin/activate
     export PYTHONPATH=.
     python quagen\worker.py
+     
+    # Run the front-end server
+    npm run dev
 
 ### Testing
 
