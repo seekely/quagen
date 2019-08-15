@@ -33,9 +33,8 @@ At some point this will all be containerized, but for now...
     pip install -r requirements-dev.txt
      
     # Init the SQL database
-    export FLASK_APP=quagen
-    export FLASK_ENV=development    
-    flask create-db
+    export PYTHONPATH=.
+    python quagen/db.py
 
 ### Running
 
