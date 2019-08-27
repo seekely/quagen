@@ -34,7 +34,9 @@ def game_new():
     queries.insert_game(game)
     queries.insert_game_event(game.game_id, {"type": "start"})
 
-    return json.jsonify(game=game.as_dict())
+    response = json.jsonify(game=game.as_dict())
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 
 @BLUEPRINT.route("/game/<string:game_id>", methods=["GET"])
@@ -60,6 +62,7 @@ def game_view(game_id):
 
         response = json.jsonify(game=game_dict)
 
+    response.headers["Access-Control-Allow-Origin"] = "*"
     return response
 
 
@@ -76,4 +79,6 @@ def game_move(game_id, x, y):
         queries.insert_game_event(game_id, event)
         print("Taking turn for player " + player_id)
 
-    return json.jsonify({"x": x, "y": y})
+    response = json.jsonify({"x": x, "y": y})
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response

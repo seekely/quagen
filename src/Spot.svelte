@@ -1,5 +1,27 @@
+<script>
+
+    import { createEventDispatcher } from 'svelte';
+
+    export let x; 
+    export let y;
+    export let pending = false;
+    export let active = true;
+
+    const dispatch = createEventDispatcher();
+
+    function handleMouseUp(event) {
+
+        dispatch('move', {x: x, y: y});
+        console.log(event);
+        console.log(this);
+        console.log(this.classList);
+        pending = true;
+    }
+
+</script>
+
 <style>
-    .spot, .spot:disabled {
+    button, button:disabled {
         margin: 1px;
         height: 25px;
         width: 25px;
@@ -9,11 +31,21 @@
         text-align: center;
     }
 
-    .spot:active {
+    button:active {
         background:yellow;
         opacity: 1;
     }
+
+    .pending {
+        outline: 3px solid black;
+        outline-offset: 1px;
+        z-index: 2;
+    }
+
 </style>
 
 
-<button class="spot" type="button"></button>
+<button type="button" on:mouseup={handleMouseUp}
+        class="spot" 
+        class:pending="{pending}" 
+        disabled="{!active}" ></button>
