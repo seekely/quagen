@@ -4,18 +4,15 @@
 
     export let x; 
     export let y;
-    export let pending = false;
-    export let active = true;
+    export let pendingMove = false;
+    export let allowMove = true;
 
     const dispatch = createEventDispatcher();
 
     function handleMouseUp(event) {
 
         dispatch('move', {x: x, y: y});
-        console.log(event);
-        console.log(this);
-        console.log(this.classList);
-        pending = true;
+        pendingMove = true;
     }
 
 </script>
@@ -36,7 +33,7 @@
         opacity: 1;
     }
 
-    .pending {
+    .pending-move {
         outline: 3px solid black;
         outline-offset: 1px;
         z-index: 2;
@@ -47,5 +44,5 @@
 
 <button type="button" on:mouseup={handleMouseUp}
         class="spot" 
-        class:pending="{pending}" 
-        disabled="{!active}" ></button>
+        class:pending-move="{pendingMove}" 
+        disabled="{!allowMove}" ></button>
