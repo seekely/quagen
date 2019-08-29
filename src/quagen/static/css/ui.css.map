@@ -1,14 +1,12 @@
 {
   "version": 3,
-  "file": "bundle.css",
+  "file": "ui.css",
   "sources": [
-    "..\\src\\App.svelte",
-    "..\\src\\Spot.svelte"
+    "..\\..\\ui\\game\\Spot.svelte"
   ],
   "sourcesContent": [
-    "<script>\n\timport Board from './Board.svelte';\n    import Scores from './Scores.svelte';\n    import  { setContext } from 'svelte';\n\n    export let name;\n    \n    setContext('urlApi', 'http://localhost:5000');\n\n    export let gameId = 0;\n    let turnCompleted = 0;\n    let turnMoved = 0;\n    $: active = turnCompleted <= turnMoved;\n\n\n</script>\n\n<style>\n\th1 {\n\t\tcolor: purple;\n\t}\n</style>\n\n<h1>Hello {name}!</h1>\n\n<Scores players={2} />\n<Board gameId={0} height={20} width={20} active={active} />\n",
     "<script>\n\n    import { createEventDispatcher } from 'svelte';\n\n    export let x; \n    export let y;\n    export let pending = false;\n    export let active = true;\n\n    const dispatch = createEventDispatcher();\n\n    function handleMouseUp(event) {\n\n        dispatch('move', {x: x, y: y});\n        console.log(event);\n        console.log(this);\n        console.log(this.classList);\n        pending = true;\n    }\n\n</script>\n\n<style>\n    button, button:disabled {\n        margin: 1px;\n        height: 25px;\n        width: 25px;\n        color: white;\n        font-weight: bold;\n        font-size: 12px;\n        text-align: center;\n    }\n\n    button:active {\n        background:yellow;\n        opacity: 1;\n    }\n\n    .pending {\n        outline: 3px solid black;\n        outline-offset: 1px;\n        z-index: 2;\n    }\n\n</style>\n\n\n<button type=\"button\" on:mouseup={handleMouseUp}\n        class=\"spot\" \n        class:pending=\"{pending}\" \n        disabled=\"{!active}\" ></button>"
   ],
   "names": [],
-  "mappings": "AAkBC,EAAE,cAAC,CAAC,AACH,KAAK,CAAE,MAAM,AACd,CAAC;ACGE,oBAAM,CAAE,oBAAM,SAAS,AAAC,CAAC,AACrB,MAAM,CAAE,GAAG,CACX,MAAM,CAAE,IAAI,CACZ,KAAK,CAAE,IAAI,CACX,KAAK,CAAE,KAAK,CACZ,WAAW,CAAE,IAAI,CACjB,SAAS,CAAE,IAAI,CACf,UAAU,CAAE,MAAM,AACtB,CAAC,AAED,oBAAM,OAAO,AAAC,CAAC,AACX,WAAW,MAAM,CACjB,OAAO,CAAE,CAAC,AACd,CAAC,AAED,QAAQ,cAAC,CAAC,AACN,OAAO,CAAE,GAAG,CAAC,KAAK,CAAC,KAAK,CACxB,cAAc,CAAE,GAAG,CACnB,OAAO,CAAE,CAAC,AACd,CAAC"
+  "mappings": "AAuBI,oBAAM,CAAE,oBAAM,SAAS,AAAC,CAAC,AACrB,MAAM,CAAE,GAAG,CACX,MAAM,CAAE,IAAI,CACZ,KAAK,CAAE,IAAI,CACX,KAAK,CAAE,KAAK,CACZ,WAAW,CAAE,IAAI,CACjB,SAAS,CAAE,IAAI,CACf,UAAU,CAAE,MAAM,AACtB,CAAC,AAED,oBAAM,OAAO,AAAC,CAAC,AACX,WAAW,MAAM,CACjB,OAAO,CAAE,CAAC,AACd,CAAC,AAED,QAAQ,cAAC,CAAC,AACN,OAAO,CAAE,GAAG,CAAC,KAAK,CAAC,KAAK,CACxB,cAAc,CAAE,GAAG,CACnB,OAAO,CAAE,CAAC,AACd,CAAC"
 }

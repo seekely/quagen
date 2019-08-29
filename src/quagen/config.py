@@ -7,7 +7,7 @@ import os
 DIR_CODE = os.path.dirname(os.path.abspath(__file__))
 
 """(str) Location of all files produced by Quagen"""
-DIR_INSTANCE = f"{os.getcwd()}/instance"
+DIR_INSTANCE = f"{os.getcwd()}/../instance"
 
 """(str) Location of SQLite database"""
 PATH_DB_FILE = f"{DIR_INSTANCE}/quagen.sqlite"
