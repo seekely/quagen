@@ -1,38 +1,40 @@
 <script>
     import Spot from './Spot.svelte';
 
-    export let init = false
     export let allowMove = true; 
-    export let width = 20;
-    export let height = 20;
-    export let moveHistory = {};
-    export let spotsCurrent = [];
-    export let spotsProjected = [];
+    export let width = 0;
+    export let height = 0;
+    export let spots = [];
+    export let moveHistory = [];
+    $: lastMoves = moveHistory.length > 0 
+                ? moveHistory.slice(-1)[0]
+                : [];
 
-    function handleMove(event) {
-        const spotX = event.detail.x;
-        const spotY = event.detail.y;
+    function isLastMove(moves, x, y) {
 
-        allowMove = false;
-        fetch(`/api/v1/game/${ gameId }/move/${ spotX }/${ spotY }`, 
-            {
-                mode: 'no-cors'
-            }
-        );
+      for (let move of moves) {
+        if (x == move[0] && y == move[1]) {
+          return true;
+        }
+      }
+
+      return false;
+
     }
  
 
 </script>
 
 <div>
-    {#if init } 
-        {#each { length: width } as _, y}
-            {#each { length: width } as _, x}
-                <Spot x={x} y={y} on:move={handleMove} allowMove={allowMove} ></Spot>
-            {/each}
-            <br />
+    {#each { length: height } as _, y}
+        {#each { length: width } as _, x}
+            <Spot x={x} 
+                  y={y} 
+                  allowMove={allowMove} 
+                  lastMove={isLastMove(lastMoves, x, y)}
+                  {...spots[x][y]}
+                  on:move></Spot>
         {/each}
-    {:else}
-        <p>Loading...</p>
-    {/if}
+        <br />
+    {/each}
 </div>

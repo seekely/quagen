@@ -3,16 +3,14 @@
 <head>
     <meta charset='utf8'>
     <meta name='viewport' content='width=device-width'>
-
-    <title>Svelte app</title>
+    <title>Quagen | Let's play a game</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 
     <link rel='stylesheet' href='{{ url_for('static', filename='css/ui.css') }}'>
 </head>
 
 
 <body>
-    wtf
-
     <div id="game"></div>
 
     <script src='{{ url_for('static', filename='js/ui.js') }}'></script>
@@ -21,7 +19,7 @@
         const game = new ui.Game({
             target: document.getElementById("game"),
             props: {
-                gameId: '1ba4df75a6a1490f8885306b74cfcf2f'
+                gameId: '{{ game.game_id }}'
             }
         });
     </script>

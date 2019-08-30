@@ -1,2 +1,2 @@
-export { default as Game } from './game/Game.svelte';
+export { default as Game } from './game/App.svelte';
 

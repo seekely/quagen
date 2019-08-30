@@ -35,7 +35,6 @@ def game_new():
     queries.insert_game_event(game.game_id, {"type": "start"})
 
     response = json.jsonify(game=game.as_dict())
-    response.headers["Access-Control-Allow-Origin"] = "*"
     return response
 
 
@@ -62,7 +61,6 @@ def game_view(game_id):
 
         response = json.jsonify(game=game_dict)
 
-    response.headers["Access-Control-Allow-Origin"] = "*"
     return response
 
 
@@ -80,5 +78,4 @@ def game_move(game_id, x, y):
         print("Taking turn for player " + player_id)
 
     response = json.jsonify({"x": x, "y": y})
-    response.headers["Access-Control-Allow-Origin"] = "*"
     return response

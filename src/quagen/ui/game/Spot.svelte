@@ -4,8 +4,18 @@
 
     export let x; 
     export let y;
-    export let pendingMove = false;
     export let allowMove = true;
+    export let color = -1;
+    export let power = 0;
+    export let maxPower = 4;
+    export let pressures = [];
+    export let lastMove = false;
+    $: opacity = (0 < power && power < maxPower) 
+                ? (.60 / maxPower) * power
+                : 1;
+
+    $: pendingMove = lastMove ? false : false;
+
 
     const dispatch = createEventDispatcher();
 
@@ -39,10 +49,18 @@
         z-index: 2;
     }
 
+
+    .spot-color-0 {background-color: #000000;} 
+    .spot-color-1 {background-color: #008cba;} 
+    .spot-color-2 {background-color: #f44336;}  
+    .spot-color-3 {background-color: #16d74f;}  
+    .spot-color-4 {background-color: #ffc300;}  
+
 </style>
 
 
 <button type="button" on:mouseup={handleMouseUp}
-        class="spot" 
-        class:pending-move="{pendingMove}" 
+        class="spot spot-color-{color}" 
+        class:pending-move="{pendingMove || lastMove}" 
+        style="opacity: {opacity};"
         disabled="{!allowMove}" ></button>
