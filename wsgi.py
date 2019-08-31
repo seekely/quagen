@@ -1,7 +1,9 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/src")
+new_path = os.path.dirname(os.path.abspath(__file__)) + "/src"
+sys.path.insert(0, new_path)
+os.chdir(new_path)
 
 from quagen import create_app
 
