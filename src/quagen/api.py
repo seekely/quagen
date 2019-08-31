@@ -18,15 +18,13 @@ def game_new():
     """
     Creates a new Quagen game
     """
-    settings = {
-        "ai_count": int(request.values.get("ai_count")),
-        "ai_strength": int(request.values.get("ai_strength")),
-        "dimension_x": int(request.values.get("board_size")),
-        "dimension_y": int(request.values.get("board_size")),
-        "player_count": int(request.values.get("player_count")),
-        "power": int(request.values.get("power")),
-        "pressure": request.values.get("pressure"),
-    }
+    posted = request.get_json()
+
+    settings = {}
+    possible_settings = Game.DEFAULT_SETTINGS.keys()
+    for setting in possible_settings:
+        if setting in posted:
+            settings[setting] = int(posted[setting])
 
     game = Game({"settings": settings})
     game.start()
@@ -34,7 +32,8 @@ def game_new():
     queries.insert_game(game)
     queries.insert_game_event(game.game_id, {"type": "start"})
 
-    return json.jsonify(game=game.as_dict())
+    response = json.jsonify(game=game.as_dict())
+    return response
 
 
 @BLUEPRINT.route("/game/<string:game_id>", methods=["GET"])
@@ -76,4 +75,5 @@ def game_move(game_id, x, y):
         queries.insert_game_event(game_id, event)
         print("Taking turn for player " + player_id)
 
-    return json.jsonify({"x": x, "y": y})
+    response = json.jsonify({"x": x, "y": y})
+    return response

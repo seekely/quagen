@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quagen | Let's play a game</title>
+        <meta charset="utf8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico">
+        <link rel='stylesheet' href="/static/css/sanitize.css">
+        <link rel='stylesheet' href="/static/css/web.css">
+        <link rel='stylesheet' href="/static/css/ui.css">
+    </head>
+
+    <body>
+
+        <div class="content">
+            <div id="banner">
+                <a href="/"><img src="/static/img/quagen.png" /></a>
+            </div>
+            <div id="game"></div>
+        </div>
+
+        <script src="/static/js/ui.js"></script>
+        <script>
+            const game = new ui.Game({
+                target: document.getElementById("game"),
+                props: {
+                    gameId: "{{ game.game_id }}"
+                }
+            });
+        </script>
+
+    </body>
+
+</html>
