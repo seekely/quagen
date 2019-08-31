@@ -6,14 +6,6 @@ body {
     white-space: nowrap;
 }
 
-.left {
-    float: left;
-}
-
-.clear {
-    clear:both;
-}
-
 div.content {
     margin-top: 75px;
     margin-bottom: 75px;

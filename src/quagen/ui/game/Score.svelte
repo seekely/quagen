@@ -11,7 +11,7 @@
 <style>
     
     div.container {
-        float: left; 
+        display: inline-block; 
         padding: .5em 1em .5em 1em;
     }
 

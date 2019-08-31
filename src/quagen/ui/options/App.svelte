@@ -28,19 +28,23 @@
 
 <style>
 
+    .container {
+        margin-top: 2em;
+        display: inline-flex;
+    }
+
     .block {
-        margin-left: 1em;
-        margin-top: 1em;
+        display: inline-block;
+        margin-right: 1em;
     }
 
     .option-ai {
-        margin-top: 15%;
+        margin-top: 35%;
     }
 
     .option-friend {
-        margin-top: 25%;
+        margin-top: 22%;
     }
-
 
     .button-play {
         border-radius: 4px;
@@ -77,13 +81,12 @@
 
 </style>
 
-<div>
-
-    <div class="block left">
+<div class="container">
+    <div class="block">
         <img src="/static/img/intro.gif" />
     </div>
 
-    <div class="block left">
+    <div class="block">
         <div class="option-ai">
             <div>
                 <button class="button-play button-ai" 
@@ -106,8 +109,6 @@
                     on:mouseup={playFriend}>Play Friend</button>
         </div>
     </div>
-
 </div>
-<div class="clear" />
 
 
