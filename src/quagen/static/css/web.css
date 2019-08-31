@@ -9,6 +9,7 @@ body {
 div.content {
     margin-top: 75px;
     margin-bottom: 75px;
+    margin-right: 75px;
     margin-left: 15%;
     width: 70%;
 }
