@@ -30,15 +30,3 @@ def game_view(game_id):
 
     game = queries.get_game(game_id).as_dict()
     return render_template("game.html", game=game)
-
-
-@BLUEPRINT.route("/newui/<string:game_id>", methods=["GET"])
-def newui_view(game_id):
-    """
-    Game view
-    """
-    if "player_id" not in session.keys():
-        session["player_id"] = uuid.uuid4().hex
-
-    game = queries.get_game(game_id).as_dict()
-    return render_template("newui.html", game=game)

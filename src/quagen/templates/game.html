@@ -2,56 +2,32 @@
 <html>
     <head>
         <title>Quagen | Let's play a game</title>
-        <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
-        
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v11">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v11">
+        <meta charset="utf8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+        <link rel="shortcut icon" href="/static/img/favicon.ico">
+        <link rel='stylesheet' href="/static/css/sanitize.css">
+        <link rel='stylesheet' href="/static/css/web.css">
+        <link rel='stylesheet' href="/static/css/ui.css">
     </head>
 
     <body>
-        <section id="scoreboard">
-            <p>
-                Hello everybody
-            </p>
-            <table>
-                <tr>
-                    <th>Color</th>
-                    <th>Controlled</th>
-                    <th>Pressuring</th>
-                    <th>Projected</th>
-                </tr>
-                {% for i in range(game['settings']['player_count'] + 1) %} 
-                    {% set colors = ['Black', 'Blue', 'Red', 'Green', 'Yellow'] %}
-                <tr>
-                    <td>{{ colors[i] }}</td>
-                    <td id="player-controlled-{{ i }}">--</td>
-                    <td id="player-pressuring-{{ i }}">--</td>
-                    <td id="player-projected-{{ i }}">--</td>
-                </tr>
-                {% endfor %}
-            </table>
-            <div>
-                <input id="option-projected"  type="checkbox"> See projected board
+
+        <div class="content">
+            <div id="banner">
+                <a href="/"><img src="/static/img/quagen.png" /></a>
             </div>
-        </section>
+            <div id="game"></div>
+        </div>
 
-        <section id="board">
-        {% for y in range(game['settings']['dimension_y']) %}
-            {% for x in range(game['settings']['dimension_x']) %}
-                <button id="spot-{{ x }}-{{ y }}" data-x="{{ x }}" data-y="{{ y }}" class="button" type="button"></button>
-            {% endfor %}
-            <br />
-        {% endfor %}
-        </section>
-
-        <script type="module">
-            import { init } from '{{ url_for("static", filename="js/pages/game.js") }}?v11';
-
-            window.onload = () => {
-                init('{{ game.game_id }}');
-            };
-
+        <script src="/static/js/ui.js"></script>
+        <script>
+            const game = new ui.Game({
+                target: document.getElementById("game"),
+                props: {
+                    gameId: "{{ game.game_id }}"
+                }
+            });
         </script>
 
     </body>

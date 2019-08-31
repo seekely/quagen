@@ -2,73 +2,29 @@
 <html>
     <head>
         <title>Quagen | Let's play a game</title>
-        <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+        <meta charset="utf8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}?v11">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/quagen.css') }}?v11">
-
+        <link rel="shortcut icon" href="/static/img/favicon.ico">
+        <link rel='stylesheet' href="/static/css/sanitize.css">
+        <link rel='stylesheet' href="/static/css/web.css">
+        <link rel='stylesheet' href="/static/css/ui.css">
     </head>
 
     <body>
-        <section>
-            <p>
-                Welcome to Quagen! One day, I'll tell you what this is.
-            </p>
-            <div>
-                <form id="create-game">
-                    <p>
-                        Players: 
-                        <input type="radio" name="player_count" value="2" checked> 2
-                        <input type="radio" name="player_count" value="3"> 3
-                        <input type="radio" name="player_count" value="4"> 4
-                    </p>
-                    <p>
-                        AI Count: 
-                        <input type="radio" name="ai_count" value="0" checked> 0
-                        <input type="radio" name="ai_count" value="1"> 1
-                        <input type="radio" name="ai_count" value="2"> 2
-                        <input type="radio" name="ai_count" value="3"> 3
-                        <input type="radio" name="ai_count" value="3"> 4
-                    </p>
-                    <p>
-                        AI Difficulty
-                        <input type="radio" name="ai_strength" value="0" checked> Easy
-                        <input type="radio" name="ai_strength" value="1"> Medium
-                        <input type="radio" name="ai_strength" value="2"> Hard
-                    </p>
-                    <p>
-                        Board size:
-                        <input type="radio" name="board_size" value="15"> 15x15
-                        <input type="radio" name="board_size" value="20" checked> 20x20
-                        <input type="radio" name="board_size" value="25"> 25x25
-                    </p>
-                    <p>
-                        Pressure:
-                        <input type="radio" name="pressure" value="surronding" checked> Surronding
-                        <input type="radio" name="pressure" value="cross"> Cross
-                        <input type="radio" name="pressure" value="diagonal"> Diagonal
-                    </p>
-                    <p>
-                        Max power:
-                        <input type="radio" name="power" value="4" checked> 4
-                        <input type="radio" name="power" value="5"> 5
-                        <input type="radio" name="power" value="6"> 6
-                        <input type="radio" name="power" value="7"> 7
-                        <input type="radio" name="power" value="8"> 8
-                    </p>
-                    <p>
-                        <input type="submit" value="Create game">
-                    </p>
-                </form>
+
+        <div class="content">
+            <div id="banner">
+                <a href="/"><img src="/static/img/quagen.png" /></a>
             </div>
-        </section>
+            <div id="options" class="left"></div>
+        </div>
 
-        <script type="module">
-            import { init } from '{{ url_for("static", filename="js/pages/index.js") }}?v11';
-
-            window.onload = () => {
-                init();
-            };
+        <script src="/static/js/ui.js"></script>
+        <script>
+            const options = new ui.Options({
+                target: document.getElementById("options"),
+            });
         </script>
 
 

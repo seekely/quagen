@@ -18,15 +18,13 @@ def game_new():
     """
     Creates a new Quagen game
     """
-    settings = {
-        "ai_count": int(request.values.get("ai_count")),
-        "ai_strength": int(request.values.get("ai_strength")),
-        "dimension_x": int(request.values.get("board_size")),
-        "dimension_y": int(request.values.get("board_size")),
-        "player_count": int(request.values.get("player_count")),
-        "power": int(request.values.get("power")),
-        "pressure": request.values.get("pressure"),
-    }
+    posted = request.get_json()
+
+    settings = {}
+    possible_settings = Game.DEFAULT_SETTINGS.keys()
+    for setting in possible_settings:
+        if setting in posted:
+            settings[setting] = int(posted[setting])
 
     game = Game({"settings": settings})
     game.start()

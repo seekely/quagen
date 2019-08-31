@@ -25,7 +25,15 @@
 
 </script>
 
-<div>
+<style>
+
+  div.container {
+    margin-top: 1em;
+  }
+
+</style>
+
+<div class="container">
     {#each { length: height } as _, y}
         {#each { length: width } as _, x}
             <Spot x={x} 

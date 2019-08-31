@@ -11,10 +11,12 @@
     export let pressures = [];
     export let lastMove = false;
     $: opacity = (0 < power && power < maxPower) 
-                ? (.60 / maxPower) * power
+                ? (.75 / maxPower) * power
                 : 1;
 
     $: pendingMove = lastMove ? false : false;
+
+    $: buttonEnabled = allowMove && power < maxPower;
 
 
     const dispatch = createEventDispatcher();
@@ -28,19 +30,29 @@
 </script>
 
 <style>
-    button, button:disabled {
-        margin: 1px;
+    button {
+        margin: 2px;
         height: 25px;
         width: 25px;
         color: white;
         font-weight: bold;
         font-size: 12px;
         text-align: center;
+
+        padding: 0;
+        border: 1px solid black;
+        outline: none;
+        font: inherit;
+        background: #e7e7e7;
+    }
+
+    button:hover, button:active {
+        background:yellow;
+        opacity: 1;
     }
 
     button:active {
-        background:yellow;
-        opacity: 1;
+        box-shadow: inset 2px 2px 6px #c1c1c1;        
     }
 
     .pending-move {
@@ -63,4 +75,4 @@
         class="spot spot-color-{color}" 
         class:pending-move="{pendingMove || lastMove}" 
         style="opacity: {opacity};"
-        disabled="{!allowMove}" ></button>
+        disabled="{!buttonEnabled}" ></button>

@@ -1,3 +1,5 @@
+![Quagen](/src/quagen/static/img/quagen.png?raw=true)
+
 Quagen is a Go-like game where players make simultaneous moves to control 
 territory on a grid board. You can see an in-development preview at 
 https://quagen.io/.
@@ -32,22 +34,25 @@ At some point this will all be containerized, but for now...
     pip install -r requirements.txt
     pip install -r requirements-dev.txt
      
+    # Node dependencies 
+    npm install
+     
     # Init the SQL database
+    cd src
     export FLASK_APP=quagen
     export FLASK_ENV=development    
     flask create-db
-     
-    # Node dependencies 
-    npm install 
+
 
 ### Running
 
 To develop Quagen, you need to fire up three(!!!) processes. Once all three are up and running, navigate 
-to http://127.0.0.1:5001 to play/debug!
+to http://127.0.0.1:5000 to play/debug!
 
     # Run the API server
     cd quagen
     source venv/bin/activate
+    cd src
     export FLASK_APP=quagen
     export FLASK_ENV=development   
     flask run
@@ -55,11 +60,12 @@ to http://127.0.0.1:5001 to play/debug!
     # Run the background worker
     cd quagen
     source venv/bin/activate
+    cd src
     export PYTHONPATH=.
     python quagen\worker.py
      
-    # Run the front-end server
-    npm run dev
+    # Continuously compiles the Javascript/Svelte code
+    npm run autobuild
 
 ### Testing
 

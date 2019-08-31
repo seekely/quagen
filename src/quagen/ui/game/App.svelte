@@ -1,6 +1,7 @@
 <script>
     import { GameState, GamePoll } from '../game.js'
     import Board from './Board.svelte';
+    import Settings from './Settings.svelte';
     import Scores from './Scores.svelte';
 
     export let gameId = 0;
@@ -23,7 +24,7 @@
     }
 
     function handleProjected(event) {
-        if (event.srcElement.checked) {
+        if (event.target.checked) {
             allowMove = false;
             spots = gameState.spotsProjected;
         } else {
@@ -38,13 +39,11 @@
 <style>
 </style>
 
-<h1>Hello everyone!</h1>
-
 {#if init } 
 
   <Scores scores={gameState.scores} />
 
-    <input type="checkbox" on:change="{handleProjected}"> See projected board
+  <Settings on:change="{handleProjected}" />
 
   <Board height={gameState.getSetting('dimension_x')}
          width={gameState.getSetting('dimension_y')}

@@ -4,8 +4,12 @@
     export let scores = [];
 </script>
 
+<style>
 
-<div >
+
+</style>
+
+<div>
     <div>
         <Score key={true} />
         {#each scores as score, i}
