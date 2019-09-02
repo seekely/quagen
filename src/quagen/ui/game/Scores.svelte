@@ -6,11 +6,14 @@
 
 <style>
 
+    div.container {
+        white-space: nowrap;
+    }
 
 </style>
 
 <div>
-    <div>
+    <div class="container">
         <Score key={true} />
         {#each scores as score, i}
             <Score player={i} {...score} />
@@ -18,4 +21,3 @@
     </div>
 
 </div>
-<div style="clear:both;" />

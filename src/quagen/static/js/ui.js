@@ -1313,7 +1313,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (15:8) {#each scores as score, i}
+    // (18:8) {#each scores as score, i}
     function create_each_block$1(ctx) {
     	var current;
 
@@ -1365,7 +1365,7 @@ var ui = (function (exports) {
     }
 
     function create_fragment$4(ctx) {
-    	var div1, div0, t0, t1, div2, current;
+    	var div1, div0, t, current;
 
     	var score = new Score({
     		props: { key: true },
@@ -1389,18 +1389,14 @@ var ui = (function (exports) {
     			div1 = element("div");
     			div0 = element("div");
     			score.$$.fragment.c();
-    			t0 = space();
+    			t = space();
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
-
-    			t1 = space();
-    			div2 = element("div");
-    			add_location(div0, file$4, 12, 4, 119);
-    			add_location(div1, file$4, 11, 0, 109);
-    			set_style(div2, "clear", "both");
-    			add_location(div2, file$4, 20, 0, 268);
+    			attr(div0, "class", "container svelte-15jbaw7");
+    			add_location(div0, file$4, 15, 4, 174);
+    			add_location(div1, file$4, 14, 0, 164);
     		},
 
     		l: function claim(nodes) {
@@ -1411,14 +1407,12 @@ var ui = (function (exports) {
     			insert(target, div1, anchor);
     			append(div1, div0);
     			mount_component(score, div0, null);
-    			append(div0, t0);
+    			append(div0, t);
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div0, null);
     			}
 
-    			insert(target, t1, anchor);
-    			insert(target, div2, anchor);
     			current = true;
     		},
 
@@ -1472,11 +1466,6 @@ var ui = (function (exports) {
     			destroy_component(score);
 
     			destroy_each(each_blocks, detaching);
-
-    			if (detaching) {
-    				detach(t1);
-    				detach(div2);
-    			}
     		}
     	};
     }
