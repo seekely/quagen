@@ -91,7 +91,7 @@ All Python code is auto-formatted using [Black][black] and further linted using 
 
 
 
-[flask]: http://flask.pocoo.org/
+[flask]: https://palletsprojects.com/p/flask/
 [svelte]: https://svelte.dev/
 [sqlite]: https://www.sqlite.org/
 [black]: https://black.readthedocs.io
