@@ -10,14 +10,27 @@
         <meta name="description" content="Quagen is a Go-like game where players make simultaneous moves to control territory on a grid board.">
         <meta name="keywords" content="game,go,chess">
 
-        <link rel="shortcut icon" href="/static/img/favicon.ico">
-        <link rel='stylesheet' href="/static/css/sanitize.css?v=1">
-        <link rel='stylesheet' href="/static/css/web.css?v=1">
-        <link rel='stylesheet' href="/static/css/ui.css?v=1">
+        <link rel="shortcut icon" href="/img/favicon.ico">
+        <link rel='stylesheet' href="/css/sanitize.css?v=1">
+        <link rel='stylesheet' href="/css/web.css?v=1">
+        <link rel='stylesheet' href="/css/ui.css?v=1">
     </head>
 
     <body>
-        {% block content %}{% endblock %}
+        <div class="content">
+            <div id="banner">
+                <a href="/"><img src="/img/quagen.png" /></a>
+            </div>
+            {% block content %}{% endblock %}
+        </div>
+
+        <div class="footer">
+            <p>
+                Created by <a class="link" href="https://seekely.com">Ryan Seekely</a>. Source code available on <a class="link" href="https://github.com/seekely/quagen">Github.</a>
+            </p>
+
+        {% block scripting %}{% endblock %}
+
     </body>
 
 </html>

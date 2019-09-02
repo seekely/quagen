@@ -1820,7 +1820,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (96:16) {#each difficulties as difficulty}
+    // (100:16) {#each difficulties as difficulty}
     function create_each_block$2(ctx) {
     	var button, t0_value = ctx.difficulty[0] + "", t0, t1, button_difficulty_value, dispose;
 
@@ -1829,10 +1829,10 @@ var ui = (function (exports) {
     			button = element("button");
     			t0 = text(t0_value);
     			t1 = space();
-    			attr(button, "class", "button-difficulty svelte-1sw3plv");
+    			attr(button, "class", "button-difficulty svelte-v2arcn");
     			attr(button, "difficulty", button_difficulty_value = ctx.difficulty[1]);
     			toggle_class(button, "button-difficulty-selected", ctx.aiStrength == ctx.difficulty[1]);
-    			add_location(button, file$6, 96, 20, 1881);
+    			add_location(button, file$6, 100, 20, 1933);
     			dispose = listen(button, "mouseup", ctx.changeDifficulty);
     		},
 
@@ -1891,25 +1891,26 @@ var ui = (function (exports) {
     			div4 = element("div");
     			button1 = element("button");
     			button1.textContent = "Play Friend";
-    			attr(img, "src", "/static/img/intro.gif");
-    			add_location(img, file$6, 85, 8, 1516);
-    			attr(div0, "class", "block svelte-1sw3plv");
-    			add_location(div0, file$6, 84, 4, 1488);
-    			attr(button0, "class", "button-play button-ai svelte-1sw3plv");
-    			add_location(button0, file$6, 91, 16, 1654);
-    			add_location(div1, file$6, 90, 12, 1632);
-    			attr(div2, "class", "difficulty svelte-1sw3plv");
-    			add_location(div2, file$6, 94, 12, 1785);
-    			attr(div3, "class", "option-ai svelte-1sw3plv");
-    			add_location(div3, file$6, 89, 8, 1596);
-    			attr(button1, "class", "button-play button-friend svelte-1sw3plv");
-    			add_location(button1, file$6, 107, 12, 2299);
-    			attr(div4, "class", "option-friend svelte-1sw3plv");
-    			add_location(div4, file$6, 106, 8, 2259);
-    			attr(div5, "class", "block svelte-1sw3plv");
-    			add_location(div5, file$6, 88, 4, 1568);
-    			attr(div6, "class", "container svelte-1sw3plv");
-    			add_location(div6, file$6, 83, 0, 1460);
+    			attr(img, "src", "/img/intro.gif");
+    			attr(img, "alt", "Demo gif");
+    			add_location(img, file$6, 89, 8, 1560);
+    			attr(div0, "class", "block svelte-v2arcn");
+    			add_location(div0, file$6, 88, 4, 1532);
+    			attr(button0, "class", "button-play button-ai svelte-v2arcn");
+    			add_location(button0, file$6, 95, 16, 1706);
+    			add_location(div1, file$6, 94, 12, 1684);
+    			attr(div2, "class", "difficulty svelte-v2arcn");
+    			add_location(div2, file$6, 98, 12, 1837);
+    			attr(div3, "class", "option-ai svelte-v2arcn");
+    			add_location(div3, file$6, 93, 8, 1648);
+    			attr(button1, "class", "button-play button-friend svelte-v2arcn");
+    			add_location(button1, file$6, 111, 12, 2351);
+    			attr(div4, "class", "option-friend svelte-v2arcn");
+    			add_location(div4, file$6, 110, 8, 2311);
+    			attr(div5, "class", "block svelte-v2arcn");
+    			add_location(div5, file$6, 92, 4, 1620);
+    			attr(div6, "class", "container svelte-v2arcn");
+    			add_location(div6, file$6, 87, 0, 1504);
 
     			dispose = [
     				listen(button0, "mouseup", ctx.playAi),

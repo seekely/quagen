@@ -23,7 +23,7 @@ def create_app():
     # init quagen config
     config.init()
 
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, static_url_path="")
     app.config.from_mapping(
         # @todo rseekely a default secret that should be overridden by instance config
         SECRET_KEY="dev"

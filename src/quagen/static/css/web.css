@@ -1,9 +1,15 @@
 body {
-    background-image: url('/static/img/tile.png');
+    background-image: url('/img/tile.png');
     background-repeat: repeat;
     font-size: 15px;
     font-family: 'Helvetica';
     white-space: nowrap;
+}
+
+a.link, a:visited.link {
+    font-weight:bold;
+    color:#FF3030;
+    text-decoration:none;   
 }
 
 div.content {
@@ -16,4 +22,8 @@ div.content {
 
 #banner {
     margin-bottom: 1em;
+}
+
+div.footer {
+    text-align:center;        
 }

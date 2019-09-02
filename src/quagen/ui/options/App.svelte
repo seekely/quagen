@@ -46,6 +46,10 @@
         margin-top: 22%;
     }
 
+    button {
+        cursor:pointer;
+    }
+
     .button-play {
         border-radius: 4px;
         color: white;
@@ -83,7 +87,7 @@
 
 <div class="container">
     <div class="block">
-        <img src="/static/img/intro.gif" />
+        <img src="/img/intro.gif" alt="Demo gif" />
     </div>
 
     <div class="block">

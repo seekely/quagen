@@ -1,14 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
 
-    <div class="content">
-        <div id="banner">
-            <a href="/"><img src="/static/img/quagen.png" /></a>
-        </div>
-        <div id="game"></div>
-    </div>
+    <div id="game"></div>
 
-    <script src="/static/js/ui.js"></script>
+{% endblock %}
+
+{% block scripting %}
+
+    <script src="/js/ui.js"></script>
     <script>
         const game = new ui.Game({
             target: document.getElementById("game"),
