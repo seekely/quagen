@@ -11,15 +11,15 @@
         <meta name="keywords" content="game,go,chess">
 
         <link rel="shortcut icon" href="/img/favicon.ico">
-        <link rel='stylesheet' href="/css/sanitize.css?v=1">
-        <link rel='stylesheet' href="/css/web.css?v=1">
-        <link rel='stylesheet' href="/css/ui.css?v=1">
+        <link rel='stylesheet' href="/css/sanitize.css?v={{asset_version}}">
+        <link rel='stylesheet' href="/css/web.css?v={{asset_version}}">
+        <link rel='stylesheet' href="/css/ui.css?v={{asset_version}}">
     </head>
 
     <body>
         <div class="content">
             <div id="banner">
-                <a href="/"><img src="/img/quagen.png" /></a>
+                <a href="/"><img src="/img/quagen.png?v={{asset_version}}" /></a>
             </div>
             {% block content %}{% endblock %}
         </div>
@@ -30,6 +30,7 @@
             </p>
         </div>
 
+        <script src="/js/ui.js?v={{asset_version}}"></script>
         {% block scripting %}{% endblock %}
 
     </body>

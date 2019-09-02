@@ -11,6 +11,15 @@ from quagen import queries
 
 BLUEPRINT = Blueprint("web", __name__)
 
+# @hack rseekely
+# A way to un-cache static assets when a new version of the app comes out
+ASSET_VERSION = 9
+
+
+@BLUEPRINT.context_processor
+def inject_globals():
+    return dict(asset_version=ASSET_VERSION)
+
 
 @BLUEPRINT.route("/")
 def index():
