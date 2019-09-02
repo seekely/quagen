@@ -33,6 +33,17 @@
         <script src="/js/ui.js?v={{asset_version}}"></script>
         {% block scripting %}{% endblock %}
 
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-118597160-2"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          if ("localhost" != window.location.hostname) {
+              gtag('js', new Date());
+              gtag('config', 'UA-118597160-2');
+         }
+        </script>
+
     </body>
 
 </html>
