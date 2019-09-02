@@ -472,7 +472,7 @@ var ui = (function (exports) {
     		c: function create() {
     			button = element("button");
     			attr(button, "type", "button");
-    			attr(button, "class", button_class_value = "spot spot-color-" + ctx.color + " svelte-1ehgt95");
+    			attr(button, "class", button_class_value = "spot spot-color-" + ctx.color + " svelte-12g3n3y");
     			set_style(button, "opacity", ctx.opacity);
     			button.disabled = button_disabled_value = !ctx.buttonEnabled;
     			toggle_class(button, "pending-move", ctx.pendingMove || ctx.lastMove);
@@ -489,7 +489,7 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if ((changed.color) && button_class_value !== (button_class_value = "spot spot-color-" + ctx.color + " svelte-1ehgt95")) {
+    			if ((changed.color) && button_class_value !== (button_class_value = "spot spot-color-" + ctx.color + " svelte-12g3n3y")) {
     				attr(button, "class", button_class_value);
     			}
 
@@ -671,7 +671,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (38:8) {#each { length: width } as _, x}
+    // (39:8) {#each { length: width } as _, x}
     function create_each_block_1(ctx) {
     	var current;
 
@@ -729,7 +729,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (37:4) {#each { length: height } as _, y}
+    // (38:4) {#each { length: height } as _, y}
     function create_each_block(ctx) {
     	var t, br, current;
 
@@ -753,7 +753,7 @@ var ui = (function (exports) {
 
     			t = space();
     			br = element("br");
-    			add_location(br, file$1, 45, 8, 912);
+    			add_location(br, file$1, 46, 8, 977);
     		},
 
     		m: function mount(target, anchor) {
@@ -837,8 +837,9 @@ var ui = (function (exports) {
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
-    			attr(div, "class", "container svelte-5xbfdn");
-    			add_location(div, file$1, 35, 0, 566);
+    			attr(div, "class", "container svelte-1f306dd");
+    			set_style(div, "min-width", "" + ((ctx.width * 26) + 75) + "px");
+    			add_location(div, file$1, 36, 0, 589);
     		},
 
     		l: function claim(nodes) {
@@ -876,6 +877,10 @@ var ui = (function (exports) {
     				group_outros();
     				for (i = each_value.length; i < each_blocks.length; i += 1) out(i);
     				check_outros();
+    			}
+
+    			if (!current || changed.width) {
+    				set_style(div, "min-width", "" + ((ctx.width * 26) + 75) + "px");
     			}
     		},
 
@@ -1820,7 +1825,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (100:16) {#each difficulties as difficulty}
+    // (101:16) {#each difficulties as difficulty}
     function create_each_block$2(ctx) {
     	var button, t0_value = ctx.difficulty[0] + "", t0, t1, button_difficulty_value, dispose;
 
@@ -1829,10 +1834,10 @@ var ui = (function (exports) {
     			button = element("button");
     			t0 = text(t0_value);
     			t1 = space();
-    			attr(button, "class", "button-difficulty svelte-v2arcn");
+    			attr(button, "class", "button-difficulty svelte-e2pc73");
     			attr(button, "difficulty", button_difficulty_value = ctx.difficulty[1]);
     			toggle_class(button, "button-difficulty-selected", ctx.aiStrength == ctx.difficulty[1]);
-    			add_location(button, file$6, 100, 20, 1933);
+    			add_location(button, file$6, 101, 20, 1926);
     			dispose = listen(button, "mouseup", ctx.changeDifficulty);
     		},
 
@@ -1893,24 +1898,24 @@ var ui = (function (exports) {
     			button1.textContent = "Play Friend";
     			attr(img, "src", "/img/intro.gif");
     			attr(img, "alt", "Demo gif");
-    			add_location(img, file$6, 89, 8, 1560);
-    			attr(div0, "class", "block svelte-v2arcn");
-    			add_location(div0, file$6, 88, 4, 1532);
-    			attr(button0, "class", "button-play button-ai svelte-v2arcn");
-    			add_location(button0, file$6, 95, 16, 1706);
-    			add_location(div1, file$6, 94, 12, 1684);
-    			attr(div2, "class", "difficulty svelte-v2arcn");
-    			add_location(div2, file$6, 98, 12, 1837);
-    			attr(div3, "class", "option-ai svelte-v2arcn");
-    			add_location(div3, file$6, 93, 8, 1648);
-    			attr(button1, "class", "button-play button-friend svelte-v2arcn");
-    			add_location(button1, file$6, 111, 12, 2351);
-    			attr(div4, "class", "option-friend svelte-v2arcn");
-    			add_location(div4, file$6, 110, 8, 2311);
-    			attr(div5, "class", "block svelte-v2arcn");
-    			add_location(div5, file$6, 92, 4, 1620);
-    			attr(div6, "class", "container svelte-v2arcn");
-    			add_location(div6, file$6, 87, 0, 1504);
+    			add_location(img, file$6, 90, 8, 1553);
+    			attr(div0, "class", "block svelte-e2pc73");
+    			add_location(div0, file$6, 89, 4, 1525);
+    			attr(button0, "class", "button-play button-ai svelte-e2pc73");
+    			add_location(button0, file$6, 96, 16, 1699);
+    			add_location(div1, file$6, 95, 12, 1677);
+    			attr(div2, "class", "difficulty svelte-e2pc73");
+    			add_location(div2, file$6, 99, 12, 1830);
+    			attr(div3, "class", "option-ai svelte-e2pc73");
+    			add_location(div3, file$6, 94, 8, 1641);
+    			attr(button1, "class", "button-play button-friend svelte-e2pc73");
+    			add_location(button1, file$6, 112, 12, 2344);
+    			attr(div4, "class", "option-friend svelte-e2pc73");
+    			add_location(div4, file$6, 111, 8, 2304);
+    			attr(div5, "class", "block svelte-e2pc73");
+    			add_location(div5, file$6, 93, 4, 1613);
+    			attr(div6, "class", "container svelte-e2pc73");
+    			add_location(div6, file$6, 88, 0, 1497);
 
     			dispose = [
     				listen(button0, "mouseup", ctx.playAi),

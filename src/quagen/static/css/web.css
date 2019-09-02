@@ -3,7 +3,6 @@ body {
     background-repeat: repeat;
     font-size: 15px;
     font-family: 'Helvetica';
-    white-space: nowrap;
 }
 
 a.link, a:visited.link {
@@ -15,7 +14,7 @@ a.link, a:visited.link {
 div.content {
     margin-top: 75px;
     margin-bottom: 75px;
-    margin-right: 75px;
+    margin-right: 25px;
     margin-left: 15%;
     width: 70%;
 }

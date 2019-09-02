@@ -20,7 +20,7 @@
 
       return false;
 
-    }
+    } 
  
 
 </script>
@@ -29,11 +29,12 @@
 
   div.container {
     margin-top: 1em;
+    line-height: 1px;
   }
 
 </style>
 
-<div class="container">
+<div class="container" style="min-width: {(width * 26) + 75}px;">
     {#each { length: height } as _, y}
         {#each { length: width } as _, x}
             <Spot x={x} 

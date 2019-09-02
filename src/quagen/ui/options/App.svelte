@@ -31,19 +31,20 @@
     .container {
         margin-top: 2em;
         display: inline-flex;
+        flex-wrap: wrap;
+
     }
 
     .block {
-        display: inline-block;
         margin-right: 1em;
     }
 
     .option-ai {
-        margin-top: 35%;
+        margin-top: 5%;
     }
 
     .option-friend {
-        margin-top: 22%;
+        margin-top: 8%;
     }
 
     button {

@@ -31,7 +31,7 @@
 
 <style>
     button {
-        margin: 2px;
+        margin: 1px;
         height: 25px;
         width: 25px;
         color: white;
