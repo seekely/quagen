@@ -76,18 +76,27 @@ You can run all Python tests by running the following:
 
 ### Conventions
 
+Highly suggested to integrate the tools below into your editor of choice.
+
 All Python code is auto-formatted using [Black][black] and further linted using [Pylint][pylint]:
 
     cd quagen
     source venv/bin/activate
       
-    # Run the formatter
+    # Run the python formatter
     black .
      
-    # Run pylint
-    pylint quagen
-    pylint tests
+    # Run python linter
+    pylint src tests
+          
 
+All JS/web code is auto-formatted using [Prettier][prettier] and further linted using [ESlint][eslint]
+
+    # Run web formatter
+    npm run prettier
+     
+    # Run web linter
+    npm run lint 
 
 
 
@@ -96,3 +105,5 @@ All Python code is auto-formatted using [Black][black] and further linted using 
 [sqlite]: https://www.sqlite.org/
 [black]: https://black.readthedocs.io
 [pylint]: https://www.pylint.org/
+[prettier]: https://prettier.io/
+[eslint]: https://eslint.org

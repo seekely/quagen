@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Quagen | Let's play a game</title>
-        <meta charset="utf-8">
-        <meta name="language" content="english"> 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <title>Quagen | Let's play a game</title>
+    <meta charset="utf-8" />
+    <meta name="language" content="english" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <meta name="author" content=Ryan Seekely”>
-        <meta name="description" content="Quagen is a Go-like game where players make simultaneous moves to control territory on a grid board.">
-        <meta name="keywords" content="game,go,chess">
+    <meta name="author" content="Ryan" Seekely” />
+    <meta
+      name="description"
+      content="Quagen is a Go-like game where players make simultaneous moves to control territory on a grid board."
+    />
+    <meta name="keywords" content="game,go,chess" />
 
-        <link rel="shortcut icon" href="/img/favicon.ico">
-        <link rel='stylesheet' href="/css/sanitize.css?v={{asset_version}}">
-        <link rel='stylesheet' href="/css/web.css?v={{asset_version}}">
-        <link rel='stylesheet' href="/css/ui.css?v={{asset_version}}">
-    </head>
+    <link rel="shortcut icon" href="/img/favicon.ico" />
+    <link rel="stylesheet" href="/css/sanitize.css?v={{asset_version}}" />
+    <link rel="stylesheet" href="/css/web.css?v={{asset_version}}" />
+    <link rel="stylesheet" href="/css/ui.css?v={{asset_version}}" />
+  </head>
 
-    <body>
-        <div class="content">
-            <div id="banner">
-                <a href="/"><img src="/img/quagen.png?v={{asset_version}}" /></a>
-            </div>
-            {% block content %}{% endblock %}
-        </div>
+  <body>
+    <div class="content">
+      <div id="banner">
+        <a href="/"><img src="/img/quagen.png?v={{asset_version}}"/></a>
+      </div>
+      {% block content %}{% endblock %}
+    </div>
 
-        <div class="footer">
-            <p>
-                Created by <a class="link" href="https://seekely.com">Ryan Seekely</a>. Source code available on <a class="link" href="https://github.com/seekely/quagen">Github.</a>
-            </p>
-        </div>
+    <div class="footer">
+      <p>
+        Created by <a class="link" href="https://seekely.com">Ryan Seekely</a>.
+        Source code available on
+        <a class="link" href="https://github.com/seekely/quagen">Github.</a>
+      </p>
+    </div>
 
-        <script src="/js/ui.js?v={{asset_version}}"></script>
-        {% block scripting %}{% endblock %}
+    <script src="/js/ui.js?v={{asset_version}}"></script>
+    {% block scripting %}{% endblock %}
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-118597160-2"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          if ("localhost" != window.location.hostname) {
-              gtag('js', new Date());
-              gtag('config', 'UA-118597160-2');
-         }
-        </script>
-
-    </body>
-
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-118597160-2"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      if ("localhost" != window.location.hostname) {
+        gtag("js", new Date());
+        gtag("config", "UA-118597160-2");
+      }
+    </script>
+  </body>
 </html>

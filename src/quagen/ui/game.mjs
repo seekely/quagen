@@ -84,7 +84,7 @@ export class GamePoll {
           this._callback();
         }
       })
-      .catch(() => {
+      .catch(error => {
         self._inFlight = false;
       });
   }

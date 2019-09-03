@@ -1,18 +1,13 @@
-{% extends "layout.html" %}
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 
-    <div id="options"></div>
+<div id="options"></div>
 
-{% endblock %}
+{% endblock %} {% block scripting %}
 
-{% block scripting %}
-
-    <script>
-        const options = new ui.Options({
-            target: document.getElementById("options"),
-        });
-    </script>
+<script>
+  const options = new ui.Options({
+    target: document.getElementById("options")
+  });
+</script>
 
 {% endblock %}
-
-

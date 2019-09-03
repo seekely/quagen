@@ -1,9 +1,10 @@
 <style>
-    div {
-        margin-top: 1em;
-    }
+  div {
+    margin-top: 1em;
+  }
 </style>
 
 <div>
-    <input type="checkbox" on:change /> See projected board 
+  <input type="checkbox" on:change />
+  See projected board
 </div>

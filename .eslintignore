@@ -1,0 +1,5 @@
+src/quagen/static/js/ui.js
+
+node_modules/
+__pycache__/
+venv/

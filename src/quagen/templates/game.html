@@ -1,20 +1,16 @@
-{% extends "layout.html" %}
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 
-    <div id="game"></div>
+<div id="game"></div>
 
-{% endblock %}
+{% endblock %} {% block scripting %}
 
-{% block scripting %}
-
-    <script>
-        const game = new ui.Game({
-            target: document.getElementById("game"),
-            props: {
-                gameId: "{{ game.game_id }}"
-            }
-        });
-    </script>
+<script>
+  const game = new ui.Game({
+    target: document.getElementById("game"),
+    props: {
+      gameId: "{{ game.game_id }}"
+    }
+  });
+</script>
 
 {% endblock %}
-
