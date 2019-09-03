@@ -1,12 +1,12 @@
 {% extends "layout.html" %} {% block content %}
 
-<div id="options"></div>
+<div id="menu"></div>
 
 {% endblock %} {% block scripting %}
 
 <script>
-  const options = new ui.Options({
-    target: document.getElementById("options")
+  const menu = new ui.Menu({
+    target: document.getElementById("menu")
   });
 </script>
 

@@ -1,5 +1,5 @@
 <script>
-  import { createGame } from "../options.js";
+  import { createGame } from "../menu.js";
 
   const difficulties = [["Easy", 0], ["Medium", 1], ["Hard", 2]];
   let playerCount = 2;
