@@ -93,7 +93,7 @@ All Python code is auto-formatted using [Black][black] and further linted using 
 All JS/web code is auto-formatted using [Prettier][prettier] and further linted using [ESlint][eslint]
 
     # Run web formatter
-    npm run prettier
+    npm run format
      
     # Run web linter
     npm run lint 

@@ -19,7 +19,6 @@
   function handleMove(event) {
     const spotX = event.detail.x;
     const spotY = event.detail.y;
-
     allowMove = false;
     fetch(`/api/v1/game/${gameId}/move/${spotX}/${spotY}`);
   }
@@ -46,6 +45,7 @@
   <Settings on:change={handleProjected} />
 
   <Board
+    turnCompleted={gameState.turnCompleted}
     height={gameState.getSetting('dimension_x')}
     width={gameState.getSetting('dimension_y')}
     {allowMove}

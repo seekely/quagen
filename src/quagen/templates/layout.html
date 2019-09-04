@@ -31,14 +31,20 @@
       <p>
         Created by <a class="link" href="https://seekely.com">Ryan Seekely</a>.
         Source code available on
-        <a class="link" href="https://github.com/seekely/quagen">Github.</a>
+        <a class="link" href="https://github.com/seekely/quagen">Github</a>.
       </p>
     </div>
 
+    <!-- {# Our global Javascript #} -->
     <script src="/js/ui.js?v={{asset_version}}"></script>
+    <script>
+      ui.detectCapabilities();
+    </script>
+
+    <!-- {# For page specific Javascript #} -->
     {% block scripting %}{% endblock %}
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <!-- {# Google Analytics #} -->
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=UA-118597160-2"

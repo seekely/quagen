@@ -23,6 +23,6 @@
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
     "lint": "eslint **/*.svelte **/*.js",
-    "prettier": "prettier --write *.js *.json src/**/*.css src/**/*.html src/**/*.js src/**/*.svelte"
+    "format": "prettier --write *.js *.json src/**/*.css src/**/*.html src/**/*.js src/**/*.svelte"
   }
 }

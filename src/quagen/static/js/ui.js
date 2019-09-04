@@ -462,12 +462,15 @@ var ui = (function (exports) {
     		c: function create() {
     			button = element("button");
     			attr(button, "type", "button");
-    			attr(button, "class", button_class_value = "spot spot-color-" + ctx.color + " svelte-17jgu0o");
+    			attr(button, "class", button_class_value = "spot player-color-" + ctx.color + " svelte-dk7pp7");
     			set_style(button, "opacity", ctx.opacity);
-    			button.disabled = button_disabled_value = !ctx.buttonEnabled;
-    			toggle_class(button, "pending-move", ctx.pendingMove || ctx.lastMove);
-    			add_location(button, file, 75, 0, 1373);
-    			dispose = listen(button, "mouseup", ctx.handleMouseUp);
+    			button.disabled = button_disabled_value = !ctx.enabled;
+    			toggle_class(button, "last", ctx.lastMove);
+    			toggle_class(button, "pending", ctx.pendingMove);
+    			toggle_class(button, "pulse", !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
+    			toggle_class(button, "selected", ctx.selected && !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
+    			add_location(button, file, 135, 0, 2865);
+    			dispose = listen(button, "mouseup", ctx.handleSelected);
     		},
 
     		l: function claim(nodes) {
@@ -479,7 +482,7 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if ((changed.color) && button_class_value !== (button_class_value = "spot spot-color-" + ctx.color + " svelte-17jgu0o")) {
+    			if ((changed.color) && button_class_value !== (button_class_value = "spot player-color-" + ctx.color + " svelte-dk7pp7")) {
     				attr(button, "class", button_class_value);
     			}
 
@@ -487,12 +490,24 @@ var ui = (function (exports) {
     				set_style(button, "opacity", ctx.opacity);
     			}
 
-    			if ((changed.buttonEnabled) && button_disabled_value !== (button_disabled_value = !ctx.buttonEnabled)) {
+    			if ((changed.enabled) && button_disabled_value !== (button_disabled_value = !ctx.enabled)) {
     				button.disabled = button_disabled_value;
     			}
 
-    			if ((changed.color || changed.pendingMove || changed.lastMove)) {
-    				toggle_class(button, "pending-move", ctx.pendingMove || ctx.lastMove);
+    			if ((changed.color || changed.lastMove)) {
+    				toggle_class(button, "last", ctx.lastMove);
+    			}
+
+    			if ((changed.color || changed.pendingMove)) {
+    				toggle_class(button, "pending", ctx.pendingMove);
+    			}
+
+    			if ((changed.color || changed.pendingMove || changed.lastMove || changed.enabled)) {
+    				toggle_class(button, "pulse", !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
+    			}
+
+    			if ((changed.color || changed.selected || changed.pendingMove || changed.lastMove || changed.enabled)) {
+    				toggle_class(button, "selected", ctx.selected && !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
     			}
     		},
 
@@ -510,16 +525,24 @@ var ui = (function (exports) {
     }
 
     function instance($$self, $$props, $$invalidate) {
-    	let { x, y, allowMove = true, color = -1, power = 0, maxPower = 4, pressures = [], lastMove = false } = $$props;
+    	const dispatch = createEventDispatcher();
 
-      const dispatch = createEventDispatcher();
+      // Coordinates of this spot on the board
+      let { x, y, color = -1, pressures = [], power = 0, maxPower = 4, selected = false, allowMove = true } = $$props;
 
-      function handleMouseUp() {
-        dispatch("move", { x: x, y: y });
-        $$invalidate('pendingMove', pendingMove = true);
+      // If this spot is the current move being made by the player
+      let { pendingMove = false, lastMove = false } = $$props;
+
+      /**
+       * Dispatches an event to the parent when this spot was selected by the
+       * player. Depending on the settings, we may want to wait for a double
+       * click before making this a move.
+       */
+      function handleSelected() {
+        dispatch("selected", { x: x, y: y });
       }
 
-    	const writable_props = ['x', 'y', 'allowMove', 'color', 'power', 'maxPower', 'pressures', 'lastMove'];
+    	const writable_props = ['x', 'y', 'color', 'pressures', 'power', 'maxPower', 'selected', 'allowMove', 'pendingMove', 'lastMove'];
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Spot> was created with unknown prop '${key}'`);
     	});
@@ -527,42 +550,44 @@ var ui = (function (exports) {
     	$$self.$set = $$props => {
     		if ('x' in $$props) $$invalidate('x', x = $$props.x);
     		if ('y' in $$props) $$invalidate('y', y = $$props.y);
-    		if ('allowMove' in $$props) $$invalidate('allowMove', allowMove = $$props.allowMove);
     		if ('color' in $$props) $$invalidate('color', color = $$props.color);
+    		if ('pressures' in $$props) $$invalidate('pressures', pressures = $$props.pressures);
     		if ('power' in $$props) $$invalidate('power', power = $$props.power);
     		if ('maxPower' in $$props) $$invalidate('maxPower', maxPower = $$props.maxPower);
-    		if ('pressures' in $$props) $$invalidate('pressures', pressures = $$props.pressures);
+    		if ('selected' in $$props) $$invalidate('selected', selected = $$props.selected);
+    		if ('allowMove' in $$props) $$invalidate('allowMove', allowMove = $$props.allowMove);
+    		if ('pendingMove' in $$props) $$invalidate('pendingMove', pendingMove = $$props.pendingMove);
     		if ('lastMove' in $$props) $$invalidate('lastMove', lastMove = $$props.lastMove);
     	};
 
-    	let opacity, pendingMove, buttonEnabled;
+    	let enabled, opacity;
 
-    	$$self.$$.update = ($$dirty = { power: 1, maxPower: 1, lastMove: 1, allowMove: 1 }) => {
+    	$$self.$$.update = ($$dirty = { allowMove: 1, power: 1, maxPower: 1 }) => {
+    		if ($$dirty.allowMove || $$dirty.power || $$dirty.maxPower) { $$invalidate('enabled', enabled = allowMove && power < maxPower); }
     		if ($$dirty.power || $$dirty.maxPower) { $$invalidate('opacity', opacity = 0 < power && power < maxPower ? (0.75 / maxPower) * power : 1); }
-    		if ($$dirty.lastMove) { $$invalidate('pendingMove', pendingMove = lastMove ? false : false); }
-    		if ($$dirty.allowMove || $$dirty.power || $$dirty.maxPower) { $$invalidate('buttonEnabled', buttonEnabled = allowMove && power < maxPower); }
     	};
 
     	return {
     		x,
     		y,
-    		allowMove,
     		color,
+    		pressures,
     		power,
     		maxPower,
-    		pressures,
-    		lastMove,
-    		handleMouseUp,
-    		opacity,
+    		selected,
+    		allowMove,
     		pendingMove,
-    		buttonEnabled
+    		lastMove,
+    		handleSelected,
+    		enabled,
+    		opacity
     	};
     }
 
     class Spot extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, ["x", "y", "allowMove", "color", "power", "maxPower", "pressures", "lastMove"]);
+    		init(this, options, instance, create_fragment, safe_not_equal, ["x", "y", "color", "pressures", "power", "maxPower", "selected", "allowMove", "pendingMove", "lastMove"]);
 
     		const { ctx } = this.$$;
     		const props = options.props || {};
@@ -590,19 +615,19 @@ var ui = (function (exports) {
     		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	get allowMove() {
-    		throw new Error("<Spot>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set allowMove(value) {
-    		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
     	get color() {
     		throw new Error("<Spot>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set color(value) {
+    		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get pressures() {
+    		throw new Error("<Spot>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set pressures(value) {
     		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -622,11 +647,27 @@ var ui = (function (exports) {
     		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	get pressures() {
+    	get selected() {
     		throw new Error("<Spot>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set pressures(value) {
+    	set selected(value) {
+    		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get allowMove() {
+    		throw new Error("<Spot>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set allowMove(value) {
+    		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get pendingMove() {
+    		throw new Error("<Spot>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set pendingMove(value) {
     		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -637,6 +678,35 @@ var ui = (function (exports) {
     	set lastMove(value) {
     		throw new Error("<Spot>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
+    }
+
+    /**
+     * Utility functions used across the UI
+     */
+
+    /**
+     * Sets up listeners to detect browser capabilities
+     */
+    function detectCapabilities() {
+      // Detect if the user is interacting with the screen via touching
+      window.addEventListener(
+        "touchstart",
+        function onFirstTouch() {
+          window.CAPABILITY_TOUCH = true;
+
+          // Only need to detect human touch one time
+          window.removeEventListener("touchstart", onFirstTouch, false);
+        },
+        false
+      );
+    }
+
+    /**
+     * If the user has interacted with the screen via touch
+     * @returns {bool} True if user has interacted via touch, false otherwise
+     */
+    function isTouching() {
+      return window.CAPABILITY_TOUCH;
     }
 
     /* src\quagen\ui\game\Board.svelte generated by Svelte v3.9.1 */
@@ -657,16 +727,18 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (31:4) {#each { length: width } as _, x}
+    // (93:4) {#each { length: width } as _, x}
     function create_each_block_1(ctx) {
     	var current;
 
     	var spot_spread_levels = [
     		{ x: ctx.x },
     		{ y: ctx.y },
+    		ctx.spots[ctx.x][ctx.y],
+    		{ selected: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y },
     		{ allowMove: ctx.allowMove },
     		{ lastMove: isLastMove(ctx.lastMoves, ctx.x, ctx.y) },
-    		ctx.spots[ctx.x][ctx.y]
+    		{ pendingMove: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y && ctx.pendingMove }
     	];
 
     	let spot_props = {};
@@ -674,7 +746,7 @@ var ui = (function (exports) {
     		spot_props = assign(spot_props, spot_spread_levels[i]);
     	}
     	var spot = new Spot({ props: spot_props, $$inline: true });
-    	spot.$on("move", ctx.move_handler);
+    	spot.$on("selected", ctx.handleSpotSelected);
 
     	return {
     		c: function create() {
@@ -687,12 +759,14 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			var spot_changes = (changed.allowMove || changed.isLastMove || changed.lastMoves || changed.spots) ? get_spread_update(spot_spread_levels, [
+    			var spot_changes = (changed.spots || changed.selectedX || changed.selectedY || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.pendingMove) ? get_spread_update(spot_spread_levels, [
     									spot_spread_levels[0],
     			spot_spread_levels[1],
+    			(changed.spots) && ctx.spots[ctx.x][ctx.y],
+    			(changed.selectedX || changed.selectedY) && { selected: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y },
     			(changed.allowMove) && { allowMove: ctx.allowMove },
     			(changed.isLastMove || changed.lastMoves) && { lastMove: isLastMove(ctx.lastMoves, ctx.x, ctx.y) },
-    			(changed.spots) && ctx.spots[ctx.x][ctx.y]
+    			(changed.selectedX || changed.selectedY || changed.pendingMove) && { pendingMove: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y && ctx.pendingMove }
     								]) : {};
     			spot.$set(spot_changes);
     		},
@@ -715,7 +789,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (30:2) {#each { length: height } as _, y}
+    // (92:2) {#each { length: height } as _, y}
     function create_each_block(ctx) {
     	var t, br, current;
 
@@ -739,7 +813,7 @@ var ui = (function (exports) {
 
     			t = space();
     			br = element("br");
-    			add_location(br, file$1, 39, 4, 819);
+    			add_location(br, file$1, 103, 4, 3137);
     		},
 
     		m: function mount(target, anchor) {
@@ -753,7 +827,7 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.allowMove || changed.isLastMove || changed.lastMoves || changed.spots || changed.width) {
+    			if (changed.spots || changed.selectedX || changed.selectedY || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.pendingMove || changed.width) {
     				each_value_1 = { length: ctx.width };
 
     				for (var i = 0; i < each_value_1.length; i += 1) {
@@ -825,7 +899,7 @@ var ui = (function (exports) {
     			}
     			attr(div, "class", "container svelte-18herh5");
     			set_style(div, "min-width", "" + (ctx.width * 26 + 75) + "px");
-    			add_location(div, file$1, 28, 0, 517);
+    			add_location(div, file$1, 90, 0, 2688);
     		},
 
     		l: function claim(nodes) {
@@ -843,7 +917,7 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.width || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.spots || changed.height) {
+    			if (changed.width || changed.spots || changed.selectedX || changed.selectedY || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.pendingMove || changed.height) {
     				each_value = { length: ctx.height };
 
     				for (var i = 0; i < each_value.length; i += 1) {
@@ -905,53 +979,89 @@ var ui = (function (exports) {
     }
 
     function instance$1($$self, $$props, $$invalidate) {
-    	let { allowMove = true, width = 0, height = 0, spots = [], moveHistory = [] } = $$props;
+    	const dispatch = createEventDispatcher();
 
-    	const writable_props = ['allowMove', 'width', 'height', 'spots', 'moveHistory'];
+      // The turn number completed this board state reflects
+      let { turnCompleted = 0, width = 0, height = 0, spots = [], allowMove = true, moveHistory = [] } = $$props;
+
+      /**
+       * Handles when  a spot on the board has been selected by the player.
+       * Depending on the settings, we may want to wait for a double
+       * click before making this a move.
+       */
+      function handleSpotSelected(event) {
+        const eventX = event.detail.x;
+        const eventY = event.detail.y;
+
+        // Short circuit getting here when a move should not be allowed according
+        // to board/game state
+        if (!allowMove) {
+          return;
+        }
+
+        // if the player is using a mouse, let the first selection made
+        // go through. if the player is using a touch screen, make them confirm
+        // their selection with another click so they don't accidentally make a move
+        // while scrolling/zooming.
+        if (!isTouching() || (selectedX == eventX && selectedY == eventY)) {
+          $$invalidate('pendingMove', pendingMove = true);
+          $$invalidate('allowMove', allowMove = false);
+          dispatch("move", { x: eventX, y: eventY });
+        }
+
+        $$invalidate('selectedX', selectedX = eventX);
+        $$invalidate('selectedY', selectedY = eventY);
+      }
+
+    	const writable_props = ['turnCompleted', 'width', 'height', 'spots', 'allowMove', 'moveHistory'];
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Board> was created with unknown prop '${key}'`);
     	});
 
-    	function move_handler(event) {
-    		bubble($$self, event);
-    	}
-
     	$$self.$set = $$props => {
-    		if ('allowMove' in $$props) $$invalidate('allowMove', allowMove = $$props.allowMove);
+    		if ('turnCompleted' in $$props) $$invalidate('turnCompleted', turnCompleted = $$props.turnCompleted);
     		if ('width' in $$props) $$invalidate('width', width = $$props.width);
     		if ('height' in $$props) $$invalidate('height', height = $$props.height);
     		if ('spots' in $$props) $$invalidate('spots', spots = $$props.spots);
+    		if ('allowMove' in $$props) $$invalidate('allowMove', allowMove = $$props.allowMove);
     		if ('moveHistory' in $$props) $$invalidate('moveHistory', moveHistory = $$props.moveHistory);
     	};
 
-    	let lastMoves;
+    	let selectedX, selectedY, pendingMove, lastMoves;
 
-    	$$self.$$.update = ($$dirty = { moveHistory: 1 }) => {
+    	$$self.$$.update = ($$dirty = { turnCompleted: 1, moveHistory: 1 }) => {
+    		if ($$dirty.turnCompleted) { $$invalidate('selectedX', selectedX = turnCompleted ? -1 : -1); }
+    		if ($$dirty.turnCompleted) { $$invalidate('selectedY', selectedY = turnCompleted ? -1 : -1); }
+    		if ($$dirty.turnCompleted) { $$invalidate('pendingMove', pendingMove = turnCompleted ? false : false); }
     		if ($$dirty.moveHistory) { $$invalidate('lastMoves', lastMoves = moveHistory.length > 0 ? moveHistory.slice(-1)[0] : []); }
     	};
 
     	return {
-    		allowMove,
+    		turnCompleted,
     		width,
     		height,
     		spots,
+    		allowMove,
     		moveHistory,
-    		lastMoves,
-    		move_handler
+    		handleSpotSelected,
+    		selectedX,
+    		selectedY,
+    		pendingMove,
+    		lastMoves
     	};
     }
 
     class Board extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, ["allowMove", "width", "height", "spots", "moveHistory"]);
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, ["turnCompleted", "width", "height", "spots", "allowMove", "moveHistory"]);
     	}
 
-    	get allowMove() {
+    	get turnCompleted() {
     		throw new Error("<Board>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set allowMove(value) {
+    	set turnCompleted(value) {
     		throw new Error("<Board>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -976,6 +1086,14 @@ var ui = (function (exports) {
     	}
 
     	set spots(value) {
+    		throw new Error("<Board>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get allowMove() {
+    		throw new Error("<Board>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set allowMove(value) {
     		throw new Error("<Board>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -1494,7 +1612,7 @@ var ui = (function (exports) {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Loading...";
-    			add_location(p, file$5, 55, 2, 1231);
+    			add_location(p, file$5, 55, 2, 1274);
     		},
 
     		m: function mount(target, anchor) {
@@ -1513,7 +1631,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (42:0) {#if init}
+    // (41:0) {#if init}
     function create_if_block$1(ctx) {
     	var t0, t1, current;
 
@@ -1527,6 +1645,7 @@ var ui = (function (exports) {
 
     	var board = new Board({
     		props: {
+    		turnCompleted: ctx.gameState.turnCompleted,
     		height: ctx.gameState.getSetting('dimension_x'),
     		width: ctx.gameState.getSetting('dimension_y'),
     		allowMove: ctx.allowMove,
@@ -1561,6 +1680,7 @@ var ui = (function (exports) {
     			scores.$set(scores_changes);
 
     			var board_changes = {};
+    			if (changed.gameState) board_changes.turnCompleted = ctx.gameState.turnCompleted;
     			if (changed.gameState) board_changes.height = ctx.gameState.getSetting('dimension_x');
     			if (changed.gameState) board_changes.width = ctx.gameState.getSetting('dimension_y');
     			if (changed.allowMove) board_changes.allowMove = ctx.allowMove;
@@ -1697,7 +1817,6 @@ var ui = (function (exports) {
       function handleMove(event) {
         const spotX = event.detail.x;
         const spotY = event.detail.y;
-
         $$invalidate('allowMove', allowMove = false);
         fetch(`/api/v1/game/${gameId}/move/${spotX}/${spotY}`);
       }
@@ -1994,6 +2113,7 @@ var ui = (function (exports) {
 
     exports.Game = App;
     exports.Menu = App$1;
+    exports.detectCapabilities = detectCapabilities;
 
     return exports;
 
