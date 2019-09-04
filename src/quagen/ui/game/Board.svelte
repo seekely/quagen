@@ -56,11 +56,13 @@
     if (!isTouching() || (selectedX == eventX && selectedY == eventY)) {
       pendingMove = true;
       allowMove = false;
+      selectedX = eventX;
+      selectedY = eventY;
       dispatch("move", { x: eventX, y: eventY });
+    } else {
+      selectedX = eventX;
+      selectedY = eventY;
     }
-
-    selectedX = eventX;
-    selectedY = eventY;
   }
 
   /**

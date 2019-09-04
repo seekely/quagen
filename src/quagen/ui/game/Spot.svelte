@@ -6,6 +6,17 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
+  // possible background colors for a spot based on state
+  const BG_COLOR_DEFAULT = [231, 231, 231];
+  const BG_COLOR_SELECTED = [240, 255, 0];
+  const BG_COLORS_PLAYER = [
+    [0, 0, 0],
+    [0, 140, 186],
+    [244, 67, 54],
+    [22, 215, 79],
+    [255, 195, 0]
+  ];
+
   // Coordinates of this spot on the board
   export let x;
   export let y;
@@ -28,7 +39,6 @@
 
   // If a move is allowed to made on this spot
   export let allowMove = true;
-  $: enabled = allowMove && power < maxPower;
 
   // If this spot is the current move being made by the player
   export let pendingMove = false;
@@ -36,8 +46,25 @@
   // If this spot was the last move made by any player
   export let lastMove = false;
 
-  // Opacity of this spot determined by current power level
-  $: opacity = 0 < power && power < maxPower ? (0.75 / maxPower) * power : 1;
+  // The background color of the button based on current state
+  let buttonColor = BG_COLOR_DEFAULT;
+  let buttonOpacity = 1;
+  $: {
+    if (selected || pendingMove) {
+      buttonColor = BG_COLOR_SELECTED;
+      buttonOpacity = 1;
+    } else if (0 <= color) {
+      buttonColor = BG_COLORS_PLAYER[color];
+      buttonOpacity =
+        0 < power && power < maxPower ? (0.75 / maxPower) * power : 1;
+    } else {
+      buttonColor = BG_COLOR_DEFAULT;
+      buttonOpacity = 1;
+    }
+  }
+
+  // If the button should be enabled at all based on current state
+  $: buttonEnabled = allowMove && power < maxPower;
 
   /**
    * Dispatches an event to the parent when this spot was selected by the
@@ -47,23 +74,35 @@
   function handleSelected() {
     dispatch("selected", { x: x, y: y });
   }
+
+  /**
+   * Creates a CSS rgba() string
+   * @param  {list} color expressed as [r,g,b]
+   * @param  {float} opactiy expressed as float from 0 - 1
+   * @return {string} rgba(r,g,b,opacity)
+   */
+  function toRGBA(color, opacity) {
+    return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${opacity})`;
+  }
 </script>
 
 <style>
-  button {
+  button,
+  button:disabled,
+  button[disabled] {
     margin: 1px;
+    padding: 0px;
     height: 25px;
     width: 25px;
+
     color: white;
+    font: inherit;
     font-weight: bold;
     font-size: 12px;
     text-align: center;
 
-    padding: 0;
     border: 1px solid black;
     outline: none;
-    font: inherit;
-    background-color: #e7e7e7;
   }
 
   button:active {
@@ -81,65 +120,27 @@
   }
 
   .selected,
-  .pulse:hover,
-  .pulse:active {
+  .pulse:hover {
     animation-name: pulse;
     animation-duration: 1s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
-    opacity: 1;
   }
 
+  /* Outline a spot to indicate a move */
+  .outline,
   .pulse:hover {
-    border: 1px solid rgba(0, 0, 0, 0);
-    outline: 3px solid black;
     z-index: 2;
-  }
-
-  .selected {
-    background: yellow;
-  }
-
-  /* A player is trying to move here */
-  .pending {
-    border: 1px solid rgba(0, 0, 0, 0);
-    outline: 3px solid black;
-    z-index: 2;
-    background: yellow;
-  }
-
-  /* A player moved here last turn */
-  .last {
-    border: 1px solid rgba(0, 0, 0, 0);
-    outline: 3px solid black;
-    z-index: 2;
-  }
-
-  /* Spot colors based on player control */
-  .player-color-0 {
-    background-color: #000000;
-  }
-  .player-color-1 {
-    background-color: #008cba;
-  }
-  .player-color-2 {
-    background-color: #f44336;
-  }
-  .player-color-3 {
-    background-color: #16d74f;
-  }
-  .player-color-4 {
-    background-color: #ffc300;
+    border: 1px solid rgba(0, 0, 0, 0) !important;
+    outline: 3px solid black !important;
   }
 </style>
 
 <button
   type="button"
   on:mouseup={handleSelected}
-  class="spot player-color-{color}"
-  class:last={lastMove}
-  class:pending={pendingMove}
-  class:pulse={!pendingMove && !lastMove && enabled}
-  class:selected={selected && !pendingMove && !lastMove && enabled}
-  style="opacity: {opacity};"
-  disabled={!enabled} />
+  class:outline={lastMove || pendingMove || selected}
+  class:pulse={!pendingMove && !lastMove && buttonEnabled}
+  class:selected={selected && !pendingMove && !lastMove && buttonEnabled}
+  style="background-color: {toRGBA(buttonColor, buttonOpacity)};"
+  disabled={!buttonEnabled} />

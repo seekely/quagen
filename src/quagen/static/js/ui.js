@@ -456,20 +456,19 @@ var ui = (function (exports) {
     const file = "src\\quagen\\ui\\game\\Spot.svelte";
 
     function create_fragment(ctx) {
-    	var button, button_class_value, button_disabled_value, dispose;
+    	var button, button_disabled_value, dispose;
 
     	return {
     		c: function create() {
     			button = element("button");
     			attr(button, "type", "button");
-    			attr(button, "class", button_class_value = "spot player-color-" + ctx.color + " svelte-dk7pp7");
-    			set_style(button, "opacity", ctx.opacity);
-    			button.disabled = button_disabled_value = !ctx.enabled;
-    			toggle_class(button, "last", ctx.lastMove);
-    			toggle_class(button, "pending", ctx.pendingMove);
-    			toggle_class(button, "pulse", !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
-    			toggle_class(button, "selected", ctx.selected && !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
-    			add_location(button, file, 135, 0, 2865);
+    			set_style(button, "background-color", toRGBA(ctx.buttonColor, ctx.buttonOpacity));
+    			button.disabled = button_disabled_value = !ctx.buttonEnabled;
+    			attr(button, "class", "svelte-1spi4vf");
+    			toggle_class(button, "outline", ctx.lastMove || ctx.pendingMove || ctx.selected);
+    			toggle_class(button, "pulse", !ctx.pendingMove && !ctx.lastMove && ctx.buttonEnabled);
+    			toggle_class(button, "selected", ctx.selected && !ctx.pendingMove && !ctx.lastMove && ctx.buttonEnabled);
+    			add_location(button, file, 138, 0, 3244);
     			dispose = listen(button, "mouseup", ctx.handleSelected);
     		},
 
@@ -482,32 +481,24 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if ((changed.color) && button_class_value !== (button_class_value = "spot player-color-" + ctx.color + " svelte-dk7pp7")) {
-    				attr(button, "class", button_class_value);
+    			if (changed.buttonColor || changed.buttonOpacity) {
+    				set_style(button, "background-color", toRGBA(ctx.buttonColor, ctx.buttonOpacity));
     			}
 
-    			if (changed.opacity) {
-    				set_style(button, "opacity", ctx.opacity);
-    			}
-
-    			if ((changed.enabled) && button_disabled_value !== (button_disabled_value = !ctx.enabled)) {
+    			if ((changed.buttonEnabled) && button_disabled_value !== (button_disabled_value = !ctx.buttonEnabled)) {
     				button.disabled = button_disabled_value;
     			}
 
-    			if ((changed.color || changed.lastMove)) {
-    				toggle_class(button, "last", ctx.lastMove);
+    			if ((changed.lastMove || changed.pendingMove || changed.selected)) {
+    				toggle_class(button, "outline", ctx.lastMove || ctx.pendingMove || ctx.selected);
     			}
 
-    			if ((changed.color || changed.pendingMove)) {
-    				toggle_class(button, "pending", ctx.pendingMove);
+    			if ((changed.pendingMove || changed.lastMove || changed.buttonEnabled)) {
+    				toggle_class(button, "pulse", !ctx.pendingMove && !ctx.lastMove && ctx.buttonEnabled);
     			}
 
-    			if ((changed.color || changed.pendingMove || changed.lastMove || changed.enabled)) {
-    				toggle_class(button, "pulse", !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
-    			}
-
-    			if ((changed.color || changed.selected || changed.pendingMove || changed.lastMove || changed.enabled)) {
-    				toggle_class(button, "selected", ctx.selected && !ctx.pendingMove && !ctx.lastMove && ctx.enabled);
+    			if ((changed.selected || changed.pendingMove || changed.lastMove || changed.buttonEnabled)) {
+    				toggle_class(button, "selected", ctx.selected && !ctx.pendingMove && !ctx.lastMove && ctx.buttonEnabled);
     			}
     		},
 
@@ -524,14 +515,30 @@ var ui = (function (exports) {
     	};
     }
 
+    function toRGBA(color, opacity) {
+      return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${opacity})`;
+    }
+
     function instance($$self, $$props, $$invalidate) {
     	const dispatch = createEventDispatcher();
 
-      // Coordinates of this spot on the board
-      let { x, y, color = -1, pressures = [], power = 0, maxPower = 4, selected = false, allowMove = true } = $$props;
+      // possible background colors for a spot based on state
+      const BG_COLOR_DEFAULT = [231, 231, 231];
+      const BG_COLOR_SELECTED = [240, 255, 0];
+      const BG_COLORS_PLAYER = [
+        [0, 0, 0],
+        [0, 140, 186],
+        [244, 67, 54],
+        [22, 215, 79],
+        [255, 195, 0]
+      ];
 
-      // If this spot is the current move being made by the player
-      let { pendingMove = false, lastMove = false } = $$props;
+      // Coordinates of this spot on the board
+      let { x, y, color = -1, pressures = [], power = 0, maxPower = 4, selected = false, allowMove = true, pendingMove = false, lastMove = false } = $$props;
+
+      // The background color of the button based on current state
+      let buttonColor = BG_COLOR_DEFAULT;
+      let buttonOpacity = 1;
 
       /**
        * Dispatches an event to the parent when this spot was selected by the
@@ -560,11 +567,23 @@ var ui = (function (exports) {
     		if ('lastMove' in $$props) $$invalidate('lastMove', lastMove = $$props.lastMove);
     	};
 
-    	let enabled, opacity;
+    	let buttonEnabled;
 
-    	$$self.$$.update = ($$dirty = { allowMove: 1, power: 1, maxPower: 1 }) => {
-    		if ($$dirty.allowMove || $$dirty.power || $$dirty.maxPower) { $$invalidate('enabled', enabled = allowMove && power < maxPower); }
-    		if ($$dirty.power || $$dirty.maxPower) { $$invalidate('opacity', opacity = 0 < power && power < maxPower ? (0.75 / maxPower) * power : 1); }
+    	$$self.$$.update = ($$dirty = { selected: 1, pendingMove: 1, color: 1, power: 1, maxPower: 1, allowMove: 1 }) => {
+    		if ($$dirty.selected || $$dirty.pendingMove || $$dirty.color || $$dirty.power || $$dirty.maxPower) { {
+            if (selected || pendingMove) {
+              $$invalidate('buttonColor', buttonColor = BG_COLOR_SELECTED);
+              $$invalidate('buttonOpacity', buttonOpacity = 1);
+            } else if (0 <= color) {
+              $$invalidate('buttonColor', buttonColor = BG_COLORS_PLAYER[color]);
+              $$invalidate('buttonOpacity', buttonOpacity =
+                0 < power && power < maxPower ? (0.75 / maxPower) * power : 1);
+            } else {
+              $$invalidate('buttonColor', buttonColor = BG_COLOR_DEFAULT);
+              $$invalidate('buttonOpacity', buttonOpacity = 1);
+            }
+          } }
+    		if ($$dirty.allowMove || $$dirty.power || $$dirty.maxPower) { $$invalidate('buttonEnabled', buttonEnabled = allowMove && power < maxPower); }
     	};
 
     	return {
@@ -578,9 +597,10 @@ var ui = (function (exports) {
     		allowMove,
     		pendingMove,
     		lastMove,
+    		buttonColor,
+    		buttonOpacity,
     		handleSelected,
-    		enabled,
-    		opacity
+    		buttonEnabled
     	};
     }
 
@@ -727,7 +747,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (93:4) {#each { length: width } as _, x}
+    // (95:4) {#each { length: width } as _, x}
     function create_each_block_1(ctx) {
     	var current;
 
@@ -789,7 +809,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (92:2) {#each { length: height } as _, y}
+    // (94:2) {#each { length: height } as _, y}
     function create_each_block(ctx) {
     	var t, br, current;
 
@@ -813,7 +833,7 @@ var ui = (function (exports) {
 
     			t = space();
     			br = element("br");
-    			add_location(br, file$1, 103, 4, 3137);
+    			add_location(br, file$1, 105, 4, 3205);
     		},
 
     		m: function mount(target, anchor) {
@@ -899,7 +919,7 @@ var ui = (function (exports) {
     			}
     			attr(div, "class", "container svelte-18herh5");
     			set_style(div, "min-width", "" + (ctx.width * 26 + 75) + "px");
-    			add_location(div, file$1, 90, 0, 2688);
+    			add_location(div, file$1, 92, 0, 2756);
     		},
 
     		l: function claim(nodes) {
@@ -1006,11 +1026,13 @@ var ui = (function (exports) {
         if (!isTouching() || (selectedX == eventX && selectedY == eventY)) {
           $$invalidate('pendingMove', pendingMove = true);
           $$invalidate('allowMove', allowMove = false);
+          $$invalidate('selectedX', selectedX = eventX);
+          $$invalidate('selectedY', selectedY = eventY);
           dispatch("move", { x: eventX, y: eventY });
+        } else {
+          $$invalidate('selectedX', selectedX = eventX);
+          $$invalidate('selectedY', selectedY = eventY);
         }
-
-        $$invalidate('selectedX', selectedX = eventX);
-        $$invalidate('selectedY', selectedY = eventY);
       }
 
     	const writable_props = ['turnCompleted', 'width', 'height', 'spots', 'allowMove', 'moveHistory'];
