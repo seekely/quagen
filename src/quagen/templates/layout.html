@@ -4,7 +4,11 @@
     <title>Quagen | Let's play a game</title>
     <meta charset="utf-8" />
     <meta name="language" content="english" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      id="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
 
     <meta name="author" content="Ryan" Seekely” />
     <meta
@@ -24,15 +28,18 @@
       <div id="banner">
         <a href="/"><img src="/img/quagen.png?v={{asset_version}}"/></a>
       </div>
-      {% block content %}{% endblock %}
-    </div>
 
-    <div class="footer">
-      <p>
-        Created by <a class="link" href="https://seekely.com">Ryan Seekely</a>.
-        Source code available on
-        <a class="link" href="https://github.com/seekely/quagen">Github</a>.
-      </p>
+      {% block content %}{% endblock %}
+
+      <div class="footer">
+        <p>
+          Created by
+          <a class="link" href="https://seekely.com">Ryan Seekely</a>.
+          <br />
+          Source code available on
+          <a class="link" href="https://github.com/seekely/quagen">Github</a>.
+        </p>
+      </div>
     </div>
 
     <!-- {# Our global Javascript #} -->

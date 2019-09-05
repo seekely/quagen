@@ -34,6 +34,18 @@
   // [(color0, x, y), (color1, x, y)]
   $: lastMoves = moveHistory.length > 0 ? moveHistory.slice(-1)[0] : [];
 
+  // Change the viewport of a mobile device so the whole board is visible
+  // on page load
+  $: containerWidth = width * 26 + 75;
+  $: {
+    const viewport = document.getElementById("viewport");
+    console.log("heh" + containerWidth);
+    if (0 < width && containerWidth > screen.width) {
+      console.log("change " + containerWidth);
+      viewport.setAttribute("content", `width=${containerWidth}`);
+    }
+  }
+
   /**
    * Handles when  a spot on the board has been selected by the player.
    * Depending on the settings, we may want to wait for a double
@@ -85,12 +97,11 @@
 
 <style>
   div.container {
-    margin-top: 1em;
     line-height: 1px;
   }
 </style>
 
-<div class="container" style="min-width: {width * 26 + 75}px;">
+<div class="container" style="min-width: {containerWidth}px;">
   {#each { length: height } as _, y}
     {#each { length: width } as _, x}
       <Spot

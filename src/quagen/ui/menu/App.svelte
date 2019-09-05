@@ -22,7 +22,6 @@
 
 <style>
   .container {
-    margin-top: 2em;
     display: inline-flex;
     flex-wrap: wrap;
   }
