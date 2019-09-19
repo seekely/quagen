@@ -9,6 +9,7 @@ export class GameState {
     this.spotsProjected = [];
     this.moveHistory = [];
     this.moveLast = [];
+    this.players = {};
     this.scores = {};
     this.turnCompleted = 0;
     this.turnMoved = 0;
@@ -19,6 +20,7 @@ export class GameState {
   }
 
   update(dict) {
+    this.players = dict["players"];
     this.spotsCurrent = dict["board"];
     this.spotsProjected = dict["projected"];
     this.scores = dict["scores"];
@@ -40,6 +42,27 @@ export class GameState {
   getSetting(key) {
     return this.settings[key];
   }
+
+  /**
+   * If there is more than one human player in the game
+   * @return {Boolean} True when playing at least one other human
+   */
+  isVsHuman() {
+    const aiCount = this.getSetting("ai_count");
+    const playerCount = this.getSetting("player_count");
+    const humanCount = playerCount - aiCount;
+    return humanCount > 1;
+  }
+
+  /**
+   * If there is an AI in the game
+   * @return {Boolean} True when at least one player is AI
+   */
+  isVsAI() {
+    const aiCount = this.getSetting("ai_count");
+    return aiCount > 0;
+  }
+
 }
 
 export class GamePoll {

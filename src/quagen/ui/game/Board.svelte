@@ -39,7 +39,6 @@
   $: containerWidth = width * 26 + 75;
   $: {
     const viewport = document.getElementById("viewport");
-    console.log("heh" + containerWidth);
     if (0 < width && containerWidth > screen.width) {
       console.log("change " + containerWidth);
       viewport.setAttribute("content", `width=${containerWidth}`);

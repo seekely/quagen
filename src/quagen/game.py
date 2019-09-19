@@ -1,5 +1,5 @@
 """
-Contains the crux logic for the game
+Contains the backend game modeling and logic
 """
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-public-methods
@@ -12,7 +12,21 @@ from quagen import utils
 
 class Game:
     """
-    The game
+    A single instance of a Quagen game.
+
+    game = Game()
+    game.add_player("player1")
+    game.add_player("ai1", ai=True)
+    game.start()
+
+    while game.is_in_progress()
+        game.add_move("player1", x1, y1)
+        game.add_move("ai", x2, y2)
+        game.process_turn()
+
+    print(game.scores)
+    print(game.get_leaders())
+
     """
 
     """(dict) Default mutable settings for a game"""
@@ -52,27 +66,27 @@ class Game:
 
     @property
     def game_id(self):
-        """Game id """
+        """Globally unique game id """
         return self._game_id
 
     @property
     def completed(self):
-        """If the game has been completed"""
+        """Marks if the game has finished"""
         return self._completed
 
     @property
     def board(self):
-        """Game board"""
+        """Instance of the Board for this game"""
         return self._board
 
     @property
     def history(self):
-        """Move history"""
+        """Entire move history of the game"""
         return self._history
 
     @property
     def scores(self):
-        """Game scores"""
+        """Game scores for each player"""
         return self._scores
 
     @property
@@ -102,11 +116,14 @@ class Game:
 
     @property
     def turn_completed(self):
-        """Last turn completed"""
+        """Number for the last turn completed"""
         return self._turn_completed
 
     def updated(self):
-        """Indicate the game state updated"""
+        """
+        Should be called after every state change so we can track when the
+        state game last changed state
+        """
         self._time_updated = int(time())
 
     def get_game_state(self):
@@ -136,7 +153,7 @@ class Game:
 
     def get_sensitive_state(self):
         """
-        Appends sensitive/internal only game state to the shareable state
+        Appends sensitive/internal only game state to the shareable dictionary
 
         Returns:
             (dict): Game state including sensitive data as a dictionary
@@ -148,7 +165,7 @@ class Game:
 
     def start(self):
         """
-        Readies a game after all players joined and settings finalized
+        Starts the game after all settings finalized
         """
         if self.is_in_progress():
             return
@@ -172,6 +189,9 @@ class Game:
     def is_in_progress(self):
         """
         If the current game is in progress
+
+        Returns:
+            (bool) True if game is in progress
         """
         return self._time_started is not None and self._time_completed is None
 
@@ -184,7 +204,7 @@ class Game:
             is_ai (bool): If the player is AI controlled
 
         Returns:
-            True on successful addition to the game, false otherwise
+            (bool) True on successful addition to the game, false otherwise
         """
         player_added = False
         print("Adding player " + player_id)
@@ -213,7 +233,7 @@ class Game:
             player_id (str): Id of the player to check
 
         Returns:
-            True if this player is in the game, false otherwise
+            (bool) True if this player is in the game, false otherwise
         """
         return player_id in self._players.keys()
 
@@ -229,7 +249,7 @@ class Game:
             y (int): Vertical spot of the move on the board
 
         Returns:
-            True on a valid move, false otherwise
+            (bool) True on a valid move, false otherwise
         """
         valid_move = False
         print("Adding move at " + str(x) + " " + str(y) + " for player " + player_id)
@@ -288,8 +308,7 @@ class Game:
             field (string): Option stat to check
 
         Returns:
-            List of leading scores in in the tuple format of
-            (player_color, score)
+            (list) Leading scores in in the format of (player_color, score)
         """
         leaders = []
         leading_score = -1
@@ -315,7 +334,7 @@ class Game:
             field (no ties)
 
         Returns:
-            True if the passed player color has the lead
+            (bool) True if the passed player color has the lead
         """
         is_leader = False
         leaders = self.get_leaders(field)
@@ -333,7 +352,7 @@ class Game:
         next turn.
 
         Returns:
-            True when successfully processed
+            (bool) True when turn successfully processed
         """
         processed_turn = False
 
@@ -361,7 +380,7 @@ class Game:
         Determines if the game has ended due to a winning or tie score.
 
         Returns:
-            True if winners are amongst us
+            (bool) True if winners are amongst us
         """
         available_spots = self._board.get_movable_spots()
         available_count = len(available_spots)
@@ -399,9 +418,11 @@ class Game:
 
 
 class Board:
+    """
+    Model of the x * y dimension game board.
+    """
 
     """(int) When no player controls the board spot"""
-
     COLOR_NO_PLAYER = -1
 
     """(int) When the two players make a move on the same board spot"""
@@ -413,12 +434,12 @@ class Board:
 
     @property
     def spots(self):
-        """All the spots on the board"""
+        """All the spots on the board in x * y lists"""
         return self._spots
 
     def generate(self):
         """
-        Generates the board based on the current game settings
+        Generates the game board based on the current game settings
         """
         self._spots = []
         for _x in range(self._settings["dimension_x"]):
