@@ -72,6 +72,7 @@ You can run all Python tests by running the following:
 
     cd quagen
     source venv/bin/activate
+    export PYTHONPATH=src
     python -m pytest tests -W ignore::DeprecationWarning
 
 ### Conventions

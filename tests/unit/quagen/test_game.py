@@ -54,6 +54,61 @@ def test_game_start(mock_generate):
     mock_generate.assert_called_once()
 
 
+@mock.patch("quagen.game.Board.generate")
+def test_game_start_once(mock_generate):
+    """
+    Assert game can not start more than once
+    """
+    a_game = Game()
+    a_game.start()
+    time_started = a_game.time_started
+
+    a_game.start()
+    assert a_game.time_started == time_started
+    mock_generate.assert_called_once()
+
+
+def test_game_end():
+    """
+    Assert game ends in right state
+    """
+    a_game = Game()
+    a_game.start()
+    assert not a_game.completed
+    assert a_game.time_completed is None
+
+    a_game.end()
+    assert a_game.completed
+    assert a_game.time_completed is not None
+
+
+def test_game_end_once():
+    """
+    Assert game only ends once
+    """
+    a_game = Game()
+    a_game.start()
+    a_game.end()
+    time_completed = a_game.time_completed
+
+    a_game.end()
+    assert a_game.time_completed == time_completed
+
+
+def test_game_in_progress():
+    """
+    Assert game is in progress between start and end
+    """
+    a_game = Game()
+    assert not a_game.is_in_progress()
+
+    a_game.start()
+    assert a_game.is_in_progress()
+
+    a_game.end()
+    assert not a_game.is_in_progress()
+
+
 def test_game_add_player():
     """
     Adding players when space still exists
@@ -82,9 +137,24 @@ def test_game_add_player_not_exists():
     """
     a_game = Game()
     a_game.settings["player_count"] = 4
+
     assert a_game.add_player("duplicate")
     assert not a_game.add_player("duplicate")
     assert a_game.add_player("allgood")
+
+
+def test_game_is_player():
+    """
+    Assert verifying players in game
+    """
+    a_game = Game()
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+
+    assert a_game.is_player("player1")
+    assert a_game.is_player("player2")
+    assert not a_game.is_player("player3")
+    assert not a_game.is_player("player12")
 
 
 def test_game_add_move():
@@ -172,13 +242,192 @@ def test_game_add_move_invalid(mock_validate_move):
     mock_validate_move.return_value = False
 
     a_game = Game()
-    a_game.start()
     a_game.settings["player_count"] = 2
     a_game.add_player("player1")
     a_game.add_player("player2")
+    a_game.start()
 
     assert not a_game.add_move("player1", -1, -1)
     mock_validate_move.assert_called_once()
+
+
+def test_game_has_moved():
+    """
+    Assert correct players have moved
+    """
+    a_game = Game()
+    a_game.settings["player_count"] = 2
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.start()
+
+    a_game.add_move("player1", 3, 4)
+
+    assert a_game.has_moved("player1")
+    assert not a_game.has_moved("player2")
+    assert not a_game.has_moved("player12")
+
+
+def test_game_missing_moves():
+    """
+    Assert correct players missing moves
+    """
+    a_game = Game()
+    a_game.settings["player_count"] = 3
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.add_player("player3")
+    a_game.start()
+
+    a_game.add_move("player1", 3, 4)
+    a_game.add_move("player3", 3, 4)
+    missing = a_game.get_missing_moves()
+
+    assert "player2" in missing
+    assert "player1" not in missing
+    assert "player3" not in missing
+
+
+def test_game_missing_moves_short_player():
+    """
+    Assert we are missing moves when not enough players in game
+    """
+    a_game = Game()
+    a_game.settings["player_count"] = 3
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.start()
+
+    a_game.add_move("player1", 3, 4)
+    a_game.add_move("player2", 3, 4)
+    missing = a_game.get_missing_moves()
+    assert "missing_player" in missing
+    assert "player3" not in missing
+
+    a_game.add_player("player3")
+    missing = a_game.get_missing_moves()
+    assert "missing_player" not in missing
+    assert "player3" in missing
+
+
+def test_game_get_leaders():
+    """
+    Grab the correct leader based on current score
+    """
+    a_game = Game()
+
+    # Manually hack the scores for test
+    a_game._scores = [
+        {"controlled": 2},
+        {"controlled": 15},
+        {"controlled": 2},
+        {"controlled": 4},
+    ]
+
+    leaders = a_game.get_leaders()
+    assert len(leaders) == 1
+    assert leaders[0][0] == 1
+    assert leaders[0][1] == 15
+
+
+def test_game_get_leaders_tied():
+    """
+    Grab the correct leaders based on current score when tie exists
+    """
+    a_game = Game()
+
+    # Manually hack the scores for test
+    a_game._scores = [
+        {"controlled": 2},
+        {"controlled": 15},
+        {"controlled": 2},
+        {"controlled": 15},
+    ]
+
+    leaders = a_game.get_leaders()
+    assert len(leaders) == 2
+    assert leaders[0][0] == 1
+    assert leaders[0][1] == 15
+    assert leaders[1][0] == 3
+    assert leaders[1][1] == 15
+
+
+def test_game_get_leaders_alt_field():
+    """
+    Grab the correct leader based on projected score
+    """
+    a_game = Game()
+
+    # Manually hack the scores for test
+    a_game._scores = [
+        {"controlled": 2, "projected": 1},
+        {"controlled": 15, "projected": 1},
+        {"controlled": 2, "projected": 17},
+        {"controlled": 15, "projected": 2},
+    ]
+
+    leaders = a_game.get_leaders("projected")
+    assert len(leaders) == 1
+    assert leaders[0][0] == 2
+    assert leaders[0][1] == 17
+
+
+def test_game_is_leading():
+    """
+    Assert player is leading the game
+    """
+    a_game = Game()
+
+    # Manually hack the scores for test
+    a_game._scores = [
+        {"controlled": 2, "projected": 1},
+        {"controlled": 15, "projected": 1},
+        {"controlled": 2, "projected": 17},
+        {"controlled": 12, "projected": 2},
+    ]
+
+    assert a_game.is_leading(1)
+    assert not a_game.is_leading(3)
+
+
+def test_game_is_leading_tied():
+    """
+    Assert tied players leading the game
+    """
+    a_game = Game()
+
+    # Manually hack the scores for test
+    a_game._scores = [
+        {"controlled": 2, "projected": 1},
+        {"controlled": 15, "projected": 1},
+        {"controlled": 2, "projected": 17},
+        {"controlled": 15, "projected": 2},
+    ]
+
+    # Not an outright lead when tied
+    assert not a_game.is_leading(1)
+    assert not a_game.is_leading(3)
+
+    assert a_game.is_leading(1, outright=False)
+    assert a_game.is_leading(3, outright=False)
+
+
+def test_game_is_leading_alt_field():
+    """
+    Assert player is projected to lead the game
+    """
+    a_game = Game()
+
+    # Manually hack the scores for test
+    a_game._scores = [
+        {"controlled": 2, "projected": 1},
+        {"controlled": 15, "projected": 1},
+        {"controlled": 2, "projected": 17},
+        {"controlled": 12, "projected": 2},
+    ]
+
+    assert not a_game.is_leading(1, field="projected")
+    assert a_game.is_leading(2, field="projected")
 
 
 @mock.patch("quagen.game.Board.apply_moves")
@@ -208,17 +457,17 @@ def test_process_turn(mock_calculate_scores, mock_apply_power, mock_apply_moves)
 @mock.patch("quagen.game.Board.apply_moves")
 @mock.patch("quagen.game.Board.apply_power")
 @mock.patch("quagen.game.Board.calculate_scores")
-def test_process_turn_multiple(
+def test_game_process_turn_multiple(
     mock_calculate_scores, mock_apply_power, mock_apply_moves
 ):
     """
     Process consecutive turns
     """
     a_game = Game()
-    a_game.start()
     a_game.settings["player_count"] = 2
     a_game.add_player("player1")
     a_game.add_player("player2")
+    a_game.start()
 
     # First move
     a_game.add_move("player1", 1, 1)
@@ -238,7 +487,42 @@ def test_process_turn_multiple(
 
 
 @mock.patch("quagen.game.Board.apply_moves")
-def test_process_turn_missing_players(mock_apply_moves):
+def test_game_process_turn_not_in_progress(mock_apply_moves):
+    """
+    Can't process if game not in progress
+    """
+
+    # Not started
+    a_game = Game()
+    a_game.settings["player_count"] = 3
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.add_player("player3")
+
+    a_game.add_move("player1", 1, 1)
+    a_game.add_move("player3", 3, 3)
+    assert not a_game.process_turn()
+    assert a_game._turn_completed == 0
+    mock_apply_moves.assert_not_called()
+
+    # Already ended
+    a_game = Game()
+    a_game.start()
+    a_game.settings["player_count"] = 3
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.add_player("player3")
+    a_game.add_move("player1", 1, 1)
+    a_game.add_move("player3", 3, 3)
+    a_game.end()
+
+    assert not a_game.process_turn()
+    assert a_game._turn_completed == 0
+    mock_apply_moves.assert_not_called()
+
+
+@mock.patch("quagen.game.Board.apply_moves")
+def test_game_process_turn_missing_players(mock_apply_moves):
     """
     Can't process turn if all players have not moved
     """
@@ -259,6 +543,96 @@ def test_process_turn_missing_players(mock_apply_moves):
     assert a_game.process_turn()
     assert a_game._turn_completed == 1
     mock_apply_moves.assert_called_once()
+
+
+@mock.patch("quagen.game.Game.end")
+@mock.patch("quagen.game.Game._check_for_winners")
+@mock.patch("quagen.game.Board.apply_moves")
+def test_game_process_turn_winner(mock_apply_moves, mock_check_for_winners, mock_end):
+    """
+    End the game when a winner has been found
+    """
+    mock_check_for_winners.return_value = True
+
+    a_game = Game()
+    a_game.settings["player_count"] = 2
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.start()
+
+    a_game.add_move("player1", 1, 1)
+    a_game.add_move("player2", 3, 3)
+    assert a_game.process_turn()
+    mock_apply_moves.assert_called_once()
+    mock_end.assert_called_once()
+
+
+@mock.patch("quagen.game.Board.get_movable_spots")
+def test_game_check_winner_no_availability(mock_get_movable_spots):
+    """
+    Assert a winner exists when no spots are available
+    """
+    mock_get_movable_spots.return_value = []
+
+    a_game = Game()
+    a_game.settings["player_count"] = 2
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.start()
+
+    assert a_game._check_for_winners()
+
+
+def test_game_check_winner_majority():
+    """
+    Assert a winner exists when a player controls the majority of spots
+    """
+    a_game = Game()
+    a_game.settings["player_count"] = 2
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.start()
+
+    # Fudge the scores so we have just under majority
+    a_game._scores = [{"controlled": 0}, {"controlled": 199}, {"controlled": 53}]
+    assert not a_game._check_for_winners()
+
+    # Fudge the scores so we now have a majority
+    a_game._scores = [{"controlled": 0}, {"controlled": 201}, {"controlled": 53}]
+    assert a_game._check_for_winners()
+
+
+@mock.patch("quagen.game.Board.get_movable_spots")
+def test_game_check_winner_no_hope(mock_get_movable_spots):
+    """
+    Assert a winner when no players can catch leader
+    """
+    mock_get_movable_spots.return_value = [(0, 0), (0, 1), (0, 2)]
+
+    a_game = Game()
+    a_game.settings["player_count"] = 3
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    a_game.add_player("player3")
+    a_game.start()
+
+    # Fudge the scores so there are just enough available spots
+    a_game._scores = [
+        {"controlled": 0},
+        {"controlled": 10},
+        {"controlled": 8},
+        {"controlled": 3},
+    ]
+    assert not a_game._check_for_winners()
+
+    # Fudge the scores so there are not enough available spots
+    a_game._scores = [
+        {"controlled": 0},
+        {"controlled": 10},
+        {"controlled": 4},
+        {"controlled": 3},
+    ]
+    assert a_game._check_for_winners()
 
 
 ##################

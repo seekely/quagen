@@ -3,7 +3,7 @@ Test projection AI
 """
 import random
 
-from quagen.ai.distributed import ProjectionAI
+from quagen.ai.projection import ProjectionAI
 from quagen.game import Game
 
 

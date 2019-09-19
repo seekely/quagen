@@ -2,6 +2,7 @@
 Contains the crux logic for the game
 """
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-public-methods
 
 import copy
 from time import time
@@ -30,6 +31,7 @@ class Game:
             params = {}
 
         self._game_id = params.get("game_id", utils.generate_id())
+        self._completed = params.get("completed", False)
         self._history = params.get("history", [])
         self._players = params.get("players", {})
         self._turn_moves = params.get("turn_moves", {})
@@ -52,6 +54,11 @@ class Game:
     def game_id(self):
         """Game id """
         return self._game_id
+
+    @property
+    def completed(self):
+        """If the game has been completed"""
+        return self._completed
 
     @property
     def board(self):
@@ -115,11 +122,13 @@ class Game:
         """
         game = {
             "game_id": self._game_id,
+            "completed": self._completed,
             "board": self._board.spots,
             "history": self._history,
             "players": self._players,
             "settings": self._settings,
             "scores": self._scores,
+            "leaders": self.get_leaders(),
             "turn_completed": self._turn_completed,
             "time_created": self._time_created,
             "time_completed": self._time_completed,
@@ -136,11 +145,30 @@ class Game:
         """
         Readies a game after all players joined and settings finalized
         """
+        if self.is_in_progress():
+            return
+
         self._time_started = int(time())
         self._board.generate()
 
         for i in range(self._settings["ai_count"]):
             self.add_player(str(i), True)
+
+    def end(self):
+        """
+        Marks the game as completed/over
+        """
+        if not self.is_in_progress():
+            return
+
+        self._completed = True
+        self._time_completed = int(time())
+
+    def is_in_progress(self):
+        """
+        If the current game is in progress
+        """
+        return self._time_started is not None and self._time_completed is None
 
     def add_player(self, player_id, is_ai=False):
         """
@@ -164,7 +192,11 @@ class Game:
 
             print("Valid player add")
             player_added = True
-            self._players[player_id] = {"color": player_count + 1, "ai": is_ai}
+            self._players[player_id] = {
+                "id": player_id,
+                "color": player_count + 1,
+                "ai": is_ai,
+            }
 
         return player_added
 
@@ -198,7 +230,7 @@ class Game:
         print("Adding move at " + str(x) + " " + str(y) + " for player " + player_id)
 
         if (
-            self._time_started is not None
+            self.is_in_progress()
             and self.is_player(player_id)
             and not self.has_moved(player_id)
             and self._board.validate_move(x, y)
@@ -224,6 +256,72 @@ class Game:
         """
         return player_id in self._turn_moves.keys()
 
+    def get_missing_moves(self):
+        """
+        The players who have yet to move this turn
+
+        Returns:
+            (list) Players ids who have yet to move this turn. A missing_player
+            means a player has yet to join the game.
+        """
+        missing = []
+        for player in self._players.values():
+            if player["id"] not in self._turn_moves.keys():
+                missing.append(player["id"])
+
+        # When players have yet to join the game
+        if len(self._players.values()) < self._settings["player_count"]:
+            missing.append("missing_player")
+
+        return missing
+
+    def get_leaders(self, field="controlled"):
+        """
+        Returns the current leader(s) on the scoreboard for a passed stat
+
+        Args:
+            field (string): Option stat to check
+
+        Returns:
+            List of leading scores in in the tuple format of
+            (player_color, score)
+        """
+        leaders = []
+        leading_score = -1
+
+        for score in self._scores:
+            leading_score = max(leading_score, score[field])
+
+        for i in range(len(self._scores)):
+            cur_score = self._scores[i][field]
+            if cur_score == leading_score:
+                leaders.append((i, cur_score))
+
+        return leaders
+
+    def is_leading(self, player_color, field="controlled", outright=True):
+        """
+        Determines if the passed player leads in score
+
+        Args:
+            player_color (int): Color to judge
+            field (string): Optional field in the scores to check
+            outright (boolean): If the color is the outright leader for the
+            field (no ties)
+
+        Returns:
+            True if the passed player color has the lead
+        """
+        is_leader = False
+        leaders = self.get_leaders(field)
+
+        for leader in leaders:
+            if player_color == leader[0]:
+                is_leader = True
+                break
+
+        return is_leader and (not outright or len(leaders) == 1)
+
     def process_turn(self):
         """
         Applies the pending moves to the board and takes the game to the
@@ -234,7 +332,7 @@ class Game:
         """
         processed_turn = False
 
-        if self._settings["player_count"] == len(self._turn_moves.keys()):
+        if self.is_in_progress() and not self.get_missing_moves():
 
             # For historical sake, the game only cares about the color which
             # took the move. The player ids would be gratuitous.
@@ -245,35 +343,54 @@ class Game:
             self._turn_moves = {}
             self._turn_completed += 1
 
+            if self._check_for_winners():
+                self.end()
+
             print("Processed turn to " + str(self._turn_completed))
             processed_turn = True
 
         return processed_turn
 
-    def is_leading(self, player_color, field="controlled"):
+    def _check_for_winners(self):
         """
-        Determines if the passed player leads in score
-
-        Args:
-            player_color (int): Color to judge
-            field (string): Optional field in the scores to check
+        Determines if the game has ended due to a winning or tie score.
 
         Returns:
-            True if the passed player color has the outright lead
+            True if winners are amongst us
         """
-        leading_color = 0
-        leading_score = -1
-        is_tied = False
+        available_spots = self._board.get_movable_spots()
+        available_count = len(available_spots)
 
-        for i in range(len(self._scores)):
-            cur_score = self._scores[i][field]
-            if cur_score > leading_score:
-                leading_color = i
-                leading_score = cur_score
-            elif cur_score == leading_score:
-                is_tied = True
+        total_count = self._settings["dimension_x"] * self._settings["dimension_y"]
+        majority_count = total_count / 2
 
-        return player_color == leading_color and not is_tied
+        leading_score = 0
+        leaders = self.get_leaders()
+        if leaders:
+            leading_score = leaders[0][1]
+
+        # Determine if any player can catch the current leader
+        still_hope = len(self.get_leaders()) != 1
+        for score in self._scores:
+            if (
+                len(leaders) == 1
+                and score["controlled"] != leading_score
+                and score["controlled"] + available_count >= leading_score
+            ):
+                still_hope = True
+                break
+
+        # The game has ended when there no more moves, or the current leader
+        # controls the majority of the board, or no other player can catch the
+        # current leader with the number of still available spots.
+        is_winner = (
+            available_count == 0 or leading_score > majority_count or not still_hope
+        )
+        print(f"Is there a winner: {is_winner}")
+        print(f"...Check unavailable: {available_count == 0}")
+        print(f"...Check majority: {leading_score > majority_count}")
+        print(f"...Check no hope: {not still_hope}")
+        return is_winner
 
 
 class Board:
