@@ -4,13 +4,14 @@ export class GameState {
   constructor(gameId) {
     this.gameId = gameId;
     this.init = false;
-    this.settings = {};
-    this.spotsCurrent = [];
-    this.spotsProjected = [];
+    this.completed = false;
     this.moveHistory = [];
     this.moveLast = [];
     this.players = {};
     this.scores = {};
+    this.settings = {};
+    this.spotsCurrent = [];
+    this.spotsProjected = [];
     this.turnCompleted = 0;
     this.turnMoved = 0;
     this.timeCompleted = null;
@@ -20,6 +21,7 @@ export class GameState {
   }
 
   update(dict) {
+    this.completed = dict["completed"]
     this.players = dict["players"];
     this.spotsCurrent = dict["board"];
     this.spotsProjected = dict["projected"];

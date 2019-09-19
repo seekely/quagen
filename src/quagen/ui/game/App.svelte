@@ -9,7 +9,8 @@
 
   let gameState = new GameState(gameId);
   $: init = gameState.init;
-  $: allowMove = gameState.turnMoved <= gameState.turnCompleted;
+  $: gameOver = gameState.completed;
+  $: allowMove = !gameOver && gameState.turnMoved <= gameState.turnCompleted;
   $: spots = gameState.spotsCurrent;
   $: turnCompleted = gameState.turnCompleted;
 
@@ -43,7 +44,7 @@
 {#if init}
   
   {#if 0 < turnCompleted}
-    <Scores scores={gameState.scores} />
+    <Scores gameOver={gameOver} scores={gameState.scores} />
   {:else}
     <StartPrompt gameId={gameState.gameId} vsHumans={gameState.isVsHuman()} />
   {/if}

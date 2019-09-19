@@ -367,13 +367,14 @@ var ui = (function (exports) {
       constructor(gameId) {
         this.gameId = gameId;
         this.init = false;
-        this.settings = {};
-        this.spotsCurrent = [];
-        this.spotsProjected = [];
+        this.completed = false;
         this.moveHistory = [];
         this.moveLast = [];
         this.players = {};
         this.scores = {};
+        this.settings = {};
+        this.spotsCurrent = [];
+        this.spotsProjected = [];
         this.turnCompleted = 0;
         this.turnMoved = 0;
         this.timeCompleted = null;
@@ -383,6 +384,7 @@ var ui = (function (exports) {
       }
 
       update(dict) {
+        this.completed = dict["completed"];
         this.players = dict["players"];
         this.spotsCurrent = dict["board"];
         this.spotsProjected = dict["projected"];
@@ -1167,7 +1169,36 @@ var ui = (function (exports) {
 
     const file$2 = "src\\quagen\\ui\\game\\Score.svelte";
 
-    // (46:2) {:else}
+    // (96:4) {#if crown }
+    function create_if_block_1(ctx) {
+    	var div, img;
+
+    	return {
+    		c: function create() {
+    			div = element("div");
+    			img = element("img");
+    			attr(img, "src", "/img/crown.png");
+    			attr(img, "width", "35px");
+    			attr(img, "alt", "Crown!");
+    			add_location(img, file$2, 96, 25, 1734);
+    			attr(div, "class", "crown svelte-5ezb6z");
+    			add_location(div, file$2, 96, 6, 1715);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert(target, div, anchor);
+    			append(div, img);
+    		},
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach(div);
+    			}
+    		}
+    	};
+    }
+
+    // (105:4) {:else}
     function create_else_block(ctx) {
     	var div0, t0, t1, div1, t2, t3, div2, t4;
 
@@ -1181,9 +1212,9 @@ var ui = (function (exports) {
     			t3 = space();
     			div2 = element("div");
     			t4 = text(ctx.pressuring);
-    			add_location(div0, file$2, 46, 4, 857);
-    			add_location(div1, file$2, 47, 4, 885);
-    			add_location(div2, file$2, 48, 4, 912);
+    			add_location(div0, file$2, 105, 6, 2011);
+    			add_location(div1, file$2, 106, 6, 2041);
+    			add_location(div2, file$2, 107, 6, 2070);
     		},
 
     		m: function mount(target, anchor) {
@@ -1223,7 +1254,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (42:2) {#if key}
+    // (101:4) {#if key}
     function create_if_block(ctx) {
     	var div0, t1, div1, t3, div2;
 
@@ -1237,9 +1268,9 @@ var ui = (function (exports) {
     			t3 = space();
     			div2 = element("div");
     			div2.textContent = "Pressuring";
-    			add_location(div0, file$2, 42, 4, 770);
-    			add_location(div1, file$2, 43, 4, 796);
-    			add_location(div2, file$2, 44, 4, 821);
+    			add_location(div0, file$2, 101, 6, 1916);
+    			add_location(div1, file$2, 102, 6, 1944);
+    			add_location(div2, file$2, 103, 6, 1971);
     		},
 
     		m: function mount(target, anchor) {
@@ -1265,7 +1296,9 @@ var ui = (function (exports) {
     }
 
     function create_fragment$2(ctx) {
-    	var div, div_class_value;
+    	var div1, t, div0, div0_class_value;
+
+    	var if_block0 = (ctx.crown) && create_if_block_1();
 
     	function select_block_type(changed, ctx) {
     		if (ctx.key) return create_if_block;
@@ -1273,16 +1306,22 @@ var ui = (function (exports) {
     	}
 
     	var current_block_type = select_block_type(null, ctx);
-    	var if_block = current_block_type(ctx);
+    	var if_block1 = current_block_type(ctx);
 
     	return {
     		c: function create() {
-    			div = element("div");
-    			if_block.c();
-    			attr(div, "class", div_class_value = "container bg-color-" + ctx.player + " svelte-1ec8cbf");
-    			toggle_class(div, "key", ctx.key);
-    			toggle_class(div, "player", !ctx.key);
-    			add_location(div, file$2, 40, 0, 682);
+    			div1 = element("div");
+    			if (if_block0) if_block0.c();
+    			t = space();
+    			div0 = element("div");
+    			if_block1.c();
+    			attr(div0, "class", div0_class_value = "inner bg-color-" + ctx.color + " svelte-5ezb6z");
+    			toggle_class(div0, "crown", ctx.crown);
+    			toggle_class(div0, "key", ctx.key);
+    			toggle_class(div0, "player", !ctx.key);
+    			add_location(div0, file$2, 99, 4, 1809);
+    			attr(div1, "class", "container svelte-5ezb6z");
+    			add_location(div1, file$2, 93, 0, 1667);
     		},
 
     		l: function claim(nodes) {
@@ -1290,29 +1329,47 @@ var ui = (function (exports) {
     		},
 
     		m: function mount(target, anchor) {
-    			insert(target, div, anchor);
-    			if_block.m(div, null);
+    			insert(target, div1, anchor);
+    			if (if_block0) if_block0.m(div1, null);
+    			append(div1, t);
+    			append(div1, div0);
+    			if_block1.m(div0, null);
     		},
 
     		p: function update(changed, ctx) {
-    			if (current_block_type === (current_block_type = select_block_type(changed, ctx)) && if_block) {
-    				if_block.p(changed, ctx);
+    			if (ctx.crown) {
+    				if (!if_block0) {
+    					if_block0 = create_if_block_1();
+    					if_block0.c();
+    					if_block0.m(div1, t);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
+    			if (current_block_type === (current_block_type = select_block_type(changed, ctx)) && if_block1) {
+    				if_block1.p(changed, ctx);
     			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
-    				if (if_block) {
-    					if_block.c();
-    					if_block.m(div, null);
+    				if_block1.d(1);
+    				if_block1 = current_block_type(ctx);
+    				if (if_block1) {
+    					if_block1.c();
+    					if_block1.m(div0, null);
     				}
     			}
 
-    			if ((changed.player) && div_class_value !== (div_class_value = "container bg-color-" + ctx.player + " svelte-1ec8cbf")) {
-    				attr(div, "class", div_class_value);
+    			if ((changed.color) && div0_class_value !== (div0_class_value = "inner bg-color-" + ctx.color + " svelte-5ezb6z")) {
+    				attr(div0, "class", div0_class_value);
     			}
 
-    			if ((changed.player || changed.key)) {
-    				toggle_class(div, "key", ctx.key);
-    				toggle_class(div, "player", !ctx.key);
+    			if ((changed.color || changed.crown)) {
+    				toggle_class(div0, "crown", ctx.crown);
+    			}
+
+    			if ((changed.color || changed.key)) {
+    				toggle_class(div0, "key", ctx.key);
+    				toggle_class(div0, "player", !ctx.key);
     			}
     		},
 
@@ -1321,43 +1378,63 @@ var ui = (function (exports) {
 
     		d: function destroy(detaching) {
     			if (detaching) {
-    				detach(div);
+    				detach(div1);
     			}
 
-    			if_block.d();
+    			if (if_block0) if_block0.d();
+    			if_block1.d();
     		}
     	};
     }
 
     function instance$2($$self, $$props, $$invalidate) {
-    	let { key = false, player = 0, controlled = 0, pressuring = 0, projected = 0 } = $$props;
+    	/**
+       * Displays the score for a single player
+       */
 
-    	const writable_props = ['key', 'player', 'controlled', 'pressuring', 'projected'];
+      // This scoreboard entry is serving as the key and not a player score 
+      let { key = false, color = 0, gameOver = false, winner = false } = $$props;
+
+      // The player's current scores
+      let { controlled = 0, pressuring = 0, projected = 0 } = $$props;
+
+    	const writable_props = ['key', 'color', 'gameOver', 'winner', 'controlled', 'pressuring', 'projected'];
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Score> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$set = $$props => {
     		if ('key' in $$props) $$invalidate('key', key = $$props.key);
-    		if ('player' in $$props) $$invalidate('player', player = $$props.player);
+    		if ('color' in $$props) $$invalidate('color', color = $$props.color);
+    		if ('gameOver' in $$props) $$invalidate('gameOver', gameOver = $$props.gameOver);
+    		if ('winner' in $$props) $$invalidate('winner', winner = $$props.winner);
     		if ('controlled' in $$props) $$invalidate('controlled', controlled = $$props.controlled);
     		if ('pressuring' in $$props) $$invalidate('pressuring', pressuring = $$props.pressuring);
     		if ('projected' in $$props) $$invalidate('projected', projected = $$props.projected);
     	};
 
+    	let crown;
+
+    	$$self.$$.update = ($$dirty = { gameOver: 1, winner: 1 }) => {
+    		if ($$dirty.gameOver || $$dirty.winner) { $$invalidate('crown', crown = gameOver && winner); }
+    	};
+
     	return {
     		key,
-    		player,
+    		color,
+    		gameOver,
+    		winner,
     		controlled,
     		pressuring,
-    		projected
+    		projected,
+    		crown
     	};
     }
 
     class Score extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, ["key", "player", "controlled", "pressuring", "projected"]);
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, ["key", "color", "gameOver", "winner", "controlled", "pressuring", "projected"]);
     	}
 
     	get key() {
@@ -1368,11 +1445,27 @@ var ui = (function (exports) {
     		throw new Error("<Score>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	get player() {
+    	get color() {
     		throw new Error("<Score>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set player(value) {
+    	set color(value) {
+    		throw new Error("<Score>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get gameOver() {
+    		throw new Error("<Score>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set gameOver(value) {
+    		throw new Error("<Score>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get winner() {
+    		throw new Error("<Score>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set winner(value) {
     		throw new Error("<Score>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -1412,12 +1505,108 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (16:4) {#each scores as score, i}
+    // (65:2) {#if gameOver}
+    function create_if_block$1(ctx) {
+    	var div;
+
+    	function select_block_type(changed, ctx) {
+    		if (ctx.tied) return create_if_block_1$1;
+    		return create_else_block$1;
+    	}
+
+    	var current_block_type = select_block_type(null, ctx);
+    	var if_block = current_block_type(ctx);
+
+    	return {
+    		c: function create() {
+    			div = element("div");
+    			if_block.c();
+    			attr(div, "class", "gameover svelte-x0f8h0");
+    			add_location(div, file$3, 65, 4, 1282);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert(target, div, anchor);
+    			if_block.m(div, null);
+    		},
+
+    		p: function update(changed, ctx) {
+    			if (current_block_type !== (current_block_type = select_block_type(changed, ctx))) {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(div, null);
+    				}
+    			}
+    		},
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach(div);
+    			}
+
+    			if_block.d();
+    		}
+    	};
+    }
+
+    // (69:6) {:else}
+    function create_else_block$1(ctx) {
+    	var p;
+
+    	return {
+    		c: function create() {
+    			p = element("p");
+    			p.textContent = "This game has ended!";
+    			attr(p, "class", "svelte-x0f8h0");
+    			add_location(p, file$3, 69, 8, 1389);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert(target, p, anchor);
+    		},
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach(p);
+    			}
+    		}
+    	};
+    }
+
+    // (67:6) {#if tied}
+    function create_if_block_1$1(ctx) {
+    	var p;
+
+    	return {
+    		c: function create() {
+    			p = element("p");
+    			p.textContent = "This game has ended in a tie!";
+    			attr(p, "class", "svelte-x0f8h0");
+    			add_location(p, file$3, 67, 8, 1330);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert(target, p, anchor);
+    		},
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach(p);
+    			}
+    		}
+    	};
+    }
+
+    // (77:4) {#each scores as score, i}
     function create_each_block$1(ctx) {
     	var current;
 
     	var score_spread_levels = [
-    		{ player: ctx.i },
+    		{ color: ctx.i },
+    		{ gameOver: ctx.gameOver },
+    		{ winner: isWinner(ctx.i, ctx.scores) },
     		ctx.score
     	];
 
@@ -1438,9 +1627,11 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			var score_changes = (changed.scores) ? get_spread_update(score_spread_levels, [
+    			var score_changes = (changed.gameOver || changed.isWinner || changed.scores) ? get_spread_update(score_spread_levels, [
     									score_spread_levels[0],
-    			ctx.score
+    			(changed.gameOver) && { gameOver: ctx.gameOver },
+    			(changed.isWinner || changed.scores) && { winner: isWinner(ctx.i, ctx.scores) },
+    			(changed.scores) && ctx.score
     								]) : {};
     			score.$set(score_changes);
     		},
@@ -1464,7 +1655,9 @@ var ui = (function (exports) {
     }
 
     function create_fragment$3(ctx) {
-    	var div1, div0, t, current;
+    	var div1, t0, div0, t1, current;
+
+    	var if_block = (ctx.gameOver) && create_if_block$1(ctx);
 
     	var score = new Score({
     		props: { key: true },
@@ -1486,16 +1679,18 @@ var ui = (function (exports) {
     	return {
     		c: function create() {
     			div1 = element("div");
+    			if (if_block) if_block.c();
+    			t0 = space();
     			div0 = element("div");
     			score.$$.fragment.c();
-    			t = space();
+    			t1 = space();
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
-    			attr(div0, "class", "container svelte-sadc9r");
-    			add_location(div0, file$3, 13, 2, 158);
-    			add_location(div1, file$3, 12, 0, 150);
+    			attr(div0, "class", "container svelte-x0f8h0");
+    			add_location(div0, file$3, 74, 2, 1451);
+    			add_location(div1, file$3, 62, 0, 1254);
     		},
 
     		l: function claim(nodes) {
@@ -1504,9 +1699,11 @@ var ui = (function (exports) {
 
     		m: function mount(target, anchor) {
     			insert(target, div1, anchor);
+    			if (if_block) if_block.m(div1, null);
+    			append(div1, t0);
     			append(div1, div0);
     			mount_component(score, div0, null);
-    			append(div0, t);
+    			append(div0, t1);
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div0, null);
@@ -1516,7 +1713,20 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.scores) {
+    			if (ctx.gameOver) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    				} else {
+    					if_block = create_if_block$1(ctx);
+    					if_block.c();
+    					if_block.m(div1, t0);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+
+    			if (changed.gameOver || changed.isWinner || changed.scores) {
     				each_value = ctx.scores;
 
     				for (var i = 0; i < each_value.length; i += 1) {
@@ -1562,6 +1772,8 @@ var ui = (function (exports) {
     				detach(div1);
     			}
 
+    			if (if_block) if_block.d();
+
     			destroy_component(score);
 
     			destroy_each(each_blocks, detaching);
@@ -1569,25 +1781,56 @@ var ui = (function (exports) {
     	};
     }
 
-    function instance$3($$self, $$props, $$invalidate) {
-    	let { scores = [] } = $$props;
+    function isWinner(color, scores) {
+      let winner = true;
+      const score = scores[color]["controlled"];
 
-    	const writable_props = ['scores'];
+      for (let i = 0; i < scores.length; i++) {
+        if (i != color && scores[i]["controlled"] >= score) {
+          winner = false;
+          break;
+        } 
+      }
+
+      return winner;
+    }
+
+    function instance$3($$self, $$props, $$invalidate) {
+    	// If the game is over 
+      let { gameOver = false, scores = [], leaders = [] } = $$props;
+
+    	const writable_props = ['gameOver', 'scores', 'leaders'];
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Scores> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$set = $$props => {
+    		if ('gameOver' in $$props) $$invalidate('gameOver', gameOver = $$props.gameOver);
     		if ('scores' in $$props) $$invalidate('scores', scores = $$props.scores);
+    		if ('leaders' in $$props) $$invalidate('leaders', leaders = $$props.leaders);
     	};
 
-    	return { scores };
+    	let tied;
+
+    	$$self.$$.update = ($$dirty = { gameOver: 1, leaders: 1 }) => {
+    		if ($$dirty.gameOver || $$dirty.leaders) { $$invalidate('tied', tied = gameOver && leaders.length > 0); }
+    	};
+
+    	return { gameOver, scores, leaders, tied };
     }
 
     class Scores extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, ["scores"]);
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, ["gameOver", "scores", "leaders"]);
+    	}
+
+    	get gameOver() {
+    		throw new Error("<Scores>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set gameOver(value) {
+    		throw new Error("<Scores>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	get scores() {
@@ -1595,6 +1838,14 @@ var ui = (function (exports) {
     	}
 
     	set scores(value) {
+    		throw new Error("<Scores>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get leaders() {
+    		throw new Error("<Scores>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set leaders(value) {
     		throw new Error("<Scores>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -1662,7 +1913,7 @@ var ui = (function (exports) {
     const file$5 = "src\\quagen\\ui\\game\\StartPrompt.svelte";
 
     // (78:4) {:else}
-    function create_else_block$1(ctx) {
+    function create_else_block$2(ctx) {
     	var p;
 
     	return {
@@ -1688,7 +1939,7 @@ var ui = (function (exports) {
     }
 
     // (71:4) {#if vsHumans}
-    function create_if_block$1(ctx) {
+    function create_if_block$2(ctx) {
     	var p0, t1, p1, span, t2, dispose;
 
     	return {
@@ -1739,8 +1990,8 @@ var ui = (function (exports) {
     	var div;
 
     	function select_block_type(changed, ctx) {
-    		if (ctx.vsHumans) return create_if_block$1;
-    		return create_else_block$1;
+    		if (ctx.vsHumans) return create_if_block$2;
+    		return create_else_block$2;
     	}
 
     	var current_block_type = select_block_type(null, ctx);
@@ -1861,7 +2112,7 @@ var ui = (function (exports) {
 
     const file$6 = "src\\quagen\\ui\\game\\App.svelte";
 
-    // (61:0) {:else}
+    // (62:0) {:else}
     function create_else_block_1(ctx) {
     	var p;
 
@@ -1869,7 +2120,7 @@ var ui = (function (exports) {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Loading...";
-    			add_location(p, file$6, 61, 2, 1487);
+    			add_location(p, file$6, 62, 2, 1557);
     		},
 
     		m: function mount(target, anchor) {
@@ -1888,13 +2139,13 @@ var ui = (function (exports) {
     	};
     }
 
-    // (43:0) {#if init}
-    function create_if_block$2(ctx) {
+    // (44:0) {#if init}
+    function create_if_block$3(ctx) {
     	var current_block_type_index, if_block, t0, t1, current;
 
     	var if_block_creators = [
-    		create_if_block_1,
-    		create_else_block$2
+    		create_if_block_1$2,
+    		create_else_block$3
     	];
 
     	var if_blocks = [];
@@ -2008,8 +2259,8 @@ var ui = (function (exports) {
     	};
     }
 
-    // (47:2) {:else}
-    function create_else_block$2(ctx) {
+    // (48:2) {:else}
+    function create_else_block$3(ctx) {
     	var current;
 
     	var startprompt = new StartPrompt({
@@ -2055,12 +2306,15 @@ var ui = (function (exports) {
     	};
     }
 
-    // (45:2) {#if 0 < turnCompleted}
-    function create_if_block_1(ctx) {
+    // (46:2) {#if 0 < turnCompleted}
+    function create_if_block_1$2(ctx) {
     	var current;
 
     	var scores = new Scores({
-    		props: { scores: ctx.gameState.scores },
+    		props: {
+    		gameOver: ctx.gameOver,
+    		scores: ctx.gameState.scores
+    	},
     		$$inline: true
     	});
 
@@ -2076,6 +2330,7 @@ var ui = (function (exports) {
 
     		p: function update(changed, ctx) {
     			var scores_changes = {};
+    			if (changed.gameOver) scores_changes.gameOver = ctx.gameOver;
     			if (changed.gameState) scores_changes.scores = ctx.gameState.scores;
     			scores.$set(scores_changes);
     		},
@@ -2102,7 +2357,7 @@ var ui = (function (exports) {
     	var current_block_type_index, if_block, if_block_anchor, current;
 
     	var if_block_creators = [
-    		create_if_block$2,
+    		create_if_block$3,
     		create_else_block_1
     	];
 
@@ -2213,11 +2468,12 @@ var ui = (function (exports) {
     		if ('gameId' in $$props) $$invalidate('gameId', gameId = $$props.gameId);
     	};
 
-    	let init, allowMove, spots, turnCompleted;
+    	let init, gameOver, allowMove, spots, turnCompleted;
 
-    	$$self.$$.update = ($$dirty = { gameState: 1 }) => {
+    	$$self.$$.update = ($$dirty = { gameState: 1, gameOver: 1 }) => {
     		if ($$dirty.gameState) { $$invalidate('init', init = gameState.init); }
-    		if ($$dirty.gameState) { $$invalidate('allowMove', allowMove = gameState.turnMoved <= gameState.turnCompleted); }
+    		if ($$dirty.gameState) { $$invalidate('gameOver', gameOver = gameState.completed); }
+    		if ($$dirty.gameOver || $$dirty.gameState) { $$invalidate('allowMove', allowMove = !gameOver && gameState.turnMoved <= gameState.turnCompleted); }
     		if ($$dirty.gameState) { $$invalidate('spots', spots = gameState.spotsCurrent); }
     		if ($$dirty.gameState) { $$invalidate('turnCompleted', turnCompleted = gameState.turnCompleted); }
     	};
@@ -2228,6 +2484,7 @@ var ui = (function (exports) {
     		handleMove,
     		handleProjected,
     		init,
+    		gameOver,
     		allowMove,
     		spots,
     		turnCompleted
