@@ -40,5 +40,5 @@ def game_view(game_id):
     if "player_id" not in session.keys():
         session["player_id"] = uuid.uuid4().hex
 
-    game = queries.get_game(game_id).as_dict()
-    return render_template("game.html", game=game)
+    state = queries.get_game(game_id).get_game_state()
+    return render_template("game.html", game=state)

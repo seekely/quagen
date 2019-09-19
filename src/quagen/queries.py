@@ -69,7 +69,7 @@ def insert_game(game):
         "INSERT INTO game (game_id, data, time_created, time_started, time_updated) VALUES (?, ?, ?, ?, ?)",
         [
             game.game_id,
-            json.dumps(game.as_dict(False)),
+            json.dumps(game.get_sensitive_state()),
             game.time_created,
             game.time_started,
             game.time_updated,
@@ -104,7 +104,7 @@ def update_game(game):
         "UPDATE game SET game_id = ?, data = ?, time_completed = ?, time_started = ?, time_updated = ? WHERE game_id = ?",
         [
             game.game_id,
-            json.dumps(game.as_dict(False)),
+            json.dumps(game.get_sensitive_state()),
             game.time_completed,
             game.time_started,
             game.time_updated,

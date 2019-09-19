@@ -109,18 +109,14 @@ class Game:
         """Indicate the game state updated"""
         self._time_updated = int(time())
 
-    def as_dict(self, shared_with_client=True):
+    def get_game_state(self):
         """
-        Converts the relevant parts of this object to a dictionary
-
-        Attr:
-            shared_with_client (bool): If the data will be shared with the
-            client, in which case we will want to keep some data out.
+        Converts the shareable parts of game state to a dictionary
 
         Returns:
-            (dict): Game object as a dictionary
+            (dict): Game state as a dictionary
         """
-        game = {
+        state = {
             "game_id": self._game_id,
             "completed": self._completed,
             "board": self._board.spots,
@@ -136,10 +132,19 @@ class Game:
             "time_updated": self._time_updated,
         }
 
-        if not shared_with_client:
-            game["turn_moves"] = self._turn_moves
+        return state
 
-        return game
+    def get_sensitive_state(self):
+        """
+        Appends sensitive/internal only game state to the shareable state
+
+        Returns:
+            (dict): Game state including sensitive data as a dictionary
+        """
+        state = self.get_game_state()
+        state["turn_moves"] = self._turn_moves
+
+        return state
 
     def start(self):
         """

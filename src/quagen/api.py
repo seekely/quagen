@@ -32,7 +32,7 @@ def game_new():
     queries.insert_game(game)
     queries.insert_game_event(game.game_id, {"type": "start"})
 
-    response = json.jsonify(game=game.as_dict())
+    response = json.jsonify(game=game.get_game_state())
     return response
 
 
@@ -46,18 +46,15 @@ def game_view(game_id):
 
     game = queries.get_game(game_id)
     if game:
-        game_dict = game.as_dict()
+        state = game.get_game_state()
 
-        if game_dict["time_updated"] <= updated_after:
-            game_dict = {
-                "game_id": game_dict["game_id"],
-                "time_updated": game_dict["time_updated"],
-            }
+        if state["time_updated"] <= updated_after:
+            state = {"game_id": state["game_id"], "time_updated": state["time_updated"]}
         else:
             projected_board = game.board.project()
-            game_dict["projected"] = projected_board.spots
+            state["projected"] = projected_board.spots
 
-        response = json.jsonify(game=game_dict)
+        response = json.jsonify(game=state)
 
     return response
 

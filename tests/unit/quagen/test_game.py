@@ -14,7 +14,7 @@ from quagen.game import Game
 ##################
 
 
-def test_as_dict():
+def test_get_game_state():
     """
     Share only information we want to share
     """
@@ -26,18 +26,32 @@ def test_as_dict():
     }
 
     a_game = Game(params)
+    state = a_game.get_game_state()
+    assert "turn_moves" not in state
+    assert state["game_id"] == "1245"
+    assert state["turn_completed"] == 5
+    assert state["settings"]["player_count"] == 3
+    assert state["settings"]["power"] == 6
 
-    # Not shared with client -- internal only
-    a_dict = a_game.as_dict(False)
-    assert a_dict["game_id"] == "1245"
-    assert a_dict["turn_completed"] == 5
-    assert {"0": "234", "1": "234"} == a_dict["turn_moves"]
-    assert a_dict["settings"]["player_count"] == 3
-    assert a_dict["settings"]["power"] == 6
 
-    # Shared with client -- sensitive info held back
-    a_dict = a_game.as_dict()
-    assert "turn_moves" not in a_dict
+def test_get_sensitive_state():
+    """
+    Sensitive state made available
+    """
+    params = {
+        "game_id": "1245",
+        "turn_completed": 5,
+        "turn_moves": {"0": "234", "1": "234"},
+        "settings": {"player_count": 3, "power": 6},
+    }
+
+    a_game = Game(params)
+    state = a_game.get_sensitive_state()
+    assert state["game_id"] == "1245"
+    assert state["turn_completed"] == 5
+    assert state["settings"]["player_count"] == 3
+    assert state["settings"]["power"] == 6
+    assert {"0": "234", "1": "234"} == state["turn_moves"]
 
 
 @mock.patch("quagen.game.Board.generate")
