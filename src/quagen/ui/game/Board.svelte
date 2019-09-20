@@ -1,4 +1,8 @@
 <script>
+  /**
+   * Game board UI.
+   */
+
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
@@ -8,11 +12,11 @@
   // The turn number completed this board state reflects
   export let turnCompleted = 0;
 
-  // number of spots on the board
+  // Number of spots on the board
   export let width = 0;
   export let height = 0;
 
-  // data for each spot on the board in the format of
+  // Data for each spot on the board in the format of
   // [[{"x": 0, "y": 0}, {"x": 0, "y": 1}], [{"x": 1, "y": 0}, {"x": 1, "y": 1}]]
   export let spots = [];
 
@@ -27,7 +31,7 @@
   $: selectedX = turnCompleted ? -1 : -1;
   $: selectedY = turnCompleted ? -1 : -1;
 
-  // if we sent off a move from this player to the server
+  // if we sent off a move from this player to the backend API
   $: pendingMove = turnCompleted ? false : false;
 
   // the last set of moves made by each player in the format of
@@ -77,7 +81,7 @@
   }
 
   /**
-   * if a player moved in the spot last turn
+   * If a player moved in the spot last turn
    * @param  {list} moves List of last turn's moves in format of [(x1,y1), (x2,y2)]
    * @param  {int} x coord of spot to check
    * @param  {int} y coord of spot to check
@@ -101,14 +105,15 @@
 </style>
 
 <div class="container" style="min-width: {containerWidth}px;">
+  <!-- {# Iterate through each spot on the board and create a Spot component #} -->
   {#each { length: height } as _, y}
     {#each { length: width } as _, x}
       <Spot
         {x}
         {y}
+        {allowMove}
         {...spots[x][y]}
         selected={selectedX == x && selectedY == y}
-        {allowMove}
         lastMove={isLastMove(lastMoves, x, y)}
         pendingMove={selectedX == x && selectedY == y && pendingMove}
         on:selected={handleSpotSelected} />

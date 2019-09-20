@@ -1,3 +1,9 @@
+<script>
+  /**
+   * In game options for the player
+   */
+</script>
+
 <style>
   div {
     margin-top: 1em;

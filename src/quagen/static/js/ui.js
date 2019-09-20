@@ -363,7 +363,42 @@ var ui = (function (exports) {
         }
     }
 
+    /**
+     * Non component specific game UI controllers
+     */
+
+    /**
+     * Holds on to and answers basic questions about the game state data received
+     * from the backend API. We try to treat this object as immutable so to not
+     * introduce any state discrepancy between client and server.
+     *
+     * @property {String} gameId          Game tracked by this object
+     * @property {Bool}   init            If the game state has received inital data
+     *                                    from backend API
+     * @property {Bool}   completed       If the game has ended
+     * @property {Array}  moveHistory     Every move made by all players. Looks like:
+     *                                    [[(color0, x, y), (color1, x, y)]]
+     * @property {Array}  moveLast        Last moves made by all players. Looks like:
+     *                                    [(color0, x, y), (color1, x, y)]
+     * @property {Object} players         All the players in the game. Looks like:
+     *                                    {"id1": {"id": "id1", "ai": false, "color": 0}}
+     * @property {Array}  scores          Scores for each player. Looks like:
+     *                                    [{"controlled": 0, "pressuring": 0, "projected": 0}]
+     * @property {Object} settings        Dictionary of key value pairs for the game settings
+     * @property {Array}  spotsCurrent    [x][y] arrays containing data for each spot on the board.
+     *                                    Each spot looks like {"color": 0, "power": 3, "pressures":[]}
+     * @property {Array}  spotsProjected  [x][y] arrays containing projected data for each spot on the board.
+     * @property {Int}    turnCompleted   Number of turns completed in the game.
+     * @property {Int}    timeCompleted   Epoch time when game ended.
+     * @property {Int}    timeCreated     Epoch time when game was created.
+     * @property {Int}    timeStarted     Epoch time when game started.
+     * @property {Int}    timeUpdated     Epoch time when game last updated/changed state.
+     */
     class GameState {
+      /**
+       * Constructor
+       * @param  {String} gameId Game tracked by this object
+       */
       constructor(gameId) {
         this.gameId = gameId;
         this.init = false;
@@ -371,36 +406,48 @@ var ui = (function (exports) {
         this.moveHistory = [];
         this.moveLast = [];
         this.players = {};
-        this.scores = {};
+        this.scores = [];
         this.settings = {};
         this.spotsCurrent = [];
         this.spotsProjected = [];
         this.turnCompleted = 0;
-        this.turnMoved = 0;
         this.timeCompleted = null;
         this.timeCreated = 0;
         this.timeStarted = null;
         this.timeUpdated = 0;
       }
 
-      update(dict) {
-        this.completed = dict["completed"];
-        this.players = dict["players"];
-        this.spotsCurrent = dict["board"];
-        this.spotsProjected = dict["projected"];
-        this.scores = dict["scores"];
-        this.settings = dict["settings"];
-        this.turnCompleted = dict["turn_completed"];
-        this.timeCompleted = dict["time_completed"];
-        this.timeCreated = dict["time_created"];
-        this.timeStarted = dict["time_started"];
-        this.timeUpdated = dict["time_updated"];
+      /**
+       * Update the game state with the new state received from the backend API.
+       * @param  {Object} state New game state
+       */
+      update(state) {
+        this.completed = "completed" in state ? state["completed"] : this.completed;
+        this.players = "players" in state ? state["players"] : this.players;
+        this.scores = "scores" in state ? state["scores"] : this.scores;
+        this.settings = "settings" in state ? state["settings"] : this.settings;
+        this.spotsCurrent = "board" in state ? state["board"] : this.spotsCurrent;
+        this.spotsProjected =
+          "projected" in state ? state["projected"] : this.spotsProjected;
+        this.turnCompleted =
+          "turn_completed" in state ? state["turn_completed"] : this.turnCompleted;
+        this.timeCompleted =
+          "time_completed" in state ? state["time_completed"] : this.timeCompleted;
+        this.timeCreated =
+          "time_created" in state ? state["time_created"] : this.timeCreated;
+        this.timeStarted =
+          "time_started" in state ? state["time_started"] : this.timeStarted;
+        this.timeUpdated =
+          "time_updated" in state ? state["time_updated"] : this.timeUpdated;
 
-        this.moveHistory = dict["history"];
+        // From the list of all moves, extract out the latest moves made by each
+        // player
+        this.moveHistory = "history" in state ? state["history"] : this.history;
         if (0 < this.moveHistory.length) {
           this.moveLast = this.moveHistory.slice(-1)[0];
         }
 
+        // Mark this object as ready to be consumed by the UI
         this.init = true;
       }
 
@@ -410,7 +457,7 @@ var ui = (function (exports) {
 
       /**
        * If there is more than one human player in the game
-       * @return {Boolean} True when playing at least one other human
+       * @return {Bool} True when at least one opponent is human
        */
       isVsHuman() {
         const aiCount = this.getSetting("ai_count");
@@ -421,16 +468,24 @@ var ui = (function (exports) {
 
       /**
        * If there is an AI in the game
-       * @return {Boolean} True when at least one player is AI
+       * @return {Bool} True when at least one opponent is AI
        */
       isVsAI() {
         const aiCount = this.getSetting("ai_count");
         return aiCount > 0;
       }
-
     }
 
+    /**
+     * A short poll to grab the latest game state from the backend API and
+     * repopulate a GameState object.
+     */
     class GamePoll {
+      /**
+       * Constructor
+       * @param  {GameState} gameState instance to update
+       * @param  {Function} callback called after update to gameState
+       */
       constructor(gameState, callback) {
         this._gameState = gameState;
         this._callback = callback;
@@ -438,6 +493,9 @@ var ui = (function (exports) {
         this._timeBetweenPoll = 1000;
       }
 
+      /**
+       * Starts the continuous short poll to the backend API
+       */
       start() {
         const self = this;
         self._poll();
@@ -446,6 +504,10 @@ var ui = (function (exports) {
         }, self._timeBetweenPoll);
       }
 
+      /**
+       * Makes the backend call to the API for the latest game state and updates
+       * the GameState object.
+       */
       _poll() {
         // do not fire off a new request while we still have one in motion
         if (this._inFlight) {
@@ -454,6 +516,9 @@ var ui = (function (exports) {
 
         this._inFlight = true;
         const self = this;
+
+        // Tells the API to only return the full game state if the game state
+        // has changed since our last update.
         const timeUpdated = self._gameState.timeUpdated;
         const queryString = `?updatedAfter=${timeUpdated}`;
 
@@ -467,6 +532,8 @@ var ui = (function (exports) {
             }
           })
           .then(data => {
+            // If the game state has new info, update and make the user
+            // callback
             if (timeUpdated < data["game"]["time_updated"]) {
               self._gameState.update(data["game"]);
               this._callback();
@@ -549,7 +616,7 @@ var ui = (function (exports) {
     function instance($$self, $$props, $$invalidate) {
     	const dispatch = createEventDispatcher();
 
-      // possible background colors for a spot based on state
+      // Possible background colors for a spot based on state
       const BG_COLOR_DEFAULT = [231, 231, 231];
       const BG_COLOR_SELECTED = [240, 255, 0];
       const BG_COLORS_PLAYER = [
@@ -750,7 +817,7 @@ var ui = (function (exports) {
 
     /**
      * If the user has interacted with the screen via touch
-     * @returns {bool} True if user has interacted via touch, false otherwise
+     * @returns {Bool} True if user has interacted via touch, false otherwise
      */
     function isTouching() {
       return window.CAPABILITY_TOUCH;
@@ -775,16 +842,16 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (105:4) {#each { length: width } as _, x}
+    // (110:4) {#each { length: width } as _, x}
     function create_each_block_1(ctx) {
     	var current;
 
     	var spot_spread_levels = [
     		{ x: ctx.x },
     		{ y: ctx.y },
+    		{ allowMove: ctx.allowMove },
     		ctx.spots[ctx.x][ctx.y],
     		{ selected: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y },
-    		{ allowMove: ctx.allowMove },
     		{ lastMove: isLastMove(ctx.lastMoves, ctx.x, ctx.y) },
     		{ pendingMove: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y && ctx.pendingMove }
     	];
@@ -807,12 +874,12 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			var spot_changes = (changed.spots || changed.selectedX || changed.selectedY || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.pendingMove) ? get_spread_update(spot_spread_levels, [
+    			var spot_changes = (changed.allowMove || changed.spots || changed.selectedX || changed.selectedY || changed.isLastMove || changed.lastMoves || changed.pendingMove) ? get_spread_update(spot_spread_levels, [
     									spot_spread_levels[0],
     			spot_spread_levels[1],
+    			(changed.allowMove) && { allowMove: ctx.allowMove },
     			(changed.spots) && ctx.spots[ctx.x][ctx.y],
     			(changed.selectedX || changed.selectedY) && { selected: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y },
-    			(changed.allowMove) && { allowMove: ctx.allowMove },
     			(changed.isLastMove || changed.lastMoves) && { lastMove: isLastMove(ctx.lastMoves, ctx.x, ctx.y) },
     			(changed.selectedX || changed.selectedY || changed.pendingMove) && { pendingMove: ctx.selectedX == ctx.x && ctx.selectedY == ctx.y && ctx.pendingMove }
     								]) : {};
@@ -837,7 +904,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (104:2) {#each { length: height } as _, y}
+    // (109:2) {#each { length: height } as _, y}
     function create_each_block(ctx) {
     	var t, br, current;
 
@@ -861,7 +928,7 @@ var ui = (function (exports) {
 
     			t = space();
     			br = element("br");
-    			add_location(br, file$1, 115, 4, 3558);
+    			add_location(br, file$1, 120, 4, 3680);
     		},
 
     		m: function mount(target, anchor) {
@@ -875,7 +942,7 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.spots || changed.selectedX || changed.selectedY || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.pendingMove || changed.width) {
+    			if (changed.allowMove || changed.spots || changed.selectedX || changed.selectedY || changed.isLastMove || changed.lastMoves || changed.pendingMove || changed.width) {
     				each_value_1 = { length: ctx.width };
 
     				for (var i = 0; i < each_value_1.length; i += 1) {
@@ -947,7 +1014,7 @@ var ui = (function (exports) {
     			}
     			attr(div, "class", "container svelte-3bn73f");
     			set_style(div, "min-width", "" + ctx.containerWidth + "px");
-    			add_location(div, file$1, 102, 0, 3110);
+    			add_location(div, file$1, 106, 0, 3148);
     		},
 
     		l: function claim(nodes) {
@@ -965,7 +1032,7 @@ var ui = (function (exports) {
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.width || changed.spots || changed.selectedX || changed.selectedY || changed.allowMove || changed.isLastMove || changed.lastMoves || changed.pendingMove || changed.height) {
+    			if (changed.width || changed.allowMove || changed.spots || changed.selectedX || changed.selectedY || changed.isLastMove || changed.lastMoves || changed.pendingMove || changed.height) {
     				each_value = { length: ctx.height };
 
     				for (var i = 0; i < each_value.length; i += 1) {
@@ -1169,7 +1236,7 @@ var ui = (function (exports) {
 
     const file$2 = "src\\quagen\\ui\\game\\Score.svelte";
 
-    // (96:4) {#if crown }
+    // (93:2) {#if crown}
     function create_if_block_1(ctx) {
     	var div, img;
 
@@ -1180,9 +1247,9 @@ var ui = (function (exports) {
     			attr(img, "src", "/img/crown.png");
     			attr(img, "width", "35px");
     			attr(img, "alt", "Crown!");
-    			add_location(img, file$2, 96, 25, 1734);
-    			attr(div, "class", "crown svelte-5ezb6z");
-    			add_location(div, file$2, 96, 6, 1715);
+    			add_location(img, file$2, 94, 6, 1743);
+    			attr(div, "class", "crown svelte-jyd0vx");
+    			add_location(div, file$2, 93, 4, 1717);
     		},
 
     		m: function mount(target, anchor) {
@@ -1198,7 +1265,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (105:4) {:else}
+    // (104:4) {:else}
     function create_else_block(ctx) {
     	var div0, t0, t1, div1, t2, t3, div2, t4;
 
@@ -1212,9 +1279,9 @@ var ui = (function (exports) {
     			t3 = space();
     			div2 = element("div");
     			t4 = text(ctx.pressuring);
-    			add_location(div0, file$2, 105, 6, 2011);
-    			add_location(div1, file$2, 106, 6, 2041);
-    			add_location(div2, file$2, 107, 6, 2070);
+    			add_location(div0, file$2, 104, 6, 2014);
+    			add_location(div1, file$2, 105, 6, 2044);
+    			add_location(div2, file$2, 106, 6, 2073);
     		},
 
     		m: function mount(target, anchor) {
@@ -1254,7 +1321,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (101:4) {#if key}
+    // (100:4) {#if key}
     function create_if_block(ctx) {
     	var div0, t1, div1, t3, div2;
 
@@ -1268,9 +1335,9 @@ var ui = (function (exports) {
     			t3 = space();
     			div2 = element("div");
     			div2.textContent = "Pressuring";
-    			add_location(div0, file$2, 101, 6, 1916);
-    			add_location(div1, file$2, 102, 6, 1944);
-    			add_location(div2, file$2, 103, 6, 1971);
+    			add_location(div0, file$2, 100, 6, 1919);
+    			add_location(div1, file$2, 101, 6, 1947);
+    			add_location(div2, file$2, 102, 6, 1974);
     		},
 
     		m: function mount(target, anchor) {
@@ -1315,13 +1382,13 @@ var ui = (function (exports) {
     			t = space();
     			div0 = element("div");
     			if_block1.c();
-    			attr(div0, "class", div0_class_value = "inner bg-color-" + ctx.color + " svelte-5ezb6z");
+    			attr(div0, "class", div0_class_value = "inner bg-color-" + ctx.color + " svelte-jyd0vx");
     			toggle_class(div0, "crown", ctx.crown);
     			toggle_class(div0, "key", ctx.key);
     			toggle_class(div0, "player", !ctx.key);
-    			add_location(div0, file$2, 99, 4, 1809);
-    			attr(div1, "class", "container svelte-5ezb6z");
-    			add_location(div1, file$2, 93, 0, 1667);
+    			add_location(div0, file$2, 98, 2, 1820);
+    			attr(div1, "class", "container svelte-jyd0vx");
+    			add_location(div1, file$2, 90, 0, 1674);
     		},
 
     		l: function claim(nodes) {
@@ -1359,7 +1426,7 @@ var ui = (function (exports) {
     				}
     			}
 
-    			if ((changed.color) && div0_class_value !== (div0_class_value = "inner bg-color-" + ctx.color + " svelte-5ezb6z")) {
+    			if ((changed.color) && div0_class_value !== (div0_class_value = "inner bg-color-" + ctx.color + " svelte-jyd0vx")) {
     				attr(div0, "class", div0_class_value);
     			}
 
@@ -1392,7 +1459,7 @@ var ui = (function (exports) {
        * Displays the score for a single player
        */
 
-      // This scoreboard entry is serving as the key and not a player score 
+      // This scoreboard entry is serving as the key and not a player score
       let { key = false, color = 0, gameOver = false, winner = false } = $$props;
 
       // The player's current scores
@@ -1505,7 +1572,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (65:2) {#if gameOver}
+    // (63:2) {#if gameOver}
     function create_if_block$1(ctx) {
     	var div;
 
@@ -1521,8 +1588,8 @@ var ui = (function (exports) {
     		c: function create() {
     			div = element("div");
     			if_block.c();
-    			attr(div, "class", "gameover svelte-x0f8h0");
-    			add_location(div, file$3, 65, 4, 1282);
+    			attr(div, "class", "gameover svelte-n38d5k");
+    			add_location(div, file$3, 63, 4, 1269);
     		},
 
     		m: function mount(target, anchor) {
@@ -1551,7 +1618,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (69:6) {:else}
+    // (67:6) {:else}
     function create_else_block$1(ctx) {
     	var p;
 
@@ -1559,8 +1626,8 @@ var ui = (function (exports) {
     		c: function create() {
     			p = element("p");
     			p.textContent = "This game has ended!";
-    			attr(p, "class", "svelte-x0f8h0");
-    			add_location(p, file$3, 69, 8, 1389);
+    			attr(p, "class", "svelte-n38d5k");
+    			add_location(p, file$3, 67, 8, 1376);
     		},
 
     		m: function mount(target, anchor) {
@@ -1575,7 +1642,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (67:6) {#if tied}
+    // (65:6) {#if tied}
     function create_if_block_1$1(ctx) {
     	var p;
 
@@ -1583,8 +1650,8 @@ var ui = (function (exports) {
     		c: function create() {
     			p = element("p");
     			p.textContent = "This game has ended in a tie!";
-    			attr(p, "class", "svelte-x0f8h0");
-    			add_location(p, file$3, 67, 8, 1330);
+    			attr(p, "class", "svelte-n38d5k");
+    			add_location(p, file$3, 65, 8, 1317);
     		},
 
     		m: function mount(target, anchor) {
@@ -1599,7 +1666,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (77:4) {#each scores as score, i}
+    // (75:4) {#each scores as score, i}
     function create_each_block$1(ctx) {
     	var current;
 
@@ -1688,9 +1755,9 @@ var ui = (function (exports) {
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
-    			attr(div0, "class", "container svelte-x0f8h0");
-    			add_location(div0, file$3, 74, 2, 1451);
-    			add_location(div1, file$3, 62, 0, 1254);
+    			attr(div0, "class", "container svelte-n38d5k");
+    			add_location(div0, file$3, 72, 2, 1438);
+    			add_location(div1, file$3, 60, 0, 1241);
     		},
 
     		l: function claim(nodes) {
@@ -1789,14 +1856,14 @@ var ui = (function (exports) {
         if (i != color && scores[i]["controlled"] >= score) {
           winner = false;
           break;
-        } 
+        }
       }
 
       return winner;
     }
 
     function instance$3($$self, $$props, $$invalidate) {
-    	// If the game is over 
+    	// If the game is over
       let { gameOver = false, scores = [], leaders = [] } = $$props;
 
     	const writable_props = ['gameOver', 'scores', 'leaders'];
@@ -1863,9 +1930,9 @@ var ui = (function (exports) {
     			input = element("input");
     			t = text("\n  See projected board");
     			attr(input, "type", "checkbox");
-    			add_location(input, file$4, 7, 2, 59);
+    			add_location(input, file$4, 13, 2, 127);
     			attr(div, "class", "svelte-jy7duu");
-    			add_location(div, file$4, 6, 0, 51);
+    			add_location(div, file$4, 12, 0, 119);
     			dispose = listen(input, "change", ctx.change_handler);
     		},
 
@@ -1912,7 +1979,7 @@ var ui = (function (exports) {
 
     const file$5 = "src\\quagen\\ui\\game\\StartPrompt.svelte";
 
-    // (78:4) {:else}
+    // (70:2) {:else}
     function create_else_block$2(ctx) {
     	var p;
 
@@ -1920,8 +1987,8 @@ var ui = (function (exports) {
     		c: function create() {
     			p = element("p");
     			p.textContent = "The game will start when you make your first move.";
-    			attr(p, "class", "svelte-ku2719");
-    			add_location(p, file$5, 78, 8, 1674);
+    			attr(p, "class", "svelte-1pfd73t");
+    			add_location(p, file$5, 70, 4, 1473);
     		},
 
     		m: function mount(target, anchor) {
@@ -1938,25 +2005,25 @@ var ui = (function (exports) {
     	};
     }
 
-    // (71:4) {#if vsHumans}
+    // (62:2) {#if vsHumans}
     function create_if_block$2(ctx) {
     	var p0, t1, p1, span, t2, dispose;
 
     	return {
     		c: function create() {
     			p0 = element("p");
-    			p0.textContent = "The game will start after all players have made their first move. To invite a friend to the game, share the following link:";
+    			p0.textContent = "The game will start after all players have made their first move. To\n      invite a friend to the game, share the following link:";
     			t1 = space();
     			p1 = element("p");
     			span = element("span");
     			t2 = text(ctx.shareUrl);
-    			attr(p0, "class", "svelte-ku2719");
-    			add_location(p0, file$5, 71, 8, 1385);
+    			attr(p0, "class", "svelte-1pfd73t");
+    			add_location(p0, file$5, 62, 4, 1209);
     			attr(span, "id", "share-url");
-    			attr(span, "class", "svelte-ku2719");
-    			add_location(span, file$5, 75, 12, 1602);
-    			attr(p1, "class", "share svelte-ku2719");
-    			add_location(p1, file$5, 74, 8, 1546);
+    			attr(span, "class", "svelte-1pfd73t");
+    			add_location(span, file$5, 67, 6, 1411);
+    			attr(p1, "class", "share svelte-1pfd73t");
+    			add_location(p1, file$5, 66, 4, 1362);
     			dispose = listen(p1, "mouseup", handleShare);
     		},
 
@@ -2001,8 +2068,8 @@ var ui = (function (exports) {
     		c: function create() {
     			div = element("div");
     			if_block.c();
-    			attr(div, "class", "svelte-ku2719");
-    			add_location(div, file$5, 69, 0, 1352);
+    			attr(div, "class", "svelte-1pfd73t");
+    			add_location(div, file$5, 60, 0, 1182);
     		},
 
     		l: function claim(nodes) {
@@ -2041,30 +2108,27 @@ var ui = (function (exports) {
     }
 
     function handleShare() {
-        
-        // highlight share url
-        const shareElm = document.getElementById("share-url");
-        
-        const range = document.createRange();
-        range.selectNodeContents(shareElm);
-        
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);       
+      // highlight share url
+      const shareElm = document.getElementById("share-url");
 
-        // copy share url to clipboard
-        document.execCommand("copy");
+      const range = document.createRange();
+      range.selectNodeContents(shareElm);
 
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
 
+      // copy share url to clipboard
+      document.execCommand("copy");
     }
 
     function instance$5($$self, $$props, $$invalidate) {
-    	/** 
-         * Information prompt at the start of the game 
-         */
+    	/**
+       * Information prompt at the start of the game
+       */
 
-        // Unique id of the game
-        let { gameId = 0, vsHumans = false } = $$props;
+      // Unique id of the game
+      let { gameId = 0, vsHumans = false } = $$props;
 
     	const writable_props = ['gameId', 'vsHumans'];
     	Object.keys($$props).forEach(key => {
@@ -2112,7 +2176,7 @@ var ui = (function (exports) {
 
     const file$6 = "src\\quagen\\ui\\game\\App.svelte";
 
-    // (62:0) {:else}
+    // (93:0) {:else}
     function create_else_block_1(ctx) {
     	var p;
 
@@ -2120,7 +2184,7 @@ var ui = (function (exports) {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Loading...";
-    			add_location(p, file$6, 62, 2, 1557);
+    			add_location(p, file$6, 94, 2, 2992);
     		},
 
     		m: function mount(target, anchor) {
@@ -2139,7 +2203,7 @@ var ui = (function (exports) {
     	};
     }
 
-    // (44:0) {#if init}
+    // (73:0) {#if init}
     function create_if_block$3(ctx) {
     	var current_block_type_index, if_block, t0, t1, current;
 
@@ -2151,7 +2215,7 @@ var ui = (function (exports) {
     	var if_blocks = [];
 
     	function select_block_type_1(changed, ctx) {
-    		if (0 < ctx.turnCompleted) return 0;
+    		if (ctx.turnCompleted == 0) return 0;
     		return 1;
     	}
 
@@ -2163,12 +2227,12 @@ var ui = (function (exports) {
 
     	var board = new Board({
     		props: {
-    		turnCompleted: ctx.turnCompleted,
     		height: ctx.gameState.getSetting('dimension_x'),
     		width: ctx.gameState.getSetting('dimension_y'),
-    		allowMove: ctx.allowMove,
     		moveHistory: ctx.gameState.moveHistory,
-    		spots: ctx.spots
+    		allowMove: ctx.allowMove,
+    		spots: ctx.spots,
+    		turnCompleted: ctx.turnCompleted
     	},
     		$$inline: true
     	});
@@ -2214,12 +2278,12 @@ var ui = (function (exports) {
     			}
 
     			var board_changes = {};
-    			if (changed.turnCompleted) board_changes.turnCompleted = ctx.turnCompleted;
     			if (changed.gameState) board_changes.height = ctx.gameState.getSetting('dimension_x');
     			if (changed.gameState) board_changes.width = ctx.gameState.getSetting('dimension_y');
-    			if (changed.allowMove) board_changes.allowMove = ctx.allowMove;
     			if (changed.gameState) board_changes.moveHistory = ctx.gameState.moveHistory;
+    			if (changed.allowMove) board_changes.allowMove = ctx.allowMove;
     			if (changed.spots) board_changes.spots = ctx.spots;
+    			if (changed.turnCompleted) board_changes.turnCompleted = ctx.turnCompleted;
     			board.$set(board_changes);
     		},
 
@@ -2259,55 +2323,8 @@ var ui = (function (exports) {
     	};
     }
 
-    // (48:2) {:else}
+    // (79:2) {:else}
     function create_else_block$3(ctx) {
-    	var current;
-
-    	var startprompt = new StartPrompt({
-    		props: {
-    		gameId: ctx.gameState.gameId,
-    		vsHumans: ctx.gameState.isVsHuman()
-    	},
-    		$$inline: true
-    	});
-
-    	return {
-    		c: function create() {
-    			startprompt.$$.fragment.c();
-    		},
-
-    		m: function mount(target, anchor) {
-    			mount_component(startprompt, target, anchor);
-    			current = true;
-    		},
-
-    		p: function update(changed, ctx) {
-    			var startprompt_changes = {};
-    			if (changed.gameState) startprompt_changes.gameId = ctx.gameState.gameId;
-    			if (changed.gameState) startprompt_changes.vsHumans = ctx.gameState.isVsHuman();
-    			startprompt.$set(startprompt_changes);
-    		},
-
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(startprompt.$$.fragment, local);
-
-    			current = true;
-    		},
-
-    		o: function outro(local) {
-    			transition_out(startprompt.$$.fragment, local);
-    			current = false;
-    		},
-
-    		d: function destroy(detaching) {
-    			destroy_component(startprompt, detaching);
-    		}
-    	};
-    }
-
-    // (46:2) {#if 0 < turnCompleted}
-    function create_if_block_1$2(ctx) {
     	var current;
 
     	var scores = new Scores({
@@ -2349,6 +2366,53 @@ var ui = (function (exports) {
 
     		d: function destroy(detaching) {
     			destroy_component(scores, detaching);
+    		}
+    	};
+    }
+
+    // (76:2) {#if turnCompleted == 0}
+    function create_if_block_1$2(ctx) {
+    	var current;
+
+    	var startprompt = new StartPrompt({
+    		props: {
+    		gameId: ctx.gameState.gameId,
+    		vsHumans: ctx.gameState.isVsHuman()
+    	},
+    		$$inline: true
+    	});
+
+    	return {
+    		c: function create() {
+    			startprompt.$$.fragment.c();
+    		},
+
+    		m: function mount(target, anchor) {
+    			mount_component(startprompt, target, anchor);
+    			current = true;
+    		},
+
+    		p: function update(changed, ctx) {
+    			var startprompt_changes = {};
+    			if (changed.gameState) startprompt_changes.gameId = ctx.gameState.gameId;
+    			if (changed.gameState) startprompt_changes.vsHumans = ctx.gameState.isVsHuman();
+    			startprompt.$set(startprompt_changes);
+    		},
+
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(startprompt.$$.fragment, local);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(startprompt.$$.fragment, local);
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			destroy_component(startprompt, detaching);
     		}
     	};
     }
@@ -2433,15 +2497,26 @@ var ui = (function (exports) {
     function instance$6($$self, $$props, $$invalidate) {
     	
 
+      // Unique string id for this game
       let { gameId = 0 } = $$props;
 
+      // Contains the current game data/state as retrieved from the backend API
       let gameState = new GameState(gameId);
 
+      // Fires off a repeated call to the backend API to grab the latest game
+      // state. Yes, this should be sockets instead of short polling.
       const gamePoll = new GamePoll(gameState, () => {
+        // Lets Svelte know the game state has changed so it can re-evaulate
+        // all related data bindings.
         $$invalidate('gameState', gameState);
       });
       gamePoll.start();
 
+      /**
+       * Fires off a player move request to the backend API initiated from
+       * a player interacting with the board.
+       * @param  {Event} event Custom event dispatched from the game board
+       */
       function handleMove(event) {
         const spotX = event.detail.x;
         const spotY = event.detail.y;
@@ -2449,6 +2524,11 @@ var ui = (function (exports) {
         fetch(`/api/v1/game/${gameId}/move/${spotX}/${spotY}`);
       }
 
+      /**
+       * Toggled the player's view of the board between the current game board
+       * and the projected board state.
+       * @param  {Event} event DOM event
+       */
       function handleProjected(event) {
         if (event.target.checked) {
           $$invalidate('allowMove', allowMove = false);
@@ -2468,14 +2548,14 @@ var ui = (function (exports) {
     		if ('gameId' in $$props) $$invalidate('gameId', gameId = $$props.gameId);
     	};
 
-    	let init, gameOver, allowMove, spots, turnCompleted;
+    	let init, gameOver, turnCompleted, allowMove, spots;
 
     	$$self.$$.update = ($$dirty = { gameState: 1, gameOver: 1 }) => {
     		if ($$dirty.gameState) { $$invalidate('init', init = gameState.init); }
     		if ($$dirty.gameState) { $$invalidate('gameOver', gameOver = gameState.completed); }
-    		if ($$dirty.gameOver || $$dirty.gameState) { $$invalidate('allowMove', allowMove = !gameOver && gameState.turnMoved <= gameState.turnCompleted); }
-    		if ($$dirty.gameState) { $$invalidate('spots', spots = gameState.spotsCurrent); }
     		if ($$dirty.gameState) { $$invalidate('turnCompleted', turnCompleted = gameState.turnCompleted); }
+    		if ($$dirty.gameOver || $$dirty.gameState) { $$invalidate('allowMove', allowMove = !gameOver && gameState.timeStarted > 0); }
+    		if ($$dirty.gameState) { $$invalidate('spots', spots = gameState.spotsCurrent); }
     	};
 
     	return {
@@ -2485,9 +2565,9 @@ var ui = (function (exports) {
     		handleProjected,
     		init,
     		gameOver,
+    		turnCompleted,
     		allowMove,
-    		spots,
-    		turnCompleted
+    		spots
     	};
     }
 
@@ -2506,7 +2586,19 @@ var ui = (function (exports) {
     	}
     }
 
+    /**
+     * Controller functions for the game's main menu on the home page
+     */
+
+    /**
+     * Sends a create game request to the backend API. Redirects the browser to
+     * the new game on success.
+     * @param  {Int} playerCount Number of total players to be in the game
+     * @param  {Int} aiCount Number of AI players to be in the game
+     * @param  {Int} aiStrength Strength of the AI. Higher is more difficult.
+     */
     function createGame(playerCount, aiCount, aiStrength) {
+      // Build the request options
       const options = {
         method: "POST",
         headers: {
@@ -2519,6 +2611,7 @@ var ui = (function (exports) {
         })
       };
 
+      // Fire the new game request
       fetch(`/api/v1/game/new`, options)
         .then(response => {
           if (200 == response.status) {
@@ -2528,6 +2621,7 @@ var ui = (function (exports) {
           }
         })
         .then(data => {
+          // On successful creation of new game, redirect the browser to the game.
           const gameId = data["game"]["game_id"];
           window.location.href = `/game/${gameId}`;
         })
@@ -2546,7 +2640,7 @@ var ui = (function (exports) {
     	return child_ctx;
     }
 
-    // (91:8) {#each difficulties as difficulty}
+    // (116:8) {#each difficulties as difficulty}
     function create_each_block$2(ctx) {
     	var button, t0_value = ctx.difficulty[0] + "", t0, t1, button_difficulty_value, dispose;
 
@@ -2558,7 +2652,7 @@ var ui = (function (exports) {
     			attr(button, "class", "button-difficulty svelte-1czfe8e");
     			attr(button, "difficulty", button_difficulty_value = ctx.difficulty[1]);
     			toggle_class(button, "button-difficulty-selected", ctx.aiStrength == ctx.difficulty[1]);
-    			add_location(button, file$7, 91, 10, 1638);
+    			add_location(button, file$7, 116, 10, 2246);
     			dispose = listen(button, "mouseup", ctx.changeDifficulty);
     		},
 
@@ -2619,24 +2713,24 @@ var ui = (function (exports) {
     			button1.textContent = "Play Friend";
     			attr(img, "src", "/img/intro.gif");
     			attr(img, "alt", "Demo gif");
-    			add_location(img, file$7, 79, 4, 1322);
+    			add_location(img, file$7, 100, 4, 1827);
     			attr(div0, "class", "block svelte-1czfe8e");
-    			add_location(div0, file$7, 78, 2, 1298);
+    			add_location(div0, file$7, 99, 2, 1803);
     			attr(button0, "class", "button-play button-ai svelte-1czfe8e");
-    			add_location(button0, file$7, 85, 8, 1446);
-    			add_location(div1, file$7, 84, 6, 1432);
+    			add_location(button0, file$7, 108, 8, 1996);
+    			add_location(div1, file$7, 107, 6, 1982);
     			attr(div2, "class", "difficulty svelte-1czfe8e");
-    			add_location(div2, file$7, 89, 6, 1560);
+    			add_location(div2, file$7, 114, 6, 2168);
     			attr(div3, "class", "option-ai svelte-1czfe8e");
-    			add_location(div3, file$7, 83, 4, 1402);
+    			add_location(div3, file$7, 104, 4, 1907);
     			attr(button1, "class", "button-play button-friend svelte-1czfe8e");
-    			add_location(button1, file$7, 103, 6, 1968);
+    			add_location(button1, file$7, 129, 6, 2619);
     			attr(div4, "class", "option-friend svelte-1czfe8e");
-    			add_location(div4, file$7, 102, 4, 1934);
+    			add_location(div4, file$7, 128, 4, 2585);
     			attr(div5, "class", "block svelte-1czfe8e");
-    			add_location(div5, file$7, 82, 2, 1378);
+    			add_location(div5, file$7, 103, 2, 1883);
     			attr(div6, "class", "container svelte-1czfe8e");
-    			add_location(div6, file$7, 77, 0, 1272);
+    			add_location(div6, file$7, 98, 0, 1777);
 
     			dispose = [
     				listen(button0, "mouseup", ctx.playAi),
@@ -2710,19 +2804,34 @@ var ui = (function (exports) {
     let playerCount = 2;
 
     function instance$7($$self, $$props, $$invalidate) {
-    	const difficulties = [["Easy", 0], ["Medium", 1], ["Hard", 2]];
+    	// Possible game difficulties for an AI opponent
+      const difficulties = [["Easy", 0], ["Medium", 1], ["Hard", 2]];
+
+      // Number of AI players in the game
       let aiCount = 0;
+
+      // Higher AI strength means higher difficulty
       let aiStrength = 0;
 
+      /**
+       * Creates a game with a single AI opponent
+       */
       function playAi() {
         aiCount = 1;
         createGame(playerCount, aiCount, aiStrength);
       }
 
+      /**
+       * Creates a game with a single human opponent
+       */
       function playFriend() {
         createGame(playerCount, aiCount, aiStrength);
       }
 
+      /**
+       * Changes the AI difficulty based on player button toggle
+       * @param  {Event} event DOM event from difficulty buttons
+       */
       function changeDifficulty(event) {
         $$invalidate('aiStrength', aiStrength = event.target.getAttribute("difficulty"));
       }

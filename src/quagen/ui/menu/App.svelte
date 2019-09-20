@@ -1,20 +1,41 @@
 <script>
+  /**
+   * Entry point for the main menu UI on the home screen.
+   */
+
   import { createGame } from "../menu.js";
 
+  // Possible game difficulties for an AI opponent
   const difficulties = [["Easy", 0], ["Medium", 1], ["Hard", 2]];
+
+  // Number of total players in the game
   let playerCount = 2;
+
+  // Number of AI players in the game
   let aiCount = 0;
+
+  // Higher AI strength means higher difficulty
   let aiStrength = 0;
 
+  /**
+   * Creates a game with a single AI opponent
+   */
   function playAi() {
     aiCount = 1;
     createGame(playerCount, aiCount, aiStrength);
   }
 
+  /**
+   * Creates a game with a single human opponent
+   */
   function playFriend() {
     createGame(playerCount, aiCount, aiStrength);
   }
 
+  /**
+   * Changes the AI difficulty based on player button toggle
+   * @param  {Event} event DOM event from difficulty buttons
+   */
   function changeDifficulty(event) {
     aiStrength = event.target.getAttribute("difficulty");
   }
@@ -82,11 +103,15 @@
 
   <div class="block">
     <div class="option-ai">
+
+      <!-- {# Start a game vs the AI #} -->
       <div>
         <button class="button-play button-ai" on:mouseup={playAi}>
           Play AI
         </button>
       </div>
+
+      <!-- {# Buttons to change the AI difficulty #} -->
       <div class="difficulty">
         {#each difficulties as difficulty}
           <button
@@ -98,12 +123,14 @@
           </button>
         {/each}
       </div>
-
     </div>
+
+    <!-- {# Start a game vs a human #} -->
     <div class="option-friend">
       <button class="button-play button-friend" on:mouseup={playFriend}>
         Play Friend
       </button>
     </div>
+
   </div>
 </div>

@@ -5,7 +5,7 @@
 
   import Score from "./Score.svelte";
 
-  // If the game is over 
+  // If the game is over
   export let gameOver = false;
 
   // List of scores for each player in the format of:
@@ -17,7 +17,7 @@
   export let leaders = [];
 
   // When the game has ended with a tie score
-  $: tied = gameOver && leaders.length > 0; 
+  $: tied = gameOver && leaders.length > 0;
 
   /**
    * If the player color is the outright winner of the match
@@ -33,17 +33,16 @@
       if (i != color && scores[i]["controlled"] >= score) {
         winner = false;
         break;
-      } 
+      }
     }
 
     return winner;
   }
-
 </script>
 
 <style>
   p {
-      padding: 8px;
+    padding: 8px;
   }
 
   div.container {
@@ -51,13 +50,12 @@
   }
 
   div.gameover {
-      width: 535px;
-      border-radius: 5px;
-      color: white;
-      background-color: rgba(255,0,0,.6);
-      font-weight: bold;
+    width: 535px;
+    border-radius: 5px;
+    color: white;
+    background-color: rgba(255, 0, 0, 0.6);
+    font-weight: bold;
   }
-
 </style>
 
 <div>
@@ -75,10 +73,7 @@
   <div class="container">
     <Score key={true} />
     {#each scores as score, i}
-      <Score color={i} 
-             gameOver={gameOver} 
-             winner={isWinner(i, scores)} 
-             {...score} />
+      <Score color={i} {gameOver} winner={isWinner(i, scores)} {...score} />
     {/each}
   </div>
 </div>

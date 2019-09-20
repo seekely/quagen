@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * Utility functions used across the UI
  */
@@ -21,7 +23,7 @@ export function detectCapabilities() {
 
 /**
  * If the user has interacted with the screen via touch
- * @returns {bool} True if user has interacted via touch, false otherwise
+ * @returns {Bool} True if user has interacted via touch, false otherwise
  */
 export function isTouching() {
   return window.CAPABILITY_TOUCH;

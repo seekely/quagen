@@ -6,7 +6,7 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
-  // possible background colors for a spot based on state
+  // Possible background colors for a spot based on state
   const BG_COLOR_DEFAULT = [231, 231, 231];
   const BG_COLOR_SELECTED = [240, 255, 0];
   const BG_COLORS_PLAYER = [

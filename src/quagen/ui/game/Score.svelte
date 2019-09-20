@@ -3,7 +3,7 @@
    * Displays the score for a single player
    */
 
-  // This scoreboard entry is serving as the key and not a player score 
+  // This scoreboard entry is serving as the key and not a player score
   export let key = false;
 
   // The player color owning this score
@@ -15,18 +15,16 @@
   // If this player is the outright winner of the game
   export let winner = false;
 
-  // We give the winner a crown
-  $: crown = gameOver && winner
+  // We give the winner of the game a crown
+  $: crown = gameOver && winner;
 
   // The player's current scores
   export let controlled = 0;
   export let pressuring = 0;
   export let projected = 0;
-
 </script>
 
 <style>
-
   div.container {
     display: inline-block;
   }
@@ -78,7 +76,7 @@
       transform: scale(1.05);
     }
     75% {
-      transform: scale(1.0);
+      transform: scale(1);
     }
   }
 
@@ -88,16 +86,17 @@
     animation-timing-function: linear;
     animation-iteration-count: infinite;
   }
-
-
 </style>
+
 <div class="container">
 
-    {#if crown }
-      <div class="crown"><img src="/img/crown.png" width="35px" alt="Crown!"/></div>
-    {/if}
+  {#if crown}
+    <div class="crown">
+      <img src="/img/crown.png" width="35px" alt="Crown!" />
+    </div>
+  {/if}
 
-    <div class="inner bg-color-{color}" class:crown={crown} class:key class:player={!key}>
+  <div class="inner bg-color-{color}" class:crown class:key class:player={!key}>
     {#if key}
       <div>Controlled</div>
       <div>Projected</div>
