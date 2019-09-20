@@ -3,7 +3,6 @@ Interact with the SQLite database
 """
 # @hack rseekely uggggh context crap
 # pylint: disable=invalid-name,global-statement
-
 import os
 import sqlite3
 
@@ -11,6 +10,8 @@ from werkzeug.local import Local
 
 from quagen import config
 
+# Allows us to share our database connection in a WSGI environment
+# https://werkzeug.palletsprojects.com/en/0.16.x/local/
 context = Local()
 
 
@@ -40,13 +41,23 @@ def get_connection():
     return context.db
 
 
-def query(statement, args=(), one=False):
+def query(statement, parameters=(), one=False):
     """
-    Query the database
+    Query the database (e.g. SELECT)
+
+    Args:
+        statement (str): Prepared SQL statement
+            (e.g. 'SELECT game_id FROM game WHERE game_id = ?')
+        parameters (tuple): Optional parameters to inject into SQL statement
+        one (bool): Optionally return only the first result
+
+    Returns:
+        (list) Rows of query results
+
     """
     conn = get_connection()
 
-    cur = conn.execute(statement, args)
+    cur = conn.execute(statement, parameters)
     rv = [
         dict((cur.description[idx][0], value) for idx, value in enumerate(row))
         for row in cur.fetchall()
@@ -57,7 +68,16 @@ def query(statement, args=(), one=False):
 
 def write(statement, args=(), commit=True):
     """
-    Writes to the database
+    Writes to the database (e.g. INSERT/UPDATE)
+
+    Args:
+        statement (str): Prepared SQL statement
+            (e.g. 'INSERT INTO GAME VALUES(?, ?, ?)')
+        parameters (tuple): Optional parameters to inject into SQL statement
+        commit: Commit statement to the database. Defaults to true.
+
+    Returns:
+        (int) Last row id
     """
     conn = get_connection()
 
@@ -70,7 +90,7 @@ def write(statement, args=(), commit=True):
 
 def close(error=None):
     """
-    Close any existing database connection
+    Closes any existing database connection
     """
     global context
     conn = context.pop("db", None)

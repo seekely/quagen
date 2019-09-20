@@ -3,7 +3,6 @@ Contains the backend game modeling and logic
 """
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-public-methods
-
 import copy
 from time import time
 
@@ -36,7 +35,7 @@ class Game:
         "dimension_x": 20,  # Width of the game board
         "dimension_y": 20,  # Height of the game board
         "player_count": 2,  # Total number of players in a game (including AI)
-        "power": 4,  # Amount of power acquired for a spot to turn solid
+        "power": 4,  # Amount of power required for a spot to turn solid
         "pressure": "surronding",  # Where a max power spot exerts pressure
     }
 
@@ -207,7 +206,7 @@ class Game:
             (bool) True on successful addition to the game, false otherwise
         """
         player_added = False
-        print("Adding player " + player_id)
+        print(f"Adding player {player_id}")
 
         player_count = len(self._players.keys())
         if (
@@ -252,7 +251,7 @@ class Game:
             (bool) True on a valid move, false otherwise
         """
         valid_move = False
-        print("Adding move at " + str(x) + " " + str(y) + " for player " + player_id)
+        print(f"Adding move at {x} {y} for player {player_id}")
 
         if (
             self.is_in_progress()
@@ -370,7 +369,7 @@ class Game:
             if self._check_for_winners():
                 self.end()
 
-            print("Processed turn to " + str(self._turn_completed))
+            print(f"Processed turn to {self._turn_completed}")
             processed_turn = True
 
         return processed_turn

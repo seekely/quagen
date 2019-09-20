@@ -2,7 +2,6 @@
 Simulates games between multiple AIs.
 
 See bin/examples/simulate_ais.py for usage example.
-
 """
 import multiprocessing
 from multiprocessing import Pool

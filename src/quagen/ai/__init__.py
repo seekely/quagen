@@ -1,5 +1,5 @@
 """
-Defines base AI
+Defines abstract AI class
 """
 from abc import ABCMeta
 from abc import abstractmethod

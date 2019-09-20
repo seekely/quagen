@@ -1,5 +1,5 @@
 """
-Serves Quagen frontend
+Serves Quagen HTML/Javascript frontend
 """
 import uuid
 
@@ -9,14 +9,14 @@ from flask import session
 
 from quagen import queries
 
-BLUEPRINT = Blueprint("web", __name__)
+WEB = Blueprint("web", __name__)
 
 # @hack rseekely
 # A way to un-cache static assets when a new version of the app comes out
 ASSET_VERSION = 14
 
 
-@BLUEPRINT.context_processor
+@WEB.context_processor
 def inject_globals():
     """
     Injects a set of global variables to the HTML templates
@@ -24,7 +24,7 @@ def inject_globals():
     return dict(asset_version=ASSET_VERSION)
 
 
-@BLUEPRINT.route("/")
+@WEB.route("/")
 def index():
     """
     Homepage
@@ -32,7 +32,7 @@ def index():
     return render_template("index.html")
 
 
-@BLUEPRINT.route("/game/<string:game_id>", methods=["GET"])
+@WEB.route("/game/<string:game_id>", methods=["GET"])
 def game_view(game_id):
     """
     Game view
