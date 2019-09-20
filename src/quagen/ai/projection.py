@@ -36,6 +36,8 @@ class ProjectionAI(AI):
             (tuple) Board coordinates in the form of (x, y)
         """
         available_spots = self.get_movable_spots()
+        if not available_spots:
+            raise Exception("No available moves for AI to choose from.")
 
         # The potential spots we are going to project and ultimately choose from
         candidate_spots = []
@@ -121,7 +123,7 @@ class ProjectionAI(AI):
         for spot in candidate_spots:
             scores = self.project_move(spot)
             projected_score = scores[self._color]["projected"]
-            print("Scored " + str(spot) + " at " + str(projected_score))
+            print(f"Scored {spot} at {projected_score}")
 
             if projected_score > best_score:
                 best_candidate = spot

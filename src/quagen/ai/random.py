@@ -28,5 +28,8 @@ class RandomAI(AI):
             (tuple) Board coordinates in the form of (x, y)
         """
         available_spots = self.get_movable_spots()
+        if not available_spots:
+            raise Exception("No available moves for AI to choose from.")
+
         random.shuffle(available_spots)
         return available_spots.pop()

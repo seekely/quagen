@@ -48,9 +48,8 @@ class BiasedAI(AI):
             (tuple) Board coordinates in the form of (x, y)
         """
         available_spots = self.get_movable_spots()
-        # @hack rseekely should do something smarter when we are out of moves
         if not available_spots:
-            return (0, 0)
+            raise Exception("No available moves for AI to choose from.")
 
         # The potential spots we are going to project and ultimately choose from
         candidate_spots = []
@@ -205,7 +204,7 @@ class BiasedAI(AI):
         best_candidate = augmented_candidates[0]["coords"]
 
         for spot in augmented_candidates:
-            print("Scored " + str(spot))
+            print(f"Scored {spot}")
 
         return best_candidate
 
