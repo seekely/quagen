@@ -167,7 +167,7 @@ class Game:
         """
         Starts the game after all settings finalized
         """
-        if self.is_in_progress():
+        if self.completed or self.is_in_progress():
             return
 
         self._time_started = int(time())

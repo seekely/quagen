@@ -1,93 +1,135 @@
 """
-Simulates game between AIs
+Simulates games between multiple AIs.
+
+See bin/examples/simulate_ais.py for usage example.
+
 """
+import multiprocessing
 from multiprocessing import Pool
 import statistics
 
 from quagen.game import Game
-from quagen.ai.biased import BiasedAI
-from quagen.ai.projection import ProjectionAI
+
+"""(int) Default number of games to simulate"""
+DEFAULT_SIMULATION_COUNT = 100
+
+"""(int) Default number of games to simulate simultaneously"""
+DEFAULT_SIMULATION_CONCURRENCY = max(1, multiprocessing.cpu_count() - 1)
 
 
 class Simulation:
     """
-    Simulates AI opponents against on another in a game
+    A single game simulation
     """
 
-    def __init__(self, a_game):
-        self._game = a_game
+    def __init__(self):
+        self._game = Game()
         self._ai_players = []
 
-    def add_player(self, ai_player):
+    @property
+    def game(self):
+        """The game being simulated"""
+        return self._game
+
+    def add_ai_player(self, ai_instance):
         """
-        Add player to simulator
+        Add an AI player to to the simulation
+
+        Args:
+            ai_instance (AI): Instance of an AI class
+
         """
-        ai_name = ai_player.__class__.__name__ + "_" + str(len(self._ai_players))
-        self._ai_players.append((ai_name, ai_player))
+        ai_name = ai_instance.__class__.__name__ + "_" + str(len(self._ai_players))
+        self._ai_players.append((ai_name, ai_instance))
         self._game.add_player(ai_name)
 
     def run(self):
         """
-        Run the simulator
+        Simulate the game until completion
         """
         self._game.start()
-        while self._game.board.get_movable_spots():
+        while self._game.is_in_progress():
             for ai_player in self._ai_players:
                 ai_name = ai_player[0]
-                ai_logic = ai_player[1]
+                ai_instance = ai_player[1]
 
-                a_move = ai_logic.choose_move()
-                self._game.add_move(ai_name, a_move[0], a_move[1])
+                x, y = ai_instance.choose_move()
+                self._game.add_move(ai_name, x, y)
 
             self._game.process_turn()
 
 
-def simulate_game(number):
+def run_simulation(simulation):
     """
-    Simulate a single game
+    Fires of the simulation of a single game. Useful for the multiprocessing
+    map call.
+
+    Args:
+        simulation (Simulation): Instance of a single game simulation
+
+    Returns:
+        (Simulation) Completed simulation
+
     """
-    print(f"Starting game {number}")
-    a_game = Game()
-    simulation = Simulation(a_game)
-    simulation.add_player(ProjectionAI(a_game, 1, 2))
-    simulation.add_player(BiasedAI(a_game, 2, 2))
+    print(f"Starting simulation {simulation.game.game_id}")
     simulation.run()
-    return a_game
+    return simulation
 
 
-def main():
+def simulate(
+    setup_callback,
+    number_games=DEFAULT_SIMULATION_COUNT,
+    concurrency=DEFAULT_SIMULATION_CONCURRENCY,
+):
     """
-    Main
+    User entry point for simulating games.
+
+    Args:
+        setup_callback (function): Hook called before a game starts simulating
+            to give the user a chance to tweak the game settings and add AI
+            players. Called with parameters setup_callback(simluation).
+        number_games (int): Optional number of games to simulate.
+        concurrency (int): Optional number of concurrent simulations.
+
+    Returns:
+        (dict) Tallied scores for each AI player
+
     """
-    scores = [
-        {"wins": 0, "spot_counts": []},
-        {"wins": 0, "spot_counts": []},
-        {"wins": 0, "spot_counts": []},
-    ]
 
-    with Pool(6) as pool:
-        for game in pool.map(simulate_game, [i for i in range(100)]):
-            max_player = 0
-            max_score = 0
-            for i in range(len(game.scores)):
-                spot_count = game.scores[i]["controlled"]
-                scores[i]["spot_counts"].append(spot_count)
-                if spot_count > max_score:
-                    max_score = spot_count
-                    max_player = i
-                elif spot_count == max_score:
-                    max_player = 0
+    print(f"Simulating {number_games} with concurrency of {concurrency}")
+    simulations = []
+    results = {}
 
-            scores[max_player]["wins"] += 1
+    # Create all our simulations and call the user's hook for further setup
+    for i in range(number_games):  # pylint: disable=unused-variable
+        simulation = Simulation()
+        setup_callback(simulation)
+        simulations.append(simulation)
 
-        for i in range(len(scores)):  # pylint: disable=consider-using-enumerate
-            scores[i]["mean"] = statistics.mean(scores[i]["spot_counts"])
-            scores[i]["median"] = statistics.median(scores[i]["spot_counts"])
-            del scores[i]["spot_counts"]
+    # Run through the simulations concurrently
+    with Pool(concurrency) as pool:
+        for simulation in pool.map(run_simulation, simulations):
 
-    print("Simulation results")
-    print(str(scores))
+            scores = simulation.game.scores
+            leaders = simulation.game.get_leaders()
 
+            # Keep a record of every score for every game for each player
+            for color in range(len(scores)):  # pylint: disable=consider-using-enumerate
+                if color not in results.keys():
+                    results[color] = {"wins": 0, "scores": []}
 
-if __name__ == "__main__":
-    main()
+                results[color]["scores"].append(scores[color]["controlled"])
+
+            # Add a win to the player's tally for outright wins (ignore ties).
+            if len(leaders) == 1:
+                results[leaders[0][0]]["wins"] += 1
+
+    for tally in results.values():
+        tally["mean"] = statistics.mean(tally["scores"])
+        tally["median"] = statistics.median(tally["scores"])
+        tally["min"] = min(tally["scores"])
+        tally["max"] = max(tally["scores"])
+        del tally["scores"]
+
+    print(f"Simulation complete")
+    return results
