@@ -79,7 +79,7 @@ export class GameState {
 
     // From the list of all moves, extract out the latest moves made by each
     // player
-    this.moveHistory = "history" in state ? state["history"] : this.history;
+    this.moveHistory = "history" in state ? state["history"] : this.moveHistory;
     if (0 < this.moveHistory.length) {
       this.moveLast = this.moveHistory.slice(-1)[0];
     }

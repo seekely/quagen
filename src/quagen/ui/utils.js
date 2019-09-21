@@ -12,7 +12,7 @@ export function detectCapabilities() {
   window.addEventListener(
     "touchstart",
     function onFirstTouch() {
-      window.CAPABILITY_TOUCH = true;
+      global.CAPABILITY_TOUCH = true;
 
       // Only need to detect human touch one time
       window.removeEventListener("touchstart", onFirstTouch, false);
@@ -26,5 +26,5 @@ export function detectCapabilities() {
  * @returns {Bool} True if user has interacted via touch, false otherwise
  */
 export function isTouching() {
-  return window.CAPABILITY_TOUCH;
+  return true == global.CAPABILITY_TOUCH;
 }

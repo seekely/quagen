@@ -2,10 +2,13 @@
   "name": "quagen",
   "version": "1.0.0",
   "devDependencies": {
+    "@babel/preset-env": "^7.6.0",
+    "babel-jest": "^24.9.0",
     "eslint": "^6.3.0",
-    "eslint-plugin-prettier": "^3.1.0",
     "eslint-config-prettier": "^6.1.0",
+    "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-svelte3": "^2.6.3",
+    "jest": "^24.9.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.18.2",
     "prettier-plugin-svelte": "^0.7.0",
@@ -14,15 +17,21 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.0.3",
     "rollup-plugin-terser": "^4.0.4",
+    "sirv-cli": "^0.4.4",
     "svelte": "^3.0.0"
   },
-  "dependencies": {
-    "sirv-cli": "^0.4.4"
-  },
+  "dependencies": {},
   "scripts": {
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
     "lint": "eslint **/*.svelte **/*.js",
-    "format": "prettier --write *.js *.json src/**/*.css src/**/*.html src/**/*.js src/**/*.svelte"
+    "format": "prettier --write *.js *.json src/**/*.css src/**/*.html src/**/*.js src/**/*.svelte",
+    "test": "jest --verbose"
+  },
+  "babel": {
+    "presets": [
+      "jest",
+      "@babel/preset-env"
+    ]
   }
 }
