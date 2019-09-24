@@ -77,6 +77,11 @@ You can run all Python tests by running the following:
     export PYTHONPATH=src
     python -m pytest tests -W ignore::DeprecationWarning
 
+The JS/web code tests run by:
+
+    cd quagen
+    npm test
+
 ### Conventions
 
 Highly suggested to integrate the tools below into your editor of choice.
@@ -90,7 +95,7 @@ All Python code is auto-formatted using [Black][black] and further linted using 
     black .
      
     # Run python linter
-    pylint src tests
+    pylint_runner -v
           
 
 All JS/web code is auto-formatted using [Prettier][prettier] and further linted using [ESlint][eslint]

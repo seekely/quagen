@@ -88,7 +88,18 @@ export class GameState {
     this.init = true;
   }
 
+  /**
+   * Retrieves a game setting 
+   * @param  {String} key Setting key
+   * @return (mixed) Setting value
+   * @throws {Exception} If setting does not exist
+   */
   getSetting(key) {
+
+    if (!(key in this.settings)) {
+      throw `Setting '${key}'' does not exist`;
+    } 
+
     return this.settings[key];
   }
 
@@ -121,31 +132,49 @@ export class GamePoll {
   /**
    * Constructor
    * @param  {GameState} gameState instance to update
-   * @param  {Function} callback called after update to gameState
+   * @param  {Function} optional callback called after update to gameState
    */
-  constructor(gameState, callback) {
+  constructor(gameState, callback = null) {
     this._gameState = gameState;
     this._callback = callback;
     this._inFlight = false;
     this._timeBetweenPoll = 1000;
+    this._interval = null;
   }
 
   /**
    * Starts the continuous short poll to the backend API
    */
-  start() {
+  async start() {
     const self = this;
-    self._poll();
-    setInterval(() => {
-      self._poll();
-    }, self._timeBetweenPoll);
+    
+    if (self._interval == null) {
+
+      self._interval = setInterval(() => {
+        self._poll();
+      }, self._timeBetweenPoll);
+
+      return self._poll();
+
+    }
+  }
+
+  /**
+   * Stops the short poll
+   */
+  stop() {
+    if (null != this._interval) {
+      clearInterval(this._interval);
+      this._interval = null;
+    } 
   }
 
   /**
    * Makes the backend call to the API for the latest game state and updates
    * the GameState object.
    */
-  _poll() {
+  async _poll() {
+
     // do not fire off a new request while we still have one in motion
     if (this._inFlight) {
       return;
@@ -159,7 +188,7 @@ export class GamePoll {
     const timeUpdated = self._gameState.timeUpdated;
     const queryString = `?updatedAfter=${timeUpdated}`;
 
-    fetch(`/api/v1/game/${self._gameState.gameId}${queryString}`)
+    return fetch(`/api/v1/game/${self._gameState.gameId}${queryString}`)
       .then(response => {
         self._inFlight = false;
         if (200 == response.status) {
@@ -173,7 +202,10 @@ export class GamePoll {
         // callback
         if (timeUpdated < data["game"]["time_updated"]) {
           self._gameState.update(data["game"]);
-          this._callback();
+
+          if (null != this._callback) {
+            this._callback();
+          }
         }
       })
       .catch(() => {

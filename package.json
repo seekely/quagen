@@ -31,7 +31,13 @@
   "babel": {
     "presets": [
       "jest",
-      "@babel/preset-env"
+      ["@babel/preset-env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
     ]
   }
 }
