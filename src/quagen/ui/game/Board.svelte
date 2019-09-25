@@ -8,7 +8,7 @@
 
   import Spot from "./Spot.svelte";
   import { isTouching } from "../utils.js";
-
+  
   // The turn number completed this board state reflects
   export let turnCompleted = 0;
 
@@ -44,7 +44,6 @@
   $: {
     const viewport = document.getElementById("viewport");
     if (0 < width && containerWidth > screen.width) {
-      console.log("change " + containerWidth);
       viewport.setAttribute("content", `width=${containerWidth}`);
     }
   }
@@ -54,7 +53,7 @@
    * Depending on the settings, we may want to wait for a double
    * click before making this a move.
    */
-  function handleSpotSelected(event) {
+  export function handleSpotSelected(event) {
     const eventX = event.detail.x;
     const eventY = event.detail.y;
 
@@ -87,7 +86,7 @@
    * @param  {int} y coord of spot to check
    * @return {bool} true if player moved in x,y location last turned, false otherwise
    */
-  function isLastMove(moves, x, y) {
+  export function isLastMove(moves, x, y) {
     for (let move of moves) {
       if (x == move[0] && y == move[1]) {
         return true;
