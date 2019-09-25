@@ -450,16 +450,15 @@ var ui = (function (exports) {
       }
 
       /**
-       * Retrieves a game setting 
+       * Retrieves a game setting
        * @param  {String} key Setting key
        * @return (mixed) Setting value
        * @throws {Exception} If setting does not exist
        */
       getSetting(key) {
-
         if (!(key in this.settings)) {
           throw `Setting '${key}'' does not exist`;
-        } 
+        }
 
         return this.settings[key];
       }
@@ -508,15 +507,13 @@ var ui = (function (exports) {
        */
       async start() {
         const self = this;
-        
-        if (self._interval == null) {
 
+        if (self._interval == null) {
           self._interval = setInterval(() => {
             self._poll();
           }, self._timeBetweenPoll);
 
           return self._poll();
-
         }
       }
 
@@ -527,7 +524,7 @@ var ui = (function (exports) {
         if (null != this._interval) {
           clearInterval(this._interval);
           this._interval = null;
-        } 
+        }
       }
 
       /**
@@ -535,7 +532,6 @@ var ui = (function (exports) {
        * the GameState object.
        */
       async _poll() {
-
         // do not fire off a new request while we still have one in motion
         if (this._inFlight) {
           return;
@@ -957,7 +953,7 @@ var ui = (function (exports) {
 
     			t = space();
     			br = element("br");
-    			add_location(br, file$1, 119, 4, 3649);
+    			add_location(br, file$1, 119, 4, 3647);
     		},
 
     		m: function mount(target, anchor) {
@@ -1043,7 +1039,7 @@ var ui = (function (exports) {
     			}
     			attr(div, "class", "container svelte-3bn73f");
     			set_style(div, "min-width", "" + ctx.containerWidth + "px");
-    			add_location(div, file$1, 105, 0, 3117);
+    			add_location(div, file$1, 105, 0, 3115);
     		},
 
     		l: function claim(nodes) {
@@ -1124,7 +1120,7 @@ var ui = (function (exports) {
 
     function instance$1($$self, $$props, $$invalidate) {
     	const dispatch = createEventDispatcher();
-      
+
       // The turn number completed this board state reflects
       let { turnCompleted = 0, width = 0, height = 0, spots = [], allowMove = true, moveHistory = [] } = $$props;
 

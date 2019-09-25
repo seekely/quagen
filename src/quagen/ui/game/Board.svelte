@@ -8,7 +8,7 @@
 
   import Spot from "./Spot.svelte";
   import { isTouching } from "../utils.js";
-  
+
   // The turn number completed this board state reflects
   export let turnCompleted = 0;
 

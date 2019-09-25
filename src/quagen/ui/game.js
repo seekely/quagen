@@ -89,16 +89,15 @@ export class GameState {
   }
 
   /**
-   * Retrieves a game setting 
+   * Retrieves a game setting
    * @param  {String} key Setting key
    * @return (mixed) Setting value
    * @throws {Exception} If setting does not exist
    */
   getSetting(key) {
-
     if (!(key in this.settings)) {
       throw `Setting '${key}'' does not exist`;
-    } 
+    }
 
     return this.settings[key];
   }
@@ -147,15 +146,13 @@ export class GamePoll {
    */
   async start() {
     const self = this;
-    
-    if (self._interval == null) {
 
+    if (self._interval == null) {
       self._interval = setInterval(() => {
         self._poll();
       }, self._timeBetweenPoll);
 
       return self._poll();
-
     }
   }
 
@@ -166,7 +163,7 @@ export class GamePoll {
     if (null != this._interval) {
       clearInterval(this._interval);
       this._interval = null;
-    } 
+    }
   }
 
   /**
@@ -174,7 +171,6 @@ export class GamePoll {
    * the GameState object.
    */
   async _poll() {
-
     // do not fire off a new request while we still have one in motion
     if (this._inFlight) {
       return;

@@ -2,6 +2,7 @@
   "env": {
     "browser": true,
     "es6": true,
+    "jest/globals": true,
     "node": true
   },
   "extends": ["eslint:recommended"],
@@ -9,7 +10,7 @@
     "ecmaVersion": 2019,
     "sourceType": "module"
   },
-  "plugins": ["svelte3"],
+  "plugins": ["jest", "svelte3"],
   "overrides": [
     {
       "files": ["**/*.svelte"],
