@@ -4,13 +4,15 @@
  */
 
 import Board from "../../../../../src/quagen/ui/game/Board.svelte";
-import { isTouching } from "../../../../../src/quagen/ui/utils.js"
+import { isTouching } from "../../../../../src/quagen/ui/utils.js";
 
 // Mock Svelte dispatch calls
-const mockDispatch = jest.fn();  
+const mockDispatch = jest.fn();
 jest.mock("svelte", () => ({
   ...jest.requireActual("svelte"),
-  createEventDispatcher: jest.fn(() => { return mockDispatch})
+  createEventDispatcher: jest.fn(() => {
+    return mockDispatch;
+  })
 }));
 
 // Mock util calls
@@ -19,23 +21,20 @@ jest.mock("../../../../../src/quagen/ui/utils.js", () => ({
   isTouching: jest.fn()
 }));
 
-
 afterEach(() => {
-    jest.clearAllMocks();
+  jest.clearAllMocks();
 });
 
-
-test('Board handles mouse click', () => {
-
+test("Board handles mouse click", () => {
   const target = document.createElement("div");
   const board = new Board({ target });
 
   // This is a non touch screen
-  isTouching.mockReturnValue(false); 
+  isTouching.mockReturnValue(false);
 
   // Every movement event should result in a move dispatch
   let event = {
-    "detail": {"x": 5, "y": 6}
+    detail: { x: 5, y: 6 }
   };
 
   board.handleSpotSelected(event);
@@ -43,27 +42,25 @@ test('Board handles mouse click', () => {
   expect(isTouching).toHaveBeenCalledTimes(1);
 
   event = {
-    "detail": {"x": 7, "y": 3}
+    detail: { x: 7, y: 3 }
   };
 
   board.allowMove = true; // <-- Important
   board.handleSpotSelected(event);
   expect(mockDispatch).toHaveBeenCalledTimes(2);
   expect(isTouching).toHaveBeenCalledTimes(2);
-
 });
 
-test('Board handles touch click', () => {
-
+test("Board handles touch click", () => {
   const target = document.createElement("div");
   const board = new Board({ target });
 
   // This is a touch screen
-  isTouching.mockReturnValue(true); 
+  isTouching.mockReturnValue(true);
 
-  // Only movements in the same spot twice should trigger a move 
+  // Only movements in the same spot twice should trigger a move
   let event = {
-    "detail": {"x": 5, "y": 6}
+    detail: { x: 5, y: 6 }
   };
 
   // No dispatch on first click
@@ -72,7 +69,7 @@ test('Board handles touch click', () => {
   expect(isTouching).toHaveBeenCalledTimes(1);
 
   event = {
-    "detail": {"x": 7, "y": 3}
+    detail: { x: 7, y: 3 }
   };
 
   // Second click is different coords so still no dispatch
@@ -84,21 +81,18 @@ test('Board handles touch click', () => {
   board.handleSpotSelected(event);
   expect(mockDispatch).toHaveBeenCalledTimes(1);
   expect(isTouching).toHaveBeenCalledTimes(3);
-
- 
 });
 
-test('Board handles repeated clicks', () => {
-
+test("Board handles repeated clicks", () => {
   const target = document.createElement("div");
   const board = new Board({ target });
 
   // This is a non touch screen
-  isTouching.mockReturnValue(false); 
+  isTouching.mockReturnValue(false);
 
   // First click should fire an event
   let event = {
-    "detail": {"x": 5, "y": 6}
+    detail: { x: 5, y: 6 }
   };
 
   board.handleSpotSelected(event);
@@ -112,22 +106,18 @@ test('Board handles repeated clicks', () => {
 
   // And even different coords are ignored
   event = {
-    "detail": {"x": 7, "y": 3}
+    detail: { x: 7, y: 3 }
   };
 
   board.handleSpotSelected(event);
   expect(mockDispatch).toHaveBeenCalledTimes(1);
   expect(isTouching).toHaveBeenCalledTimes(1);
- 
-
 });
 
-
-test('Board detects last move', () => {
+test("Board detects last move", () => {
   const target = document.createElement("div");
   const board = new Board({ target });
 
   expect(board.isLastMove([[4, 5], [6, 3], [7, 2]], 0, 0)).toBeFalsy();
   expect(board.isLastMove([[4, 5], [6, 3], [7, 2]], 6, 3)).toBeTruthy();
-
 });
