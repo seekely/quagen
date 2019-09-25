@@ -20,7 +20,6 @@ project in your own direction!
 # Development
 ![Build status](https://github.com/seekely/quagen/workflows/ci/badge.svg)
 
-
 Quagen is built with Python (>= 3.7), NodeJS (>= 10.16), [Flask][flask], 
 [Svelte][svelte], and [SQLite][sqlite]. 
 
