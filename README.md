@@ -3,8 +3,11 @@
 ![Gameplay](/src/quagen/static/img/intro.gif?raw=true)
 
 Quagen is a Go-like game where players make simultaneous moves to control 
-territory on a grid board. You can see an in-development preview at 
-https://quagen.io/.
+territory on a grid board. 
+
+You can see an in-development preview at https://quagen.io/.
+
+You can read more about the origin of the game at https://seekely.com/funthings/quagen/.
 
 # Contributions 
 
