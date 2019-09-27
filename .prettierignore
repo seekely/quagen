@@ -1,6 +1,2 @@
 src/quagen/static/js/ui.js
 src/quagen/static/css/ui.css
-
-node_modules/
-__pycache__/
-venv/
