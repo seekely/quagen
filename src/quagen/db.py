@@ -115,5 +115,6 @@ def create():
 
 
 if __name__ == "__main__":
+    config.init()
     create()
     print("Initialized the database.")
