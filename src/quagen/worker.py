@@ -9,6 +9,7 @@ import signal
 import time
 
 from quagen import config
+from quagen import db
 from quagen import queries
 from quagen.ai.biased import BiasedAI
 
@@ -126,7 +127,12 @@ def main():
     """
     Main
     """
+    print("Worker coming online")
     config.init()
+
+    # Retries connection to database until we succeed which allows the
+    # worker to come up before the database
+    db.get_connection(True)
 
     worker = Worker()
     worker.run()

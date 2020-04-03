@@ -1,3 +1,8 @@
+NOTES:
+penguin.linux.test for localhost 
+
+
+
 ![Quagen](/src/quagen/static/img/quagen.png?raw=true)
 
 ![Gameplay](/src/quagen/static/img/intro.gif?raw=true)
@@ -67,7 +72,7 @@ to http://127.0.0.1:5000 to play/debug!
     source venv/bin/activate
     cd src
     export PYTHONPATH=.
-    python quagen\worker.py
+    python quagen/worker.py
      
     # Continuously compiles the Javascript/Svelte code
     npm run autobuild

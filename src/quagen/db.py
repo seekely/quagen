@@ -3,12 +3,10 @@ Interact with the SQLite database
 """
 # @hack rseekely uggggh context crap
 # pylint: disable=invalid-name,global-statement
-import os
-import sqlite3
+import time
 
 from werkzeug.local import Local
-
-from quagen import config
+import psycopg2
 
 # Allows us to share our database connection in a WSGI environment
 # https://werkzeug.palletsprojects.com/en/0.16.x/local/
@@ -23,20 +21,49 @@ def set_context(new_context):
     context = new_context
 
 
-def get_connection():
+def make_connection(retry=False):
     """
-    Retrieve the connection to the configured database to the configured
-    database. Makes a connection if none already exists.
+    Makes a new connection to the configred database.
+
+    Args:
+        retry (bool): In case of failure, keep retrying the connection every 5
+        seconds until success.
+
+    Returns:
+        (Connection): Database connection
+    """
+    connection = None
+
+    try:
+        connection = psycopg2.connect(
+            user="quagen", password="quagen", host="db", port="5432", database="quagen"
+        )
+
+    except psycopg2.OperationalError as error:
+        if not retry:
+            raise error
+
+        print("Error connecting to db. Trying reconnect in 5 seconds...")
+        time.sleep(5)
+        make_connection(True)
+
+    except (Exception, psycopg2.Error) as error:
+        raise error
+
+    return connection
+
+
+def get_connection(retry=False):
+    """
+    Retrieve the connection to the configured database. Makes a connection
+    if none already exists.
 
     Returns:
         (Connection): Database connection
     """
     global context
     if "db" not in context:
-        context.db = sqlite3.connect(
-            config.PATH_DB_FILE, detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        context.db.row_factory = sqlite3.Row
+        context.db = make_connection(retry)
 
     return context.db
 
@@ -55,12 +82,12 @@ def query(statement, parameters=(), one=False):
         (list) Rows of query results
 
     """
-    conn = get_connection()
+    cursor = get_connection().cursor()
 
-    cur = conn.execute(statement, parameters)
+    cursor.execute(statement, parameters)
     rv = [
-        dict((cur.description[idx][0], value) for idx, value in enumerate(row))
-        for row in cur.fetchall()
+        dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
+        for row in cursor.fetchall()
     ]
 
     return (rv[0] if rv else None) if one else rv
@@ -79,13 +106,14 @@ def write(statement, args=(), commit=True):
     Returns:
         (int) Last row id
     """
-    conn = get_connection()
+    connection = get_connection()
+    cursor = connection.cursor()
 
-    cur = conn.execute(statement, args)
+    cursor.execute(statement, args)
     if commit:
-        conn.commit()
+        connection.commit()
 
-    return cur.lastrowid
+    return cursor.lastrowid
 
 
 def close(error=None):
@@ -100,21 +128,3 @@ def close(error=None):
 
     if error:
         pass
-
-
-def create():
-    """
-    If no database exists, import a fresh copy of the schema.
-    """
-
-    if not os.path.exists(config.PATH_DB_FILE):
-        conn = get_connection()
-        with open(config.PATH_DB_SCHEMA, mode="r", encoding="utf-8") as f:
-            script = f.read()
-            conn.executescript(script)
-
-
-if __name__ == "__main__":
-    config.init()
-    create()
-    print("Initialized the database.")
