@@ -16,9 +16,14 @@ services:
       - db
     ports:
       - "5000:5000"
+    volumes: 
+      - ./src/quagen:/app/quagen
+
   worker:
     build: 
       context: .
       dockerfile: deploy/worker/Dockerfile
     links:
       - db
+    volumes: 
+      - ./src/quagen:/app/quagen
