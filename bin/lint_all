@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Lints and styles all the code
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+source $DIR/lint_python
+source $DIR/lint_js

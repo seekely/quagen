@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Lints and styles all the JS code
+
+docker-compose run node sh -c "npm run format && npm run lint"

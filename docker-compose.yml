@@ -1,0 +1,40 @@
+version: '3'
+services:
+  db:
+    build: 
+      context: .
+      dockerfile: deploy/db/Dockerfile
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./instance/db:/var/lib/postgresql
+  node:
+    build:
+      args:
+        QUAGEN_TESTING: "yes" 
+      context: .
+      dockerfile: deploy/node/Dockerfile
+    volumes: 
+      - ./src:/app/src
+  web:
+    build:
+      args:
+        QUAGEN_TESTING: "yes" 
+      context: .
+      dockerfile: deploy/web/Dockerfile
+    links:
+      - db
+    ports:
+      - "5000:5000"
+    volumes: 
+      - ./src/quagen:/app/quagen
+  worker:
+    build: 
+      args:
+        QUAGEN_TESTING: "yes"
+      context: .
+      dockerfile: deploy/worker/Dockerfile
+    links:
+      - db
+    volumes: 
+      - ./src/quagen:/app/quagen

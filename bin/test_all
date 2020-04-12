@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Runs all Quagen tests!
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+source $DIR/test_unit_python
+source $DIR/test_profile_python
+source $DIR/test_unit_js

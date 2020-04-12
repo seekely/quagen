@@ -20,7 +20,9 @@ def get_game(game_id):
         Game object
     """
     game = None
-    row = db.query("SELECT game_id, data  FROM game WHERE game_id = ?", [game_id], True)
+    row = db.query(
+        "SELECT game_id, data  FROM game WHERE game_id = %s", [game_id], True
+    )
 
     if row is not None:
         data = json.loads(row["data"])
@@ -50,7 +52,7 @@ def get_unprocessed_game_events(game_id):
         (list) of unprocessed game ids
     """
     rows = db.query(
-        "SELECT data FROM game_event WHERE processed = 0 AND game_id = ?", [game_id]
+        "SELECT data FROM game_event WHERE processed = 0 AND game_id = %s", [game_id]
     )
 
     events = [json.loads(row["data"]) for row in rows]
@@ -66,7 +68,7 @@ def insert_game(game):
         game (Game): Game object to save
     """
     db.write(
-        "INSERT INTO game (game_id, data, time_created, time_started, time_updated) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO game (game_id, data, time_created, time_started, time_updated) VALUES (%s, %s, %s, %s, %s)",
         [
             game.game_id,
             json.dumps(game.get_sensitive_state()),
@@ -87,7 +89,7 @@ def insert_game_event(game_id, event):
     """
     event["id"] = utils.generate_id()
     db.write(
-        "INSERT INTO game_event (event_id, game_id, data, processed, time_created) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO game_event (event_id, game_id, data, processed, time_created) VALUES (%s, %s, %s, %s, %s)",
         [event["id"], game_id, json.dumps(event), 0, int(time.time())],
     )
 
@@ -101,7 +103,7 @@ def update_game(game):
     """
     game.updated()
     db.write(
-        "UPDATE game SET game_id = ?, data = ?, time_completed = ?, time_started = ?, time_updated = ? WHERE game_id = ?",
+        "UPDATE game SET game_id = %s, data = %s, time_completed = %s, time_started = %s, time_updated = %s WHERE game_id = %s",
         [
             game.game_id,
             json.dumps(game.get_sensitive_state()),
@@ -120,7 +122,7 @@ def update_processed_events(event_ids):
     Attr:
         event_ids (list): Now processed event ids
     """
-    parameters = ",".join("?" * len(event_ids))
+    parameters = ",".join(["%s"] * len(event_ids))
     db.write(
         f"UPDATE game_event SET processed = 1 WHERE event_id IN ({parameters})",
         event_ids,
