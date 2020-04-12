@@ -8,8 +8,18 @@ services:
       - "5432:5432"
     volumes:
       - ./instance/db:/var/lib/postgresql
+  node:
+    build:
+      args:
+        QUAGEN_TESTING: "yes" 
+      context: .
+      dockerfile: deploy/node/Dockerfile
+    volumes: 
+      - ./src:/app/src
   web:
-    build: 
+    build:
+      args:
+        QUAGEN_TESTING: "yes" 
       context: .
       dockerfile: deploy/web/Dockerfile
     links:
@@ -18,9 +28,10 @@ services:
       - "5000:5000"
     volumes: 
       - ./src/quagen:/app/quagen
-
   worker:
     build: 
+      args:
+        QUAGEN_TESTING: "yes"
       context: .
       dockerfile: deploy/worker/Dockerfile
     links:

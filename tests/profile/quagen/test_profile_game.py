@@ -28,7 +28,7 @@ def test_profiles():
     profiler.print_stats()
 
     total_time = end - start
-    assert total_time < 0.25
+    assert total_time < 0.5
 
 
 if __name__ == "__main__":

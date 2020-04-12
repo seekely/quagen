@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Runs Python unit tests through Docker
+
+docker-compose run web python -m pytest tests/unit -W ignore::DeprecationWarning

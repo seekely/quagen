@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Runs JS unit tests through Docker
+
+docker-compose run node npm test

@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Lints and styles all the Python code
+
+docker-compose run web sh -c "/usr/local/bin/black . && /usr/local/bin/pylint_runner"

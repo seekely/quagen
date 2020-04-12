@@ -8,11 +8,20 @@ RUN apk update \
     && rm -rf /var/cache/apk/*
 
 WORKDIR /app
+ARG QUAGEN_TESTING="no"
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-dev.txt ./
+COPY deploy/web/install_deps.sh ./
 
+RUN if [ "$QUAGEN_TESTING" = "no" ]; then rm -fr requirements-dev.txt; fi
+RUN source install_deps.sh
+
+COPY .pylintrc ./
+COPY pyproject.toml ./
 COPY src/quagen quagen/
+COPY tests tests
+RUN if [ "$QUAGEN_TESTING" = "no" ]; then rm -fr tests; fi
 
 ENV FLASK_APP=quagen
 ENV FLASK_ENV=development

@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Runs Python profile tests through Docker
+
+docker-compose run web python -m pytest tests/profile -W ignore::DeprecationWarning
