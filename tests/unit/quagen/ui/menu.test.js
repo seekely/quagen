@@ -7,7 +7,10 @@ import { createGame } from "../../../../src/quagen/ui/menu";
 
 test("createGame hits callback", async () => {
   // no location available
-  window.location.assign = jest.fn();
+  Object.defineProperty(window, 'location', {
+    writable: true,
+    value: { assign: jest.fn() }
+  })
 
   // Have `fetch` grab mocked data
   const mockData = { game: { game_id: 5 } };
@@ -28,7 +31,10 @@ test("createGame hits callback", async () => {
 
 test("createGame misses callback", async () => {
   // no location available
-  window.location.assign = jest.fn();
+  Object.defineProperty(window, 'location', {
+    writable: true,
+    value: { assign: jest.fn() }
+  })
 
   // Have `fetch` grab bad mocked data
   const mockFetchPromise = Promise.resolve({ status: 400 });
