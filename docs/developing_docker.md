@@ -8,7 +8,6 @@ Ensure you have Docker installed and `docker-compose` in your path.
 
     git clone git@github.com:seekely/quagen.git
     cd quagen
-    ./bin/setup_docker
     docker-compose up
 
 If the above succeeds, you should be able to open up a browser to 
@@ -33,9 +32,15 @@ A set of shell scripts will run various parts of Quagen's testing via Docker:
 
 ### Enforcing conventions
 
-Lints and formats the code. Required for builds to pass and PR acceptance:
+Lints and formats the code. Required for builds to pass and PR acceptance. Highly suggested to integrate [Black][black], [Pylint][pylint], [Prettier][prettier], and [ESlint][eslint] into your editor of choice.
+
 
     # Lint and format code
     ./lint_all
     ./lint_js
     ./lint_python
+
+[black]: https://black.readthedocs.io
+[pylint]: https://www.pylint.org/
+[prettier]: https://prettier.io/
+[eslint]: https://eslint.org

@@ -85,3 +85,8 @@ All JS/web code is auto-formatted using [Prettier][prettier] and further linted 
      
     # Run web linter
     npm run lint 
+
+[black]: https://black.readthedocs.io
+[pylint]: https://www.pylint.org/
+[prettier]: https://prettier.io/
+[eslint]: https://eslint.org

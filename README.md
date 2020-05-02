@@ -37,7 +37,6 @@ The recommended path for development is using [Docker][docker]:
 
     git clone git@github.com:seekely/quagen.git
     cd quagen
-    ./bin/setup_docker
     docker-compose up
 
 If the above succeeds, you should be able to open up a browser to 
@@ -53,7 +52,3 @@ For more help and information on developing Quagen:
 [svelte]: https://svelte.dev/
 [postgres]: https://www.postgresql.org/
 [docker]: https://www.docker.com/get-started
-[black]: https://black.readthedocs.io
-[pylint]: https://www.pylint.org/
-[prettier]: https://prettier.io/
-[eslint]: https://eslint.org
