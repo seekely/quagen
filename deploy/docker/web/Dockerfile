@@ -12,7 +12,7 @@ ARG QUAGEN_TESTING="no"
 
 COPY requirements.txt ./
 COPY requirements-dev.txt ./
-COPY deploy/web/install_deps.sh ./
+COPY deploy/docker/web/install_deps.sh ./
 
 RUN if [ "$QUAGEN_TESTING" = "no" ]; then rm -fr requirements-dev.txt; fi
 RUN source install_deps.sh

@@ -134,6 +134,7 @@ def main():
     # worker to come up before the database
     db.get_connection(True)
 
+    print("Worker now running")
     worker = Worker()
     worker.run()
 

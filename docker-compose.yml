@@ -3,7 +3,8 @@ services:
   db:
     build: 
       context: .
-      dockerfile: deploy/db/Dockerfile
+      dockerfile: deploy/docker/db/Dockerfile
+    image: quagen-db
     ports:
       - "5432:5432"
     volumes:
@@ -13,7 +14,8 @@ services:
       args:
         QUAGEN_TESTING: "yes" 
       context: .
-      dockerfile: deploy/node/Dockerfile
+      dockerfile: deploy/docker/node/Dockerfile
+    image: quagen-node
     volumes: 
       - ./src:/app/src
   web:
@@ -21,7 +23,8 @@ services:
       args:
         QUAGEN_TESTING: "yes" 
       context: .
-      dockerfile: deploy/web/Dockerfile
+      dockerfile: deploy/docker/web/Dockerfile
+    image: quagen-web
     links:
       - db
     ports:
@@ -33,7 +36,8 @@ services:
       args:
         QUAGEN_TESTING: "yes"
       context: .
-      dockerfile: deploy/worker/Dockerfile
+      dockerfile: deploy/docker/worker/Dockerfile
+    image: quagen-worker
     links:
       - db
     volumes: 

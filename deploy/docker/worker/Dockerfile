@@ -10,7 +10,7 @@ RUN apk update \
 
 WORKDIR /app
 
-COPY deploy/worker/reloader.sh ./
+COPY deploy/docker/worker/reloader.sh ./
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
