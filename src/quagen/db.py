@@ -8,6 +8,8 @@ import time
 from werkzeug.local import Local
 import psycopg2
 
+from quagen import config
+
 # Allows us to share our database connection in a WSGI environment
 # https://werkzeug.palletsprojects.com/en/0.16.x/local/
 context = Local()
@@ -36,7 +38,11 @@ def make_connection(retry=False):
 
     try:
         connection = psycopg2.connect(
-            user="quagen", password="quagen", host="db", port="5432", database="quagen"
+            user=config.SETTING_DB_USER,
+            password=config.SETTING_DB_PASSWORD,
+            host=config.SETTING_DB_HOST,
+            port=config.SETTING_DB_PORT,
+            database=config.SETTING_DB_NAME,
         )
 
     except psycopg2.OperationalError as error:

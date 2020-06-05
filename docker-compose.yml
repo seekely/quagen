@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 services:
   db:
-    build: 
+    build:
       context: .
       dockerfile: deploy/docker/db/Dockerfile
     image: quagen-db
@@ -12,33 +12,37 @@ services:
   node:
     build:
       args:
-        QUAGEN_TESTING: "yes" 
+        QUAGEN_TESTING: "yes"
       context: .
       dockerfile: deploy/docker/node/Dockerfile
     image: quagen-node
-    volumes: 
+    volumes:
       - ./src:/app/src
   web:
     build:
       args:
-        QUAGEN_TESTING: "yes" 
+        QUAGEN_TESTING: "yes"
       context: .
       dockerfile: deploy/docker/web/Dockerfile
+    environment:
+      QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen-web
     links:
       - db
     ports:
       - "5000:5000"
-    volumes: 
+    volumes:
       - ./src/quagen:/app/quagen
   worker:
-    build: 
+    build:
       args:
         QUAGEN_TESTING: "yes"
       context: .
       dockerfile: deploy/docker/worker/Dockerfile
+    environment:
+      QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen-worker
     links:
       - db
-    volumes: 
+    volumes:
       - ./src/quagen:/app/quagen

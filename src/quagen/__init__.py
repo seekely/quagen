@@ -24,10 +24,7 @@ def create_app():
     config.init()
 
     app = Flask(__name__, instance_relative_config=True, static_url_path="")
-    app.config.from_mapping(
-        # @todo rseekely a default secret that should be overridden by instance config
-        SECRET_KEY="dev"
-    )
+    app.config.from_mapping(SECRET_KEY=config.SETTING_APP_SECRET)
 
     # register the database commands
     app.teardown_appcontext(db.close)
