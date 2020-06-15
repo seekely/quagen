@@ -23,6 +23,7 @@ COPY src/quagen quagen/
 COPY tests tests
 RUN if [ "$QUAGEN_TESTING" = "no" ]; then rm -fr tests; fi
 
+ENV PYTHONUNBUFFERED=0
 ENV FLASK_APP=quagen
 ENV FLASK_ENV=development
 ENV FLASK_RUN_HOST 0.0.0.0

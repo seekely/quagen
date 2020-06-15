@@ -10,6 +10,7 @@ import time
 
 from quagen import config
 from quagen import db
+from quagen import migrator
 from quagen import queries
 from quagen.ai.biased import BiasedAI
 
@@ -130,9 +131,9 @@ def main():
     print("Worker coming online")
     config.init()
 
-    # Retries connection to database until we succeed which allows the
-    # worker to come up before the database
+    # Wait for the db to be in good state until we fire up
     db.get_connection(True)
+    migrator.wait_until_migrated()
 
     print("Worker now running")
     worker = Worker()

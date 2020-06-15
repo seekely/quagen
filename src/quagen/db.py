@@ -1,7 +1,7 @@
 """
 Interact with the SQLite database
 """
-# @hack rseekely uggggh context crap
+# @hack rseekely uggggh context being a global crap
 # pylint: disable=invalid-name,global-statement
 import time
 
@@ -51,7 +51,7 @@ def make_connection(retry=False):
 
         print("Error connecting to db. Trying reconnect in 5 seconds...")
         time.sleep(5)
-        make_connection(True)
+        return make_connection(True)
 
     except (Exception, psycopg2.Error) as error:
         raise error

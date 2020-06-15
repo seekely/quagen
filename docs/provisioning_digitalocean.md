@@ -60,9 +60,6 @@ To blow (most) everything back up,
 
     terraform destroy -var "do_api_token=$env:DO_API_TOKEN"
 
-**NOTE**: The K8s deployment will have created a load balancer that Terraform
-will not know about. This will need to be removed out of band.
-
 [digitalocean]: https://digitalocean.com
 [kubectl]: https://kubernetes.io/docs/tasks/tools/install-kubectl/
 [doctl]: https://github.com/digitalocean/doctl

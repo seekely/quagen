@@ -10,6 +10,8 @@ RUN apk update \
 
 WORKDIR /app
 
+# When running locally for development, we will use a reloader script for 
+# hot restarting
 COPY deploy/docker/worker/reloader.sh ./
 
 COPY requirements.txt ./
@@ -17,6 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/quagen quagen/
 
+ENV PYTHONUNBUFFERED=0
 ENV PYTHONPATH=.
-CMD [ "./reloader.sh" ]
+CMD [ "python", "quagen/worker.py" ]
 
