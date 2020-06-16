@@ -24,7 +24,8 @@ def migrate(schema="quagen/sql/schema.sql"):
     # We'd be in a pretty funky state if this wasn't the case.
     try:
         db.query("SELECT game_id FROM game LIMIT 1")
-    except psycopg2.errors.UndefinedTable:
+    # pylint: disable=no-member
+    except psycopg2.UndefinedTable:
         print("Schema missing, running database init")
         connection = db.get_connection()
         cursor = connection.cursor()
@@ -49,6 +50,7 @@ def is_migrated():
         # that doesn't exist at the momment, so for now we'll just see if the
         # game table exists like above.
         db.query("SELECT game_id FROM game LIMIT 1")
+    # pylint: disable=no-member
     except psycopg2.errors.UndefinedTable:
         migrated = False
 
