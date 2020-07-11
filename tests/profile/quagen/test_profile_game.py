@@ -2,6 +2,7 @@
 Profile game functions
 """
 import cProfile
+import logging
 import time
 
 from quagen.game import Board
@@ -12,7 +13,7 @@ def test_profiles():
     """
     Run game profiles
     """
-    print("Profiling score calculation with projection")
+    logging.info("Profiling score calculation with projection")
     board = Board({}, Game.DEFAULT_SETTINGS)
     board.generate()
     board.apply_moves([[4, 19, 1], [9, 4, 2]])

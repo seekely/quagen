@@ -2,6 +2,7 @@
 Defines a biased/weight AI
 """
 import itertools
+import logging
 import random
 
 from quagen.ai import AI
@@ -204,7 +205,7 @@ class BiasedAI(AI):
         best_candidate = augmented_candidates[0]["coords"]
 
         for spot in augmented_candidates:
-            print(f"Scored {spot}")
+            logging.debug(f"Scored {spot}")
 
         return best_candidate
 

@@ -1,6 +1,10 @@
 """
 Creates main Flask application
 """
+# pylint: disable=invalid-name
+
+from datetime import datetime
+import logging
 import os
 
 from flask import Flask
@@ -10,6 +14,17 @@ from quagen import config
 from quagen import db
 from quagen import api
 from quagen import web
+
+
+# Logging setup
+logger = logging.getLogger()
+formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(stream_handler)
+logger.setLevel(logging.DEBUG)
 
 
 def create_app():
