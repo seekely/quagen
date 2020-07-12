@@ -25,7 +25,7 @@ def migrate(schema="quagen/sql/schema.sql"):
     try:
         db.query("SELECT game_id FROM game LIMIT 1")
     # pylint: disable=no-member
-    except psycopg2.UndefinedTable:
+    except psycopg2.errors.UndefinedTable:
         logging.info("Schema missing, running database init")
         connection = db.get_connection()
         cursor = connection.cursor()

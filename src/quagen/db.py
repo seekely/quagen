@@ -51,6 +51,7 @@ def make_connection(retry=False):
             raise error
 
         logging.error("Error connecting to db. Trying reconnect in 5 seconds...")
+        logging.debug(error)
         time.sleep(5)
         return make_connection(True)
 
