@@ -3,11 +3,11 @@ data "digitalocean_kubernetes_versions" "grab" {}
 
 # Create K8s cluster from the latest version available
 resource "digitalocean_kubernetes_cluster" "quagen-k8s" {
-  name    = "${var.cluster_name}-${var.cluster_env}"
+  name    = "quagen-${var.cluster}"
   region  = var.do_region
   version = data.digitalocean_kubernetes_versions.grab.latest_version
   node_pool {
-    name       = "${var.cluster_name}-${var.cluster_env}-pool"
+    name       = "quagen-${var.cluster}"
     size       = var.do_k8s_node_type
     node_count = var.do_k8s_node_count
   }
@@ -15,7 +15,7 @@ resource "digitalocean_kubernetes_cluster" "quagen-k8s" {
 
 # Create Postgres database/user
 resource "digitalocean_database_cluster" "quagen-db-cluster" {
-  name       = "${var.cluster_name}-${var.cluster_env}-db"
+  name       = "quagen-${var.cluster}"
   region     = var.do_region
   engine     = "pg"
   version    = "11"
@@ -34,7 +34,7 @@ resource "digitalocean_database_firewall" "quagen-db-fw" {
 
 resource "digitalocean_database_db" "quagen-db" {
   cluster_id = digitalocean_database_cluster.quagen-db-cluster.id
-  name       = "${var.cluster_name}-${var.cluster_env}"
+  name       = var.db_name
 }
 
 resource "digitalocean_database_user" "quagen-db-user" {

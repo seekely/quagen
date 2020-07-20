@@ -26,7 +26,103 @@ spec:
     spec:
       containers:
       - name: quagen-web
-        image: seekely/quagen-web:latest
+        image: $QUAGEN_DOCKER_HUB:web
         imagePullPolicy: Always
         ports:
         - containerPort: 5000      
+        env: 
+        - name: QUAGEN_APP_SECRET
+          value: "$QUAGEN_APP_SECRET"
+        - name: QUAGEN_DB_HOST
+          value: "$QUAGEN_DB_HOST"
+        - name: QUAGEN_DB_NAME
+          value: "$QUAGEN_DB_NAME"
+        - name: QUAGEN_DB_PASSWORD
+          value: "$QUAGEN_DB_PASSWORD"
+        - name: QUAGEN_DB_PORT
+          value: "$QUAGEN_DB_PORT"
+        - name: QUAGEN_DB_USER
+          value: "$QUAGEN_DB_USER"
+
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quagen-worker
+spec:
+  selector:
+    matchLabels:
+      app: quagen-worker
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: quagen-worker
+    spec:
+      containers:
+      - name: quagen-worker
+        image: $QUAGEN_DOCKER_HUB:worker
+        imagePullPolicy: Always
+        env: 
+        - name: QUAGEN_APP_SECRET
+          value: "$QUAGEN_APP_SECRET"
+        - name: QUAGEN_DB_HOST
+          value: "$QUAGEN_DB_HOST"
+        - name: QUAGEN_DB_NAME
+          value: "$QUAGEN_DB_NAME"
+        - name: QUAGEN_DB_PASSWORD
+          value: "$QUAGEN_DB_PASSWORD"
+        - name: QUAGEN_DB_PORT
+          value: "$QUAGEN_DB_PORT"
+        - name: QUAGEN_DB_USER
+          value: "$QUAGEN_DB_USER"
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ingress-nginx
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-hostname: "$QUAGEN_DOMAIN"
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  externalTrafficPolicy: Local
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: https
+      port: 443
+      targetPort: https
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: quagen-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - $QUAGEN_DOMAIN
+    secretName: quagen-tls
+  rules:
+  - host: $QUAGEN_DOMAIN
+    http:
+      paths:
+      - backend:
+          serviceName: quagen-web
+          servicePort: 80
+        path: /
