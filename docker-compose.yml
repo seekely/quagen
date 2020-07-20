@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/db/Dockerfile
-    image: quagen-db
+    image: quagen:db
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +15,7 @@ services:
       - db
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
-    image: quagen-worker
+    image: quagen:worker
     volumes:
       - ./src/quagen:/app/quagen
   node:
@@ -24,7 +24,7 @@ services:
         QUAGEN_TESTING: "yes"
       context: .
       dockerfile: deploy/docker/node/Dockerfile
-    image: quagen-node
+    image: quagen:node
     volumes:
       - ./src:/app/src
   web:
@@ -37,7 +37,7 @@ services:
       - db
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
-    image: quagen-web
+    image: quagen:web
     ports:
       - "5000:5000"
     volumes:
@@ -53,6 +53,6 @@ services:
       - db
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
-    image: quagen-worker
+    image: quagen:worker
     volumes:
       - ./src/quagen:/app/quagen

@@ -109,3 +109,6 @@ node_modules/
 # Terraform
 .terraform
 *.tfstate*
+
+# Deploy config
+deploy/config

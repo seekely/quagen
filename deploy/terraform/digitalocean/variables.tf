@@ -1,11 +1,5 @@
-variable "cluster_name" {
-  description = "Name prefix for all Quagen created resources"
-  type        = string
-  default     = "quagen"
-}
-
-variable "cluster_env" {
-  description = "Environment name appended for all Quagen created resources"
+variable "cluster" {
+  description = "Cluster name appended to all DO Quagen created resources"
   type        = string
   default     = "production"
 }
