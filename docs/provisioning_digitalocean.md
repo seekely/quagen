@@ -35,7 +35,8 @@ After installing the above prerequisites, open a shell and run the following:
         terraform init deploy/terraform/digitalocean
         terraform apply -state=instance/terraform.tfstate deploy/terraform/digitalocean
 
-        export QUAGEN_DB_HOST="<caputred_from_terraform_output>"
+        export QUAGEN_DB_HOST="<captured_from_terraform_output>"
+        export QUAGEN_DB_PORT="<captured_from_terraform_output>"
         export QUAGEN_DB_PASSWORD=<captured_from_terraform_output>
 
 3.  Deploy Quagen to the K8s cluster.
@@ -58,7 +59,7 @@ After installing the above prerequisites, open a shell and run the following:
         kubectl create namespace cert-manager
         cat deploy/k8/ssl.yaml | envsubst | kubectl apply -f - 
 
-    I've noticed the above might fail with `Internal error occurred: failed
+    **NOTE:** I've noticed the above might fail with `Internal error occurred: failed
     calling webhook "webhook.cert-manager.io"`, but waiting a couple of minutes
     and trying again seems to work.
 
@@ -81,7 +82,7 @@ To blow (most) everything back up,
 
     terraform destroy -var "do_api_token=$env:DO_API_TOKEN"
 
-**NOTE**: The K8s deployment will have created a load balancer that Terraform
+**NOTE:** The K8s deployment will have created a load balancer that Terraform
 will not know about. This will need to be removed out of band.
 
 [digitalocean]: https://digitalocean.com

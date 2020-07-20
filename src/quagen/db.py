@@ -39,6 +39,7 @@ def make_connection(retry=False):
 
     try:
         connection = psycopg2.connect(
+            connect_timeout=1,
             user=config.SETTING_DB_USER,
             password=config.SETTING_DB_PASSWORD,
             host=config.SETTING_DB_HOST,

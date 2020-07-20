@@ -4,14 +4,14 @@ This is the recommended way of developing for Quagen.
 
 ### Getting Started
 
-Ensure you have Docker installed and `docker-compose` in your path. 
+Ensure you have Docker installed and `docker-compose` in your path.
 
     git clone git@github.com:seekely/quagen.git
     cd quagen
     docker-compose up
 
-If the above succeeds, you should be able to open up a browser to 
-http://localhost:5000! To develop, most changes you make locally should 
+If the above succeeds, you should be able to open up a browser to
+http://localhost:5000! To develop, most changes you make locally should
 automatically hot reload in the containers.
 
 

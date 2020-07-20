@@ -31,6 +31,8 @@ spec:
         ports:
         - containerPort: 5000      
         env: 
+        - name: FLASK_ENV
+          value: "production"
         - name: QUAGEN_APP_SECRET
           value: "$QUAGEN_APP_SECRET"
         - name: QUAGEN_DB_HOST
@@ -44,7 +46,33 @@ spec:
         - name: QUAGEN_DB_USER
           value: "$QUAGEN_DB_USER"
 
-
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: quagen-migrator
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: quagen-migrator
+        image: $QUAGEN_DOCKER_HUB:worker
+        imagePullPolicy: Always
+        command: ["python", "quagen/migrator.py"]
+        env: 
+        - name: QUAGEN_APP_SECRET
+          value: "$QUAGEN_APP_SECRET"
+        - name: QUAGEN_DB_HOST
+          value: "$QUAGEN_DB_HOST"
+        - name: QUAGEN_DB_NAME
+          value: "$QUAGEN_DB_NAME"
+        - name: QUAGEN_DB_PASSWORD
+          value: "$QUAGEN_DB_PASSWORD"
+        - name: QUAGEN_DB_PORT
+          value: "$QUAGEN_DB_PORT"
+        - name: QUAGEN_DB_USER
+          value: "$QUAGEN_DB_USER"
 
 ---
 apiVersion: apps/v1
@@ -112,11 +140,13 @@ metadata:
   name: quagen-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
   - hosts:
     - $QUAGEN_DOMAIN
+    - www.$QUAGEN_DOMAIN
     secretName: quagen-tls
   rules:
   - host: $QUAGEN_DOMAIN
