@@ -5,6 +5,7 @@ some of the more strenuous tasks (like AI choosing next move).
 We currently rely on a single worker process for simplicity, but this will
 need to be distributed to handle any kind of player load greater than 1.
 """
+import logging
 import signal
 import time
 
@@ -36,8 +37,8 @@ def process_game(game_id):
     game = queries.get_game(game_id)
     events = queries.get_unprocessed_game_events(game_id)
 
-    print(f"Processing {len(events)} events for game {game_id}")
-    print(f"{events}")
+    logging.info(f"Processing {len(events)} events for game {game_id}")
+    logging.debug(f"{events}")
 
     if game.is_in_progress():
 
@@ -73,7 +74,7 @@ def handle_ai_movement(game):
         if not game.has_moved(ai_id):
 
             ai_strength = game.settings["ai_strength"]
-            print(f"Taking turn for AI { ai_id } with strength { ai_strength }")
+            logging.info(f"Taking turn for AI { ai_id } with strength { ai_strength }")
 
             ai_method = BiasedAI(game, (i + 1), ai_strength)
             ai_x, ai_y = ai_method.choose_move()
@@ -128,14 +129,14 @@ def main():
     """
     Main
     """
-    print("Worker coming online")
+    logging.info("Worker coming online")
     config.init()
 
     # Wait for the db to be in good state until we fire up
     db.get_connection(True)
     migrator.wait_until_migrated()
 
-    print("Worker now running")
+    logging.info("Worker now running")
     worker = Worker()
     worker.run()
 

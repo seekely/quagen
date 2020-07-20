@@ -16,8 +16,6 @@ services:
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen:worker
-    links:
-      - db
     volumes:
       - ./src/quagen:/app/quagen
   node:
@@ -40,8 +38,6 @@ services:
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen:web
-    links:
-      - db
     ports:
       - "5000:5000"
     volumes:
@@ -58,7 +54,5 @@ services:
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen:worker
-    links:
-      - db
     volumes:
       - ./src/quagen:/app/quagen

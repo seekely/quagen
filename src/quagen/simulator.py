@@ -3,6 +3,7 @@ Simulates games between multiple AIs.
 
 See bin/examples/simulate_ais.py for usage example.
 """
+import logging
 import multiprocessing
 from multiprocessing import Pool
 import statistics
@@ -70,7 +71,7 @@ def run_simulation(simulation):
         (Simulation) Completed simulation
 
     """
-    print(f"Starting simulation {simulation.game.game_id}")
+    logging.info(f"Starting simulation {simulation.game.game_id}")
     simulation.run()
     return simulation
 
@@ -95,7 +96,7 @@ def simulate(
 
     """
 
-    print(f"Simulating {number_games} with concurrency of {concurrency}")
+    logging.info(f"Simulating {number_games} with concurrency of {concurrency}")
     simulations = []
     results = {}
 
@@ -130,5 +131,5 @@ def simulate(
         tally["max"] = max(tally["scores"])
         del tally["scores"]
 
-    print(f"Simulation complete")
+    logging.info(f"Simulation complete")
     return results

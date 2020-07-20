@@ -4,6 +4,7 @@ Contains the backend game modeling and logic
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-public-methods
 import copy
+import logging
 from time import time
 
 from quagen import utils
@@ -206,7 +207,7 @@ class Game:
             (bool) True on successful addition to the game, false otherwise
         """
         player_added = False
-        print(f"Adding player {player_id}")
+        logging.info(f"Adding player {player_id} to game {self._game_id}")
 
         player_count = len(self._players.keys())
         if (
@@ -214,7 +215,7 @@ class Game:
             and player_id not in self._players.keys()
         ):
 
-            print("Valid player add")
+            logging.info(f"Added player {player_id} to game {self._game_id}")
             player_added = True
             self._players[player_id] = {
                 "id": player_id,
@@ -251,7 +252,9 @@ class Game:
             (bool) True on a valid move, false otherwise
         """
         valid_move = False
-        print(f"Adding move at {x} {y} for player {player_id}")
+        logging.info(
+            f"Adding move at {x} {y} for player {player_id} in game {self._game_id}"
+        )
 
         if (
             self.is_in_progress()
@@ -263,7 +266,9 @@ class Game:
             player_color = self._players[player_id]["color"]
             self._turn_moves[player_id] = [x, y, player_color]
 
-            print("Valid move")
+            logging.info(
+                f"Added move at {x} {y} for player {player_id} in game {self._game_id}"
+            )
             valid_move = True
 
         return valid_move
@@ -369,7 +374,9 @@ class Game:
             if self._check_for_winners():
                 self.end()
 
-            print(f"Processed turn to {self._turn_completed}")
+            logging.info(
+                f"Processed turn to {self._turn_completed} in game {self._game_id}"
+            )
             processed_turn = True
 
         return processed_turn
@@ -409,10 +416,10 @@ class Game:
         is_winner = (
             available_count == 0 or leading_score > majority_count or not still_hope
         )
-        print(f"Is there a winner: {is_winner}")
-        print(f"...Check unavailable: {available_count == 0}")
-        print(f"...Check majority: {leading_score > majority_count}")
-        print(f"...Check no hope: {not still_hope}")
+        logging.debug(f"Is there a winner: {is_winner}")
+        logging.debug(f"...Check unavailable: {available_count == 0}")
+        logging.debug(f"...Check majority: {leading_score > majority_count}")
+        logging.debug(f"...Check no hope: {not still_hope}")
         return is_winner
 
 

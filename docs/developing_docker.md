@@ -36,9 +36,9 @@ Lints and formats the code. Required for builds to pass and PR acceptance. Highl
 
 
     # Lint and format code
-    ./lint_all
-    ./lint_js
-    ./lint_python
+    ./bin/lint_all
+    ./bin/lint_js
+    ./bin/lint_python
 
 [black]: https://black.readthedocs.io
 [pylint]: https://www.pylint.org/

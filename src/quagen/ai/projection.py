@@ -1,6 +1,7 @@
 """
 Defines a AI which relies on projection
 """
+import logging
 import random
 
 from quagen.ai import AI
@@ -123,7 +124,7 @@ class ProjectionAI(AI):
         for spot in candidate_spots:
             scores = self.project_move(spot)
             projected_score = scores[self._color]["projected"]
-            print(f"Scored {spot} at {projected_score}")
+            logging.debug(f"Scored {spot} at {projected_score}")
 
             if projected_score > best_score:
                 best_candidate = spot

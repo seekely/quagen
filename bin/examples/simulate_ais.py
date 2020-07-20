@@ -37,7 +37,7 @@ def setup_ais(simulation):
 def main():
     """Fires off the simulation of 100 games """
     results = simulate(setup_ais, 100)
-    print(str(results))
+    logging.info((str(results))
 
 
 if __name__ == "__main__":

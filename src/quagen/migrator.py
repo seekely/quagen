@@ -1,7 +1,7 @@
 """
 Responsible for bringing the database up to date.
 """
-
+import logging
 import time
 
 import psycopg2
@@ -18,7 +18,7 @@ def migrate(schema="quagen/sql/schema.sql"):
     Args:
         schema (string): Path to database schema SQL
     """
-    print("Running database migrations")
+    logging.info("Running database migrations")
 
     # If the game table is missing, we'll assume the entire schema is missing.
     # We'd be in a pretty funky state if this wasn't the case.
@@ -26,13 +26,13 @@ def migrate(schema="quagen/sql/schema.sql"):
         db.query("SELECT game_id FROM game LIMIT 1")
     # pylint: disable=no-member
     except psycopg2.errors.UndefinedTable:
-        print("Schema missing, running database init")
+        logging.info("Schema missing, running database init")
         connection = db.get_connection()
         cursor = connection.cursor()
         cursor.execute(open(schema, "r").read())
         connection.commit()
 
-    print("Database up to date")
+    logging.info("Database up to date")
 
 
 def is_migrated():
@@ -62,7 +62,7 @@ def wait_until_migrated():
     Waits until the migrator has completed its job before returning
     """
     while not is_migrated():
-        print("Waiting until database is migrated...")
+        logging.info("Waiting until database is migrated...")
         time.sleep(5)
 
 
@@ -70,7 +70,7 @@ def main():
     """
     Main
     """
-    print("Migrator starting up")
+    logging.info("Migrator starting up")
     config.init()
 
     # Retries connection to database until we succeed which allows the

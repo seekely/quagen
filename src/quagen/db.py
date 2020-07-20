@@ -3,6 +3,7 @@ Interact with the SQLite database
 """
 # @hack rseekely uggggh context being a global crap
 # pylint: disable=invalid-name,global-statement
+import logging
 import time
 
 from werkzeug.local import Local
@@ -49,7 +50,8 @@ def make_connection(retry=False):
         if not retry:
             raise error
 
-        print("Error connecting to db. Trying reconnect in 5 seconds...")
+        logging.error("Error connecting to db. Trying reconnect in 5 seconds...")
+        logging.debug(error)
         time.sleep(5)
         return make_connection(True)
 
