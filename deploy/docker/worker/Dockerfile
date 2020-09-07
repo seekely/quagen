@@ -4,6 +4,8 @@ RUN apk update \
     && apk add --no-cache \
     && apk add build-base \
     && apk add inotify-tools \
+    && apk add linux-headers \
+    && apk add musl-dev \
     && apk add postgresql-client \
     && apk add postgresql-dev \
     && rm -rf /var/cache/apk/*
