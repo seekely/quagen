@@ -33,9 +33,11 @@ services:
         QUAGEN_TESTING: "yes"
       context: .
       dockerfile: deploy/docker/web/Dockerfile
+    command: ["flask", "run"]
     depends_on:
       - db
     environment:
+      FLASK_ENV: "development"
       QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen:web
     ports:
