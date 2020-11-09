@@ -23,8 +23,8 @@ project in your own direction!
 
 Contributors to date:
 
-* @seekely
-* @RuggeroAltair
+* [@seekely](https://github.com/seekely)
+* [@RuggeroAltair](https://github.com/RuggeroAltair)
 
 # Development
 
