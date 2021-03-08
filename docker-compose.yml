@@ -9,15 +9,6 @@ services:
       - "5432:5432"
     volumes:
       - ./instance/db:/var/lib/postgresql
-  migrator:
-    command: ["python", "quagen/migrator.py"]
-    depends_on:
-      - db
-    environment:
-      QUAGEN_APP_SECRET: "thisisjustatest"
-    image: quagen:worker
-    volumes:
-      - ./src/quagen:/app/quagen
   node:
     build:
       args:
@@ -51,6 +42,15 @@ services:
       context: .
       dockerfile: deploy/docker/worker/Dockerfile
     command: ["./reloader.sh"]
+    depends_on:
+      - db
+    environment:
+      QUAGEN_APP_SECRET: "thisisjustatest"
+    image: quagen:worker
+    volumes:
+      - ./src/quagen:/app/quagen
+  migrator:
+    command: ["python", "quagen/migrator.py"]
     depends_on:
       - db
     environment:
