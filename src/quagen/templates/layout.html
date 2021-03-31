@@ -51,20 +51,8 @@
     <!-- {# For page specific Javascript #} -->
     {% block scripting %}{% endblock %}
 
-    <!-- {# Google Analytics #} -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=UA-118597160-2"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      if ("localhost" != window.location.hostname) {
-        gtag("js", new Date());
-        gtag("config", "UA-118597160-2");
-      }
-    </script>
+    <!-- {# Goat Analytics #} -->
+    <script data-goatcounter="https://quagen.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
   </body>
 </html>
