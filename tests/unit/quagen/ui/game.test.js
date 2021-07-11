@@ -5,23 +5,27 @@
 
 import { GameState, GamePoll } from "../../../../src/quagen/ui/game";
 
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 test("GameState updates correct fields", () => {
   const gameState = new GameState("test1234");
-  gameState.players = { "1": { ai: false } };
+  gameState.players = { 1: { ai: false } };
   gameState.timeCreated = 12345678;
   gameState.timeUpdated = 87654321;
 
   gameState.update({
-    players: { "1": { ai: false }, "2": { ai: true } },
+    players: { 1: { ai: false }, 2: { ai: true } },
     time_updated: 12345678,
-    ignored: false
+    ignored: false,
   });
 
   expect(gameState.timeCreated).toBe(12345678);
   expect(gameState.timeUpdated).toBe(12345678);
   expect(gameState.players).toStrictEqual({
-    "1": { ai: false },
-    "2": { ai: true }
+    1: { ai: false },
+    2: { ai: true },
   });
 });
 
@@ -48,8 +52,8 @@ test("GameState knows human opponents", () => {
   let settings = {
     settings: {
       ai_count: 1,
-      player_count: 2
-    }
+      player_count: 2,
+    },
   };
 
   gameState.update(settings);
@@ -59,8 +63,8 @@ test("GameState knows human opponents", () => {
   settings = {
     settings: {
       ai_count: 1,
-      player_count: 3
-    }
+      player_count: 3,
+    },
   };
 
   gameState.update(settings);
@@ -70,8 +74,8 @@ test("GameState knows human opponents", () => {
   settings = {
     settings: {
       ai_count: 0,
-      player_count: 4
-    }
+      player_count: 4,
+    },
   };
 
   gameState.update(settings);
@@ -85,8 +89,8 @@ test("GameState knows AI opponents", () => {
   let settings = {
     settings: {
       ai_count: 0,
-      player_count: 2
-    }
+      player_count: 2,
+    },
   };
 
   gameState.update(settings);
@@ -96,8 +100,8 @@ test("GameState knows AI opponents", () => {
   settings = {
     settings: {
       ai_count: 1,
-      player_count: 2
-    }
+      player_count: 2,
+    },
   };
 
   gameState.update(settings);
@@ -107,8 +111,8 @@ test("GameState knows AI opponents", () => {
   settings = {
     settings: {
       ai_count: 3,
-      player_count: 0
-    }
+      player_count: 0,
+    },
   };
 
   gameState.update(settings);
@@ -118,6 +122,7 @@ test("GameState knows AI opponents", () => {
 test("GamePoll starts polling", () => {
   // Mock our timers so we don't have to wait
   jest.useFakeTimers();
+  const setIntervalSpy = jest.spyOn(global, "setInterval");
 
   const gameState = new GameState("test1234");
 
@@ -126,13 +131,14 @@ test("GamePoll starts polling", () => {
   gamePoll._poll = jest.fn();
 
   gamePoll.start();
-  expect(setInterval).toHaveBeenCalledTimes(1);
+  expect(setIntervalSpy).toHaveBeenCalledTimes(1);
   expect(gamePoll._poll).toHaveBeenCalledTimes(1);
 });
 
 test("GamePoll recurs poll", () => {
   // Mock our timers so we don't have to wait
   jest.useFakeTimers();
+  const setIntervalSpy = jest.spyOn(global, "setInterval");
 
   const gameState = new GameState("test1234");
 
@@ -142,7 +148,7 @@ test("GamePoll recurs poll", () => {
 
   gamePoll.start();
   jest.advanceTimersByTime(gamePoll._timeBetweenPoll);
-  expect(setInterval).toHaveBeenCalledTimes(1);
+  expect(setIntervalSpy).toHaveBeenCalledTimes(1);
   expect(gamePoll._poll).toHaveBeenCalledTimes(2);
 });
 
@@ -164,7 +170,7 @@ test("GamePoll hits callbacks", async () => {
   const mockJsonPromise = Promise.resolve(mockData);
   const mockFetchPromise = Promise.resolve({
     status: 200,
-    json: () => mockJsonPromise
+    json: () => mockJsonPromise,
   });
   global.fetch = jest.fn().mockImplementation(() => mockFetchPromise);
 
