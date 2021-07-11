@@ -29,7 +29,7 @@
   "scripts": {
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
-    "lint": "eslint **/*.svelte **/*.js",
+    "lint": "eslint src/**/*.svelte src/**/*.js tests/**/*.js",
     "format": "prettier --write *.js *.json src/**/*.css src/**/*.html src/**/*.js src/**/*.svelte tests/**/*.js",
     "format-check": "prettier --check *.js *.json src/**/*.css src/**/*.html src/**/*.js src/**/*.svelte tests/**/*.js",
     "test": "jest --verbose"

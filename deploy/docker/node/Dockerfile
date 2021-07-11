@@ -14,7 +14,6 @@ COPY package-lock.json ./
 COPY rollup.config.js ./
 RUN npm install
 
-COPY .eslintignore ./
 COPY .eslintrc.json ./
 COPY .prettierignore ./
 COPY .prettierrc ./

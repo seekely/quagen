@@ -6,8 +6,14 @@
     "node": true
   },
   "extends": ["eslint:recommended"],
+  "ignorePatterns": ["src/quagen/static/js/ui.js"
+                  , "src/quagen/static/css/ui.css"
+                  , "/**/node_modules/*"
+                  , "/**/__pycache__/*"
+                  , "/**/venv/*"],
+
   "parserOptions": {
-    "ecmaVersion": 2019,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "plugins": ["jest", "svelte3"],
