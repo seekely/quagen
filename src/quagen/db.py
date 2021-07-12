@@ -77,7 +77,7 @@ def get_connection(retry=False):
     return context.db
 
 
-def query(statement, parameters=(), one=False):
+def query(statement, parameters=(), one=False, commit=True):
     """
     Query the database (e.g. SELECT)
 
@@ -91,9 +91,13 @@ def query(statement, parameters=(), one=False):
         (list) Rows of query results
 
     """
-    cursor = get_connection().cursor()
+    connection = get_connection()
+    cursor = connection.cursor()
 
     cursor.execute(statement, parameters)
+    if commit:
+        connection.commit()
+
     rv = [
         dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
         for row in cursor.fetchall()
