@@ -66,7 +66,7 @@ class Game:
 
     @property
     def game_id(self):
-        """Globally unique game id """
+        """Globally unique game id"""
         return self._game_id
 
     @property
@@ -207,7 +207,7 @@ class Game:
             (bool) True on successful addition to the game, false otherwise
         """
         player_added = False
-        logging.info(f"Adding player {player_id} to game {self._game_id}")
+        logging.info(f"Attempting add of player {player_id} to game {self._game_id}")
 
         player_count = len(self._players.keys())
         if (
@@ -253,7 +253,7 @@ class Game:
         """
         valid_move = False
         logging.info(
-            f"Adding move at {x} {y} for player {player_id} in game {self._game_id}"
+            f"Attempting add of move at {x} {y} for player {player_id} in game {self._game_id}"
         )
 
         if (

@@ -2,6 +2,7 @@
 Database queries
 """
 import json
+import logging
 import time
 
 from quagen import db
@@ -79,19 +80,28 @@ def insert_game(game):
     )
 
 
-def insert_game_event(game_id, event):
+def insert_game_move(game_id, player_id, turn, x, y):
     """
-    Inserts a new game event into the database
+    Inserts a new game move into the database. If a move already exists for
+    the player for this game/turn, it's ignored.
 
     Attr:
         game_id (str): The game this event belongs to
-        event (dict): Event dictionary
+        player_id (str): Unique player id
+        turn (int): Turn number in the game
+        x (int): x coordinate of the move
+        y (int): y coordinate of the move
+
+    Returns:
+        (bool) True when the move is new and inserted
+
     """
-    event["id"] = utils.generate_id()
-    db.write(
-        "INSERT INTO game_event (event_id, game_id, data, processed, time_created) VALUES (%s, %s, %s, %s, %s)",
-        [event["id"], game_id, json.dumps(event), 0, int(time.time())],
+    event_id = utils.generate_id()
+    last_id, row_count = db.write(
+        "INSERT INTO game_move (event_id, game_id, player_id, turn, x, y, time_created) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
+        [event_id, game_id, player_id, turn, x, y, int(time.time())],
     )
+    return 0 < row_count
 
 
 def update_game(game):

@@ -1,6 +1,8 @@
 """
 API for Quagen frontends to interact with backend.
 """
+import logging
+
 from flask import Blueprint
 from flask import json
 from flask import make_response
@@ -45,7 +47,6 @@ def game_new():
 
     # Save the game to the database
     queries.insert_game(game)
-    queries.insert_game_event(game.game_id, {"type": "start"})
 
     response = json.jsonify(game=game.get_game_state())
     return response
@@ -95,7 +96,7 @@ def game_view(game_id):
 @API.route("/game/<game_id>/move/<int:x>/<int:y>", methods=["GET", "POST"])
 def game_move(game_id, x, y):
     """
-    Makes a move for a Quagen game
+    If valid, queues a move for a player
 
     Args:
         game_id (str): Id of game to take a move
@@ -109,10 +110,23 @@ def game_move(game_id, x, y):
     if game and "player_id" in session.keys():
         player_id = session["player_id"]
 
-        # Inserts a move game event to be picked up asynchronously by our
-        # backround workers.
-        event = {"type": "move", "player_id": player_id, "x": int(x), "y": int(y)}
-        queries.insert_game_event(game_id, event)
+        # The best way to check the validity of the move is to go on and try
+        # and make the move. Since interacting with the game won't change the
+        # DB, this is safe.
+        valid = False
+        x = int(x)
+        y = int(y)
+        turn = len(game.history) + 1
+        if (game.is_player(player_id) or game.add_player(player_id)) and game.add_move(
+            player_id, x, y
+        ):
+            # The insert will ignore any duplicate request
+            valid = queries.insert_game_move(game_id, player_id, turn, x, y)
+
+        if not valid:
+            logging.debug(
+                f"Invalid or duplciated move for player {player_id} at {x},{y} to game {game_id}"
+            )
 
     response = json.jsonify({"x": x, "y": y})
     return response

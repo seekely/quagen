@@ -185,7 +185,7 @@ export class GamePoll {
     const queryString = `?updatedAfter=${timeUpdated}`;
 
     return fetch(`/api/v1/game/${self._gameState.gameId}${queryString}`)
-      .then(response => {
+      .then((response) => {
         self._inFlight = false;
         if (200 == response.status) {
           return response.json();
@@ -193,7 +193,7 @@ export class GamePoll {
           throw response.statusText;
         }
       })
-      .then(data => {
+      .then((data) => {
         // If the game state has new info, update and make the user
         // callback
         if (timeUpdated < data["game"]["time_updated"]) {

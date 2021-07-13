@@ -117,7 +117,7 @@ def write(statement, args=(), commit=True):
         commit: Commit statement to the database. Defaults to true.
 
     Returns:
-        (int) Last row id
+        (tuple) Last row id, Number of affected rows
     """
     connection = get_connection()
     cursor = connection.cursor()
@@ -126,7 +126,7 @@ def write(statement, args=(), commit=True):
     if commit:
         connection.commit()
 
-    return cursor.lastrowid
+    return (cursor.lastrowid, cursor.rowcount)
 
 
 def close(error=None):
