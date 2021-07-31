@@ -38,6 +38,7 @@ export class GameState {
    */
   constructor(gameId) {
     this.gameId = gameId;
+    this.playerId = null;
     this.init = false;
     this.completed = false;
     this.moveHistory = [];
@@ -48,6 +49,7 @@ export class GameState {
     this.spotsCurrent = [];
     this.spotsProjected = [];
     this.turnCompleted = 0;
+    this.turnMoves = {};
     this.timeCompleted = null;
     this.timeCreated = 0;
     this.timeStarted = null;
@@ -60,6 +62,7 @@ export class GameState {
    */
   update(state) {
     this.completed = "completed" in state ? state["completed"] : this.completed;
+    this.playerId = "player_id" in state ? state["player_id"] : this.playerId;
     this.players = "players" in state ? state["players"] : this.players;
     this.scores = "scores" in state ? state["scores"] : this.scores;
     this.settings = "settings" in state ? state["settings"] : this.settings;
@@ -68,6 +71,8 @@ export class GameState {
       "projected" in state ? state["projected"] : this.spotsProjected;
     this.turnCompleted =
       "turn_completed" in state ? state["turn_completed"] : this.turnCompleted;
+    this.turnMoves =
+      "turn_moves" in state ? state["turn_moves"] : this.turnMoves;
     this.timeCompleted =
       "time_completed" in state ? state["time_completed"] : this.timeCompleted;
     this.timeCreated =
@@ -185,7 +190,7 @@ export class GamePoll {
     const queryString = `?updatedAfter=${timeUpdated}`;
 
     return fetch(`/api/v1/game/${self._gameState.gameId}${queryString}`)
-      .then(response => {
+      .then((response) => {
         self._inFlight = false;
         if (200 == response.status) {
           return response.json();
@@ -193,7 +198,7 @@ export class GamePoll {
           throw response.statusText;
         }
       })
-      .then(data => {
+      .then((data) => {
         // If the game state has new info, update and make the user
         // callback
         if (timeUpdated < data["game"]["time_updated"]) {

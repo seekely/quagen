@@ -16,25 +16,25 @@ export async function createGame(playerCount, aiCount, aiStrength) {
   const options = {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       player_count: playerCount,
       ai_count: aiCount,
-      ai_strength: aiStrength
-    })
+      ai_strength: aiStrength,
+    }),
   };
 
   // Fire the new game request
   return fetch(`/api/v1/game/new`, options)
-    .then(response => {
+    .then((response) => {
       if (200 == response.status) {
         return response.json();
       } else {
         throw response.statusText;
       }
     })
-    .then(data => {
+    .then((data) => {
       // On successful creation of new game, redirect the browser to the game.
       const gameId = data["game"]["game_id"];
       window.location.assign(`/game/${gameId}`);

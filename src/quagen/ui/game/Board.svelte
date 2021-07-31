@@ -27,12 +27,17 @@
   // [[(color0, x, y), (color1, x, y)]]
   export let moveHistory = [];
 
+  // The spot the player submitted and must use
+  export let submittedSpotX = -1;
+  export let submittedSpotY = -1;
+
   // This player's selected spot on the board, or -1 if none
-  $: selectedX = turnCompleted ? -1 : -1;
-  $: selectedY = turnCompleted ? -1 : -1;
+  $: selectedX = turnCompleted ? submittedSpotX : submittedSpotX;
+  $: selectedY = turnCompleted ? submittedSpotY : submittedSpotY;
 
   // if we sent off a move from this player to the backend API
-  $: pendingMove = turnCompleted ? false : false;
+  let pendingMove;
+  $: turnCompleted, (pendingMove = !submittedSpotX === -1);
 
   // the last set of moves made by each player in the format of
   // [(color0, x, y), (color1, x, y)]
@@ -97,12 +102,6 @@
   }
 </script>
 
-<style>
-  div.container {
-    line-height: 1px;
-  }
-</style>
-
 <div class="container" style="min-width: {containerWidth}px;">
   <!-- {# Iterate through each spot on the board and create a Spot component #} -->
   {#each { length: height } as _, y}
@@ -115,8 +114,15 @@
         selected={selectedX == x && selectedY == y}
         lastMove={isLastMove(lastMoves, x, y)}
         pendingMove={selectedX == x && selectedY == y && pendingMove}
-        on:selected={handleSpotSelected} />
+        on:selected={handleSpotSelected}
+      />
     {/each}
     <br />
   {/each}
 </div>
+
+<style>
+  div.container {
+    line-height: 1px;
+  }
+</style>

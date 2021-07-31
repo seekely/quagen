@@ -31,6 +31,20 @@
   }
 </script>
 
+<div>
+  {#if vsHumans}
+    <p>
+      The game will start after all players have made their first move. To
+      invite a friend to the game, share the following link:
+    </p>
+    <p class="share" on:mouseup={handleShare}>
+      <span id="share-url">{shareUrl}</span>
+    </p>
+  {:else}
+    <p>The game will start when you make your first move.</p>
+  {/if}
+</div>
+
 <style>
   div {
     width: 535px;
@@ -57,17 +71,3 @@
     border-style: dashed;
   }
 </style>
-
-<div>
-  {#if vsHumans}
-    <p>
-      The game will start after all players have made their first move. To
-      invite a friend to the game, share the following link:
-    </p>
-    <p class="share" on:mouseup={handleShare}>
-      <span id="share-url">{shareUrl}</span>
-    </p>
-  {:else}
-    <p>The game will start when you make your first move.</p>
-  {/if}
-</div>

@@ -24,6 +24,26 @@
   export let projected = 0;
 </script>
 
+<div class="container">
+  {#if crown}
+    <div class="crown">
+      <img src="/img/crown.png" width="35px" alt="Crown!" />
+    </div>
+  {/if}
+
+  <div class="inner bg-color-{color}" class:crown class:key class:player={!key}>
+    {#if key}
+      <div>Controlled</div>
+      <div>Projected</div>
+      <div>Pressuring</div>
+    {:else}
+      <div>{controlled}</div>
+      <div>{projected}</div>
+      <div>{pressuring}</div>
+    {/if}
+  </div>
+</div>
+
 <style>
   div.container {
     display: inline-block;
@@ -87,24 +107,3 @@
     animation-iteration-count: infinite;
   }
 </style>
-
-<div class="container">
-
-  {#if crown}
-    <div class="crown">
-      <img src="/img/crown.png" width="35px" alt="Crown!" />
-    </div>
-  {/if}
-
-  <div class="inner bg-color-{color}" class:crown class:key class:player={!key}>
-    {#if key}
-      <div>Controlled</div>
-      <div>Projected</div>
-      <div>Pressuring</div>
-    {:else}
-      <div>{controlled}</div>
-      <div>{projected}</div>
-      <div>{pressuring}</div>
-    {/if}
-  </div>
-</div>

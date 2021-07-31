@@ -149,6 +149,25 @@ class Game:
             "time_updated": self._time_updated,
         }
 
+        # Hide chosen moves, but indiciate their existence
+        state["turn_moves"] = {
+            x: [-1, -1, self._turn_moves[x][2]] for x in self._turn_moves
+        }
+
+        return state
+
+    def get_game_state_for_player(self, player_id):
+        """
+        Appends sensitive game state the specified player is privileged to see
+
+        Returns:
+            (dict): Game state including sensitive data for a player as a dictionary
+        """
+        state = self.get_game_state()
+        state["player_id"] = player_id
+        if player_id in self._turn_moves.keys():
+            state["turn_moves"][player_id] = self._turn_moves[player_id]
+
         return state
 
     def get_sensitive_state(self):

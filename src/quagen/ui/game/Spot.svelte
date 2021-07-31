@@ -14,7 +14,7 @@
     [0, 140, 186],
     [244, 67, 54],
     [22, 215, 79],
-    [255, 195, 0]
+    [255, 195, 0],
   ];
 
   // Coordinates of this spot on the board
@@ -86,6 +86,16 @@
   }
 </script>
 
+<button
+  type="button"
+  on:mouseup={handleSelected}
+  class:outline={lastMove || pendingMove || selected}
+  class:pulse={!pendingMove && !lastMove && buttonEnabled}
+  class:selected={selected && !pendingMove && !lastMove && buttonEnabled}
+  style="background-color: {toRGBA(buttonColor, buttonOpacity)};"
+  disabled={!buttonEnabled}
+/>
+
 <style>
   button,
   button:disabled,
@@ -135,12 +145,3 @@
     outline: 3px solid black !important;
   }
 </style>
-
-<button
-  type="button"
-  on:mouseup={handleSelected}
-  class:outline={lastMove || pendingMove || selected}
-  class:pulse={!pendingMove && !lastMove && buttonEnabled}
-  class:selected={selected && !pendingMove && !lastMove && buttonEnabled}
-  style="background-color: {toRGBA(buttonColor, buttonOpacity)};"
-  disabled={!buttonEnabled} />

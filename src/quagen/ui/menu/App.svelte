@@ -6,7 +6,11 @@
   import { createGame } from "../menu.js";
 
   // Possible game difficulties for an AI opponent
-  const difficulties = [["Easy", 0], ["Medium", 1], ["Hard", 2]];
+  const difficulties = [
+    ["Easy", 0],
+    ["Medium", 1],
+    ["Hard", 2],
+  ];
 
   // Number of total players in the game
   let playerCount = 2;
@@ -40,6 +44,44 @@
     aiStrength = event.target.getAttribute("difficulty");
   }
 </script>
+
+<div class="container">
+  <div class="block">
+    <img src="/img/intro.gif" alt="Demo gif" />
+  </div>
+
+  <div class="block">
+    <div class="option-ai">
+      <!-- {# Start a game vs the AI #} -->
+      <div>
+        <button class="button-play button-ai" on:mouseup={playAi}>
+          Play AI
+        </button>
+      </div>
+
+      <!-- {# Buttons to change the AI difficulty #} -->
+      <div class="difficulty">
+        {#each difficulties as difficulty}
+          <button
+            class="button-difficulty"
+            class:button-difficulty-selected={aiStrength == difficulty[1]}
+            difficulty={difficulty[1]}
+            on:mouseup={changeDifficulty}
+          >
+            {difficulty[0]}
+          </button>
+        {/each}
+      </div>
+    </div>
+
+    <!-- {# Start a game vs a human #} -->
+    <div class="option-friend">
+      <button class="button-play button-friend" on:mouseup={playFriend}>
+        Play Friend
+      </button>
+    </div>
+  </div>
+</div>
 
 <style>
   .container {
@@ -95,42 +137,3 @@
     outline-offset: 3px;
   }
 </style>
-
-<div class="container">
-  <div class="block">
-    <img src="/img/intro.gif" alt="Demo gif" />
-  </div>
-
-  <div class="block">
-    <div class="option-ai">
-
-      <!-- {# Start a game vs the AI #} -->
-      <div>
-        <button class="button-play button-ai" on:mouseup={playAi}>
-          Play AI
-        </button>
-      </div>
-
-      <!-- {# Buttons to change the AI difficulty #} -->
-      <div class="difficulty">
-        {#each difficulties as difficulty}
-          <button
-            class="button-difficulty"
-            class:button-difficulty-selected={aiStrength == difficulty[1]}
-            difficulty={difficulty[1]}
-            on:mouseup={changeDifficulty}>
-            {difficulty[0]}
-          </button>
-        {/each}
-      </div>
-    </div>
-
-    <!-- {# Start a game vs a human #} -->
-    <div class="option-friend">
-      <button class="button-play button-friend" on:mouseup={playFriend}>
-        Play Friend
-      </button>
-    </div>
-
-  </div>
-</div>

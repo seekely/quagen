@@ -40,26 +40,7 @@
   }
 </script>
 
-<style>
-  p {
-    padding: 8px;
-  }
-
-  div.container {
-    white-space: nowrap;
-  }
-
-  div.gameover {
-    width: 535px;
-    border-radius: 5px;
-    color: white;
-    background-color: rgba(255, 0, 0, 0.6);
-    font-weight: bold;
-  }
-</style>
-
 <div>
-
   {#if gameOver}
     <div class="gameover">
       {#if tied}
@@ -77,3 +58,21 @@
     {/each}
   </div>
 </div>
+
+<style>
+  p {
+    padding: 8px;
+  }
+
+  div.container {
+    white-space: nowrap;
+  }
+
+  div.gameover {
+    width: 535px;
+    border-radius: 5px;
+    color: white;
+    background-color: rgba(255, 0, 0, 0.6);
+    font-weight: bold;
+  }
+</style>
