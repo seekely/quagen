@@ -21,17 +21,50 @@ def test_get_game_state():
     params = {
         "game_id": "1245",
         "turn_completed": 5,
-        "turn_moves": {"0": "234", "1": "234"},
-        "settings": {"player_count": 3, "power": 6},
+        "turn_moves": {
+            "player1": [1, 4, 1],
+            "player2": [4, 2, 2]
+        },
+        "settings": {"player_count": 2, "power": 6},
     }
 
     a_game = Game(params)
+    a_game.add_player("player1")
+    a_game.add_player("player2")
     state = a_game.get_game_state()
-    assert "turn_moves" not in state
+    assert state["turn_moves"] == {
+        "player1": [-1, -1, 1],
+        "player2": [-1, -1, 2],
+    }
     assert state["game_id"] == "1245"
     assert state["turn_completed"] == 5
-    assert state["settings"]["player_count"] == 3
+    assert state["settings"]["player_count"] == 2
     assert state["settings"]["power"] == 6
+
+
+def test_get_game_state_for_player():
+    """
+    Sensitive state made available to a player
+    """
+    params = {
+        "game_id": "1245",
+        "turn_completed": 5,
+        "turn_moves": {
+            "player1": [1, 4, 1],
+            "player2": [4, 2, 2]
+        },
+    }
+
+    a_game = Game(params)
+    a_game.add_player("player1")
+    a_game.add_player("player2")
+    state = a_game.get_game_state_for_player("player2")
+    assert state["turn_moves"] == {
+        "player1": [-1, -1, 1],
+        "player2": [4, 2, 2],
+    }
+    assert state["game_id"] == "1245"
+    assert state["turn_completed"] == 5
 
 
 def test_get_sensitive_state():

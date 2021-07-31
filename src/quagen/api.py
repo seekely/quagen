@@ -76,6 +76,10 @@ def game_view(game_id):
         # Grab the game state
         state = game.get_game_state()
 
+        if "player_id" in session.keys():
+            player_id = session["player_id"]
+            state = game.get_game_state_for_player(player_id)
+
         # If nothing has changed, let's send a minimal response
         if state["time_updated"] <= updated_after:
             state = {"game_id": state["game_id"], "time_updated": state["time_updated"]}
