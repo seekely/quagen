@@ -49,8 +49,7 @@
     // all related data bindings.
     gameState = gameState;
 
-    if (gameState.turnMoves)
-      updateSubmittedSpot();
+    if (gameState.turnMoves) updateSubmittedSpot();
   });
   gamePoll.start();
 
@@ -63,8 +62,7 @@
     submittedSpotY = undefined;
 
     const playerMove = gameState.turnMoves[gameState.playerId];
-    if (!playerMove)
-      return;
+    if (!playerMove) return;
 
     submittedSpotX = playerMove[0];
     submittedSpotY = playerMove[1];
@@ -98,6 +96,37 @@
   }
 </script>
 
+{#if init}
+  <!-- {# Prompt the players with instructions at start of game #} -->
+  {#if turnCompleted == 0}
+    <StartPrompt gameId={gameState.gameId} vsHumans={gameState.isVsHuman()} />
+    <!-- {# Otherwise, show the score of the game once a turn has finished #} -->
+  {:else}
+    <Scores {gameOver} scores={gameState.scores} />
+  {/if}
+
+  <div class="board-header">
+    <Settings on:change={handleProjected} />
+    {#if opponentSubmittedMove}
+      <div class="opponent-status">Opponent is ready</div>
+    {/if}
+  </div>
+
+  <Board
+    height={gameState.getSetting("dimension_x")}
+    width={gameState.getSetting("dimension_y")}
+    moveHistory={gameState.moveHistory}
+    {allowMove}
+    {spots}
+    {turnCompleted}
+    {submittedSpotX}
+    {submittedSpotY}
+    on:move={handleMove}
+  />
+{:else}
+  <p>Loading...</p>
+{/if}
+
 <style>
   .board-header {
     margin-top: 1rem;
@@ -111,37 +140,3 @@
     color: rgba(0, 0, 0, 0.5);
   }
 </style>
-
-{#if init}
-
-  <!-- {# Prompt the players with instructions at start of game #} -->
-  {#if turnCompleted == 0}
-    <StartPrompt gameId={gameState.gameId} vsHumans={gameState.isVsHuman()} />
-    <!-- {# Otherwise, show the score of the game once a turn has finished #} -->
-  {:else}
-    <Scores {gameOver} scores={gameState.scores} />
-  {/if}
-
-  <div class="board-header">
-    <Settings on:change={handleProjected} />
-    {#if opponentSubmittedMove}
-      <div class="opponent-status">
-        Opponent is ready
-      </div>
-    {/if}
-  </div>
-
-  <Board
-    height={gameState.getSetting('dimension_x')}
-    width={gameState.getSetting('dimension_y')}
-    moveHistory={gameState.moveHistory}
-    {allowMove}
-    {spots}
-    {turnCompleted}
-    {submittedSpotX}
-    {submittedSpotY}
-    on:move={handleMove} />
-{:else}
-
-  <p>Loading...</p>
-{/if}

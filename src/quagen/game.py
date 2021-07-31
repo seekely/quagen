@@ -150,7 +150,9 @@ class Game:
         }
 
         # Hide chosen moves, but indiciate their existence
-        state["turn_moves"] = {x: [-1, -1, self._turn_moves[x][2]] for x in self._turn_moves}
+        state["turn_moves"] = {
+            x: [-1, -1, self._turn_moves[x][2]] for x in self._turn_moves
+        }
 
         return state
 

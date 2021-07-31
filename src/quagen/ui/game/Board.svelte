@@ -37,7 +37,7 @@
 
   // if we sent off a move from this player to the backend API
   let pendingMove;
-  $: turnCompleted, pendingMove = !submittedSpotX === -1;
+  $: turnCompleted, (pendingMove = !submittedSpotX === -1);
 
   // the last set of moves made by each player in the format of
   // [(color0, x, y), (color1, x, y)]
@@ -102,12 +102,6 @@
   }
 </script>
 
-<style>
-  div.container {
-    line-height: 1px;
-  }
-</style>
-
 <div class="container" style="min-width: {containerWidth}px;">
   <!-- {# Iterate through each spot on the board and create a Spot component #} -->
   {#each { length: height } as _, y}
@@ -120,8 +114,15 @@
         selected={selectedX == x && selectedY == y}
         lastMove={isLastMove(lastMoves, x, y)}
         pendingMove={selectedX == x && selectedY == y && pendingMove}
-        on:selected={handleSpotSelected} />
+        on:selected={handleSpotSelected}
+      />
     {/each}
     <br />
   {/each}
 </div>
+
+<style>
+  div.container {
+    line-height: 1px;
+  }
+</style>
