@@ -1,6 +1,13 @@
 CREATE TABLE IF NOT EXISTS game (
     game_id             TEXT        NOT NULL,
+    
+    /* JSON representation of the game/board state */
     data                TEXT        NOT NULL,
+
+    /* Number of moves still needed to be made this turn. This is used to 
+       determine which games need processing.*/
+    awaiting_moves      SMALLINT    DEFAULT -1,
+
     time_created        INTEGER     NOT NULL,
     time_completed      INTEGER     DEFAULT NULL,
     time_started        INTEGER     DEFAULT NULL,

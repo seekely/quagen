@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask import render_template
 from flask import session
 
+from quagen import db
 from quagen import queries
 
 WEB = Blueprint("web", __name__)
@@ -40,5 +41,9 @@ def game_view(game_id):
     if "player_id" not in session.keys():
         session["player_id"] = uuid.uuid4().hex
 
-    state = queries.get_game(game_id).get_game_state()
+    game = None
+    with db.get_connection():
+        game = queries.get_game(game_id)
+
+    state = game.get_game_state()
     return render_template("game.html", game=state)

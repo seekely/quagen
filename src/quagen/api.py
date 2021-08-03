@@ -9,6 +9,7 @@ from flask import make_response
 from flask import request
 from flask import session
 
+from quagen import db
 from quagen import queries
 from quagen.game import Game
 
@@ -46,7 +47,8 @@ def game_new():
     game.start()
 
     # Save the game to the database
-    queries.insert_game(game)
+    with db.get_connection():
+        queries.insert_game(game)
 
     response = json.jsonify(game=game.get_game_state())
     return response
@@ -71,7 +73,10 @@ def game_view(game_id):
     response = make_response(json.jsonify({"error": "Not found"}), 404)
     updated_after = int(request.values.get("updatedAfter", 0))
 
-    game = queries.get_game(game_id)
+    game = None
+    with db.get_connection():
+        game = queries.get_game(game_id)
+
     if game:
 
         # Grab the game state
@@ -116,12 +121,12 @@ def game_move(game_id, x, y):
         valid = False
         x = int(x)
         y = int(y)
-        turn = len(game.history) + 1
         if (game.is_player(player_id) or game.add_player(player_id)) and game.add_move(
             player_id, x, y
         ):
             # The insert will ignore any duplicate request
-            valid = queries.insert_game_move(game_id, player_id, turn, x, y)
+            with db.get_connection():
+                valid = queries.insert_game_move(game_id, player_id, game.turn, x, y)
 
         if not valid:
             logging.debug(

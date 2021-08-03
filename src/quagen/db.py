@@ -46,6 +46,7 @@ def make_connection(retry=False):
             port=config.SETTING_DB_PORT,
             database=config.SETTING_DB_NAME,
         )
+        connection.autocommit = False
 
     except psycopg2.OperationalError as error:
         if not retry:
@@ -77,7 +78,7 @@ def get_connection(retry=False):
     return context.db
 
 
-def query(statement, parameters=(), one=False, commit=True):
+def query(statement, parameters=(), one=False):
     """
     Query the database (e.g. SELECT)
 
@@ -93,10 +94,7 @@ def query(statement, parameters=(), one=False, commit=True):
     """
     connection = get_connection()
     cursor = connection.cursor()
-
     cursor.execute(statement, parameters)
-    if commit:
-        connection.commit()
 
     rv = [
         dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
@@ -106,7 +104,7 @@ def query(statement, parameters=(), one=False, commit=True):
     return (rv[0] if rv else None) if one else rv
 
 
-def write(statement, args=(), commit=True):
+def write(statement, args=()):
     """
     Writes to the database (e.g. INSERT/UPDATE)
 
@@ -114,17 +112,13 @@ def write(statement, args=(), commit=True):
         statement (str): Prepared SQL statement
             (e.g. 'INSERT INTO GAME VALUES(?, ?, ?)')
         parameters (tuple): Optional parameters to inject into SQL statement
-        commit: Commit statement to the database. Defaults to true.
 
     Returns:
         (tuple) Last row id, Number of affected rows
     """
     connection = get_connection()
     cursor = connection.cursor()
-
     cursor.execute(statement, args)
-    if commit:
-        connection.commit()
 
     return (cursor.lastrowid, cursor.rowcount)
 

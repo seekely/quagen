@@ -85,6 +85,11 @@ class Game:
         return self._history
 
     @property
+    def human_count(self):
+        """Number of non-ai real human players in the game"""
+        return self._settings["player_count"] - self._settings["ai_count"]
+
+    @property
     def scores(self):
         """Game scores for each player"""
         return self._scores
@@ -113,6 +118,11 @@ class Game:
     def time_updated(self):
         """Timestamp last time game state changed"""
         return self._time_updated
+
+    @property
+    def turn(self):
+        """Current turn number"""
+        return len(self._history) + 1
 
     @property
     def turn_completed(self):

@@ -14,31 +14,41 @@ If the above succeeds, you should be able to open up a browser to
 http://localhost:5000! To develop, most changes you make locally should
 automatically hot reload in the containers.
 
-
 ### Running tests
 
 A set of shell scripts will run various parts of Quagen's testing via Docker:
 
     # Run all tests (Python/JS and Unit/Profile)
     ./bin/test_all
-     
+
     # Run parts of Python tests
     ./bin/test_profile_python
     ./bin/test_unit_python
-     
-    # Run parts of JS tests  
-    ./bin/test_unit_js
 
+    # Run parts of JS tests
+    ./bin/test_unit_js
 
 ### Enforcing conventions
 
 Lints and formats the code. Required for builds to pass and PR acceptance. Highly suggested to integrate [Black][black], [Pylint][pylint], [Prettier][prettier], and [ESlint][eslint] into your editor of choice.
 
-
     # Lint and format code
     ./bin/lint_all
     ./bin/lint_js
     ./bin/lint_python
+
+### Common debugging
+
+##### SSH into a container
+
+    docker ps
+    docker exec -it <container_id> sh
+
+##### Connect to the database
+
+    psql -h localhost -d quagen -U quagen -W
+    \dt
+    \d <table>
 
 [black]: https://black.readthedocs.io
 [pylint]: https://www.pylint.org/

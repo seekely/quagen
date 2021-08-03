@@ -22,7 +22,7 @@ def get_game(game_id):
     """
     game = None
     row = db.query(
-        "SELECT game_id, data  FROM game WHERE game_id = %s", [game_id], True
+        "SELECT game_id, data FROM game WHERE game_id = %s", [game_id], one=True
     )
 
     if row is not None:
@@ -32,33 +32,39 @@ def get_game(game_id):
     return game
 
 
-def get_unprocessed_game_ids():
+def get_unprocessed_game_id():
     """
     Get the ids of games which have unprocessed game events
 
     Returns:
         (list) of game ids
     """
-    rows = db.query("SELECT DISTINCT game_id FROM game_event WHERE processed = 0")
-    game_ids = [row["game_id"] for row in rows]
+    game = None
+    row = db.query(
+        "SELECT game_id, data FROM game WHERE awaiting_moves <= 0 FOR UPDATE SKIP LOCKED",
+        one=True,
+    )
 
-    return game_ids
+    if row is not None:
+        data = json.loads(row["data"])
+        game = Game(data)
+
+    return game
 
 
-def get_unprocessed_game_events(game_id):
+def get_game_moves(game_id, turn):
     """
     Retrieve the unprocessed game events from a specific game
 
     Returns:
         (list) of unprocessed game ids
     """
-    rows = db.query(
-        "SELECT data FROM game_event WHERE processed = 0 AND game_id = %s", [game_id]
+    moves = db.query(
+        "SELECT event_id, game_id, player_id, turn, x, y, time_created FROM game_move WHERE game_id = %s and turn = %s",
+        [game_id, turn],
     )
 
-    events = [json.loads(row["data"]) for row in rows]
-
-    return events
+    return moves
 
 
 def insert_game(game):
@@ -69,10 +75,11 @@ def insert_game(game):
         game (Game): Game object to save
     """
     db.write(
-        "INSERT INTO game (game_id, data, time_created, time_started, time_updated) VALUES (%s, %s, %s, %s, %s)",
+        "INSERT INTO game (game_id, data, awaiting_moves, time_created, time_started, time_updated) VALUES (%s, %s, %s, %s, %s, %s)",
         [
             game.game_id,
             json.dumps(game.get_sensitive_state()),
+            game.human_count,
             game.time_created,
             game.time_started,
             game.time_updated,
@@ -91,16 +98,26 @@ def insert_game_move(game_id, player_id, turn, x, y):
         turn (int): Turn number in the game
         x (int): x coordinate of the move
         y (int): y coordinate of the move
+        is_ai (bool): If the move is meant for an ai player
 
     Returns:
         (bool) True when the move is new and inserted
 
     """
     event_id = utils.generate_id()
+    db_connection = db.get_connection()
+
     last_id, row_count = db.write(
         "INSERT INTO game_move (event_id, game_id, player_id, turn, x, y, time_created) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
         [event_id, game_id, player_id, turn, x, y, int(time.time())],
     )
+
+    if 0 < row_count:
+        db.write(
+            "UPDATE game SET awaiting_moves = (awaiting_moves - 1) WHERE game_id = %s",
+            [game_id],
+        )
+
     return 0 < row_count
 
 
@@ -113,9 +130,8 @@ def update_game(game):
     """
     game.updated()
     db.write(
-        "UPDATE game SET game_id = %s, data = %s, time_completed = %s, time_started = %s, time_updated = %s WHERE game_id = %s",
+        "UPDATE game SET data = %s, time_completed = %s, time_started = %s, time_updated = %s WHERE game_id = %s",
         [
-            game.game_id,
             json.dumps(game.get_sensitive_state()),
             game.time_completed,
             game.time_started,
@@ -125,15 +141,18 @@ def update_game(game):
     )
 
 
-def update_processed_events(event_ids):
+def reset_game_awaiting_moves(game):
     """
-    Marks event ids as processed
+    Updates an existing Game object to the database
 
     Attr:
-        event_ids (list): Now processed event ids
+        game (Game): Game object to save
     """
-    parameters = ",".join(["%s"] * len(event_ids))
+    logging.info(f"humans { game.human_count }")
     db.write(
-        f"UPDATE game_event SET processed = 1 WHERE event_id IN ({parameters})",
-        event_ids,
+        "UPDATE game SET awaiting_moves = %s WHERE game_id = %s",
+        [
+            game.human_count,
+            game.game_id,
+        ],
     )

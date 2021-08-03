@@ -16,16 +16,17 @@ from quagen import queries
 from quagen.ai.biased import BiasedAI
 
 
-def process_outstanding_games():
+def process_outstanding_game():
     """
-    Grab and process all games which have unprocessed events
+    Lock a  and process all games which have unprocessed events
     """
-    unprocessed_game_ids = queries.get_unprocessed_game_ids()
-    for game_id in unprocessed_game_ids:
-        process_game(game_id)
+    with db.get_connection():
+        game = queries.get_unprocessed_game_id()
+        if game:
+            process_game(game)
+            logging.debug(f"{game.board.spots}")
 
-
-def process_game(game_id):
+def process_game(game):
     """
     Process unprocessed game events for a single game. At the end of a
     successful process, all outstanding events for the game will be marked
@@ -34,30 +35,24 @@ def process_game(game_id):
     Args:
         game_id (str): Game to process
     """
-    game = queries.get_game(game_id)
-    events = queries.get_unprocessed_game_events(game_id)
 
-    logging.info(f"Processing {len(events)} events for game {game_id}")
-    logging.debug(f"{events}")
+    moves = queries.get_game_moves(game.game_id, game.turn)
+    logging.info(f"Processing turn {game.turn} for game {game.game_id}")
+    logging.debug(f"{moves}")
 
     if game.is_in_progress():
 
         handle_ai_movement(game)
-        handle_player_movement(game, events)
+        handle_player_movement(game, moves)
 
-        # Try to complete a turn -- we may still be missing player turns
-        turn_complete = game.process_turn()
-        queries.update_game(game)
+        # Complete the turn
+            game.process_turn()
 
-        # If we did manage to complete a turn, fire off a turn_complete event
-        # which will kick off this loop again and allow any AI to get ahead
-        # start on processing it's next move.
-        if turn_complete:
-            queries.insert_game_event(game.game_id, {"type": "turn_complete"})
-
-    # Mark all outstanding events we just went through as processed
-    event_ids = [event["id"] for event in events]
-    queries.update_processed_events(event_ids)
+        with db.get_connection():
+            logging.info("okok")
+            queries.update_game(game)
+            queries.reset_game_awaiting_moves(game)
+            logging.info("yup")
 
 
 def handle_ai_movement(game):
@@ -80,9 +75,11 @@ def handle_ai_movement(game):
             ai_x, ai_y = ai_method.choose_move()
 
             game.add_move(ai_id, ai_x, ai_y)
+            with db.get_connection():
+                queries.insert_game_move(game.game_id, ai_id, game.turn, ai_x, ai_y)
 
 
-def handle_player_movement(game, events):
+def handle_player_movement(game, moves):
     """
     Adds any moves made by human players to the game
 
@@ -90,10 +87,9 @@ def handle_player_movement(game, events):
         game (Game): Current game to add moves
         event (list): List of game events which make contain player moves
     """
-    for event in events:
-        if event["type"] == "move":
-            game.add_player(event["player_id"])
-            game.add_move(event["player_id"], event["x"], event["y"])
+    for move in moves:
+        game.add_player(move["player_id"])
+        game.add_move(move["player_id"], move["x"], move["y"])
 
 
 class Worker:
@@ -113,7 +109,7 @@ class Worker:
         """
 
         while self._keep_alive:
-            process_outstanding_games()
+            process_outstanding_game()
             time.sleep(0.25)
 
     def stop(self, signum=None, frame=None):
