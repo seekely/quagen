@@ -8,6 +8,8 @@ import time
 
 from werkzeug.local import Local
 import psycopg2
+from psycopg2.extras import LoggingConnection
+
 
 from quagen import config
 
@@ -36,6 +38,7 @@ def make_connection(retry=False):
         (Connection): Database connection
     """
     connection = None
+    logging.debug("Creating new database connection")
 
     try:
         connection = psycopg2.connect(
@@ -45,7 +48,13 @@ def make_connection(retry=False):
             host=config.SETTING_DB_HOST,
             port=config.SETTING_DB_PORT,
             database=config.SETTING_DB_NAME,
+            # Uncomment for debugging queries
+            # connection_factory=LoggingConnection,
         )
+
+        # Uncomment for debugging queries
+        # connection.initialize(logging.getLogger())
+
         connection.autocommit = False
 
     except psycopg2.OperationalError as error:
@@ -72,7 +81,7 @@ def get_connection(retry=False):
         (Connection): Database connection
     """
     global context
-    if "db" not in context:
+    if not hasattr(context, "db"):
         context.db = make_connection(retry)
 
     return context.db
@@ -93,13 +102,14 @@ def query(statement, parameters=(), one=False):
 
     """
     connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute(statement, parameters)
+    rv = None
+    with connection.cursor() as cursor:
+        cursor.execute(statement, parameters)
 
-    rv = [
-        dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
-        for row in cursor.fetchall()
-    ]
+        rv = [
+            dict((cursor.description[idx][0], value) for idx, value in enumerate(row))
+            for row in cursor.fetchall()
+        ]
 
     return (rv[0] if rv else None) if one else rv
 
@@ -117,10 +127,15 @@ def write(statement, args=()):
         (tuple) Last row id, Number of affected rows
     """
     connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute(statement, args)
+    with connection.cursor() as cursor:
+        cursor.execute(statement, args)
 
-    return (cursor.lastrowid, cursor.rowcount)
+        if 0 < len(connection.notices):
+            logging.warn(f"Query warnings: {connection.notices}")
+
+        return (cursor.lastrowid, cursor.rowcount)
+
+    return (-1, -1)
 
 
 def close(error=None):
@@ -131,6 +146,7 @@ def close(error=None):
     conn = context.pop("db", None)
 
     if conn is not None:
+        logging.debug(f"Closing database connection {conn}")
         conn.close()
 
     if error:

@@ -9,6 +9,10 @@ RUN apk update \
 WORKDIR /app
 ARG QUAGEN_TESTING="no"
 
+# When running locally for development, we will use a rebuilder script for 
+# detecting changes
+COPY deploy/docker/node/rebuilder.sh ./
+
 COPY package.json ./
 COPY package-lock.json ./
 COPY rollup.config.js ./
@@ -21,4 +25,4 @@ COPY src src
 COPY tests tests
 RUN if [ "$QUAGEN_TESTING" = "no" ]; then rm -fr tests; fi
 
-CMD [ "npm", "run", "autobuild" ]
+CMD [ "./rebuilder.sh" ]

@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 services:
   db:
     build:
@@ -47,6 +47,7 @@ services:
     environment:
       QUAGEN_APP_SECRET: "thisisjustatest"
     image: quagen:worker
+    scale: 2
     volumes:
       - ./src/quagen:/app/quagen
   migrator:

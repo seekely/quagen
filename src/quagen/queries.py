@@ -105,7 +105,6 @@ def insert_game_move(game_id, player_id, turn, x, y):
 
     """
     event_id = utils.generate_id()
-    db_connection = db.get_connection()
 
     last_id, row_count = db.write(
         "INSERT INTO game_move (event_id, game_id, player_id, turn, x, y, time_created) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
@@ -148,7 +147,6 @@ def reset_game_awaiting_moves(game):
     Attr:
         game (Game): Game object to save
     """
-    logging.info(f"humans { game.human_count }")
     db.write(
         "UPDATE game SET awaiting_moves = %s WHERE game_id = %s",
         [

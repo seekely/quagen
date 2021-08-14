@@ -20,11 +20,11 @@ def process_outstanding_game():
     """
     Lock a  and process all games which have unprocessed events
     """
-    with db.get_connection():
+    with db.get_connection() as connection:
         game = queries.get_unprocessed_game_id()
         if game:
             process_game(game)
-            logging.debug(f"{game.board.spots}")
+
 
 def process_game(game):
     """
@@ -46,13 +46,10 @@ def process_game(game):
         handle_player_movement(game, moves)
 
         # Complete the turn
-            game.process_turn()
+        game.process_turn()
 
-        with db.get_connection():
-            logging.info("okok")
-            queries.update_game(game)
-            queries.reset_game_awaiting_moves(game)
-            logging.info("yup")
+        queries.update_game(game)
+        queries.reset_game_awaiting_moves(game)
 
 
 def handle_ai_movement(game):
@@ -75,8 +72,7 @@ def handle_ai_movement(game):
             ai_x, ai_y = ai_method.choose_move()
 
             game.add_move(ai_id, ai_x, ai_y)
-            with db.get_connection():
-                queries.insert_game_move(game.game_id, ai_id, game.turn, ai_x, ai_y)
+            queries.insert_game_move(game.game_id, ai_id, game.turn, ai_x, ai_y)
 
 
 def handle_player_movement(game, moves):
@@ -110,7 +106,7 @@ class Worker:
 
         while self._keep_alive:
             process_outstanding_game()
-            time.sleep(0.25)
+            time.sleep(0.05)
 
     def stop(self, signum=None, frame=None):
         """
